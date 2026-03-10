@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-black antialiased;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}

@@ -1,0 +1,80 @@
+{
+  "login": {
+    "title": "Welcome to JOSH Nomination App",
+    "mobile": "Mobile Number",
+    "otp": "Request OTP",
+    "login": "Login",
+    "invalid": "Invalid OTP",
+    "resend": "Resend",
+    "otp_sent": "OTP Sent",
+    "invalid_number": "Invalid mobile number",
+    "enter_number": "Enter valid number",
+    "login_success": "Login Successful"
+  },
+
+  "dashboard": {
+    "create_nomination": "Create New Nomination",
+    "nomi_new": "Create Nomination",
+    "submitted_nominatio": "Nomination Submitted",
+    "training": "Ready for Training",
+    "credit_limit": "Credit Limit",
+    "no_data": "No data available",
+    "ent_type": "Enterprise Type",
+    "review": "Review Nomination",
+    "pending": "Pending",
+    "approved": "Approved"
+  },
+
+  "form": {
+    "nomi_details": "Nominee Details",
+    "first_name": "First Name",
+    "full_name": "Full Name",
+    "last_name": "Last Name ",
+    "pincode": "Pincode",
+    "dictrict": "District",
+    "area": "Town/ Village",
+    "adhaar": "Aadhaar Number ",
+    "permanent_address": "Permanent Address",
+    "pan": "PAN Number",
+    "dob": "Date of Birth",
+    "nomi_form": "Nomination Form",
+    "enterprise": "Enterprise Details",
+    "sector_type": "Sector Type",
+    "next_step": "Next Step",
+    "business_type": "Type of Business",
+    "support": "Select support needed (optional)",
+    "important_form": "Important - Final Review",
+    "final_review_desc_form": "Please review all information carefully. Once submitted, you cannot edit this application. To edit the application you need to press on the screen number at top.",
+    "check_credit": "Credit Check",
+    "important_credit_check": "Credit Bureau Check",
+    "final_review_credit_check": "Credit score and risk flags will be fetched automatically after submission for review by checkers.",
+    "save_and_next": "Save & Next",
+    "submit": "Submit",
+    "submit_credit": "Submit Credit Limit",
+    "nomi_approved": "Nomination Approved!",
+    "approved": "Approve"
+  },
+
+  "credit_score": {
+    "needs_help": "Needs help",
+    "average": "Average",
+    "fair": "Fair",
+    "good": "Good",
+    "excellent": "Excellent",
+    "dialog_heading": "Understand Credit Score",
+    "dialog_content": "Your credit score is a 3 digit number that appears on your credit report. The usual range is between 300 and 900.",
+    "below": "Below",
+    "above": "Above",
+    "lang": "In English",
+    "set_credit_limit": "Set Credit Limit ",
+    "next": "What happens next?",
+    "nomniee_title": "NOMINEE’S INFORMATION"
+  },
+
+  "nomi_form": {
+    "nomniee_title": "NOMINEE’S INFORMATION",
+    "enterprises_title": "ENTERPRISE DETAILS",
+    "credit_bureau": "CREDIT BUREAU ASSESSMENT",
+    "approve": "Approve"
+  }
+}
