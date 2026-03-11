@@ -78,7 +78,9 @@ type Ctx = {
 
   resetAll: () => void;
 
-  submitForm: () => Promise<SubmitResult>;
+  submitForm: (
+    overrides?: Partial<NominationSubmitPayload>
+  ) => Promise<SubmitResult>;
 };
 
 const NominationFormContext = createContext<Ctx | null>(null);
@@ -106,28 +108,37 @@ export function NominationFormProvider({
     setForm(initialState);
   }, []);
 
-  const submitForm = useCallback(async (): Promise<SubmitResult> => {
-    try {
-      const payload: NominationSubmitPayload = {
-        ...form.step1,
-        ...form.step2,
-        ...form.step3,
-      };
+  const submitForm = useCallback(
+    async (
+      overrides?: Partial<NominationSubmitPayload>
+    ): Promise<SubmitResult> => {
+      try {
+        const payload: NominationSubmitPayload = {
+          ...form.step1,
+          ...form.step2,
+          ...form.step3,
+          ...overrides,
+        };
+        if (payload.mobile_number) {
+          payload.mobile_number = payload.mobile_number.replace(/\D/g, '');
+        }
 
-      const res = await submitNominationForm(payload);
-      const msg =
-        typeof res?.message?.msg === 'string'
-          ? res.message.msg
-          : Array.isArray(res?.message?.msg)
-            ? res.message.msg[0]
-            : 'Submitted successfully';
+        const res = await submitNominationForm(payload);
+        const msg =
+          typeof res?.message?.msg === 'string'
+            ? res.message.msg
+            : Array.isArray(res?.message?.msg)
+              ? res.message.msg[0]
+              : 'Submitted successfully';
 
-      return { ok: true, name: msg };
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Submit failed';
-      return { ok: false, error: msg };
-    }
-  }, [form]);
+        return { ok: true, name: msg };
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Submit failed';
+        return { ok: false, error: msg };
+      }
+    },
+    [form]
+  );
 
   const value = useMemo<Ctx>(
     () => ({

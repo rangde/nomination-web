@@ -112,7 +112,15 @@ function NominationStepOne() {
       const okRequired = validateRequired();
       if (!okRequired) return;
 
-      const res = await submitForm();
+      const mobileForSubmit = (form.step3.mobile_number || mobile).replace(
+        /\D/g,
+        ''
+      );
+      const res = await submitForm(
+        mobileForSubmit.length >= 10
+          ? { mobile_number: mobileForSubmit }
+          : undefined
+      );
 
       if (!res.ok) {
         addToast({
@@ -148,8 +156,10 @@ function NominationStepOne() {
             if (res?.message?.status === 1) {
               const score = Number(res.message.msg);
               setScore(Number.isFinite(score) ? score : 0);
-              setStep3({ mobile_number: mobile });
-              setStep3({ credit_score: score.toString() });
+              setStep3({
+                mobile_number: mobile,
+                credit_score: score.toString(),
+              });
               addToast({
                 type: 'success',
                 hi: 'क्रेडिट स्कोर प्राप्त हुआ',
@@ -203,6 +213,18 @@ function NominationStepOne() {
   };
 
   const validateRequired = (): boolean => {
+    const mobileToCheck = (form.step3.mobile_number || mobile).replace(
+      /\D/g,
+      ''
+    );
+    if (mobileToCheck.length < 10) {
+      addToast({
+        type: 'error',
+        hi: 'कृपया मान्य मोबाइल नंबर दर्ज करें',
+        en: 'Please enter a valid mobile number',
+      });
+      return false;
+    }
     if (!set_credit_limit) {
       addToast({
         type: 'error',
