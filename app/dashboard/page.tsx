@@ -206,7 +206,9 @@ export default function DashboardPage() {
       >
         <Box sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <CreateNominationBox disable={disableCreation} />
+            {!disableCreation && (
+              <CreateNominationBox disable={disableCreation} />
+            )}
 
             <Box sx={{ display: 'flex', gap: 2 }}>
               <StatsButtons

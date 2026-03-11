@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const mobile = request.cookies.get('mobile')?.value;
   const { pathname } = request.nextUrl;
 
-  const publicRoutes = ['/login', '/no-permission'];
+  const publicRoutes = ['/login'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   if (!mobile && !isPublicRoute) {
@@ -28,6 +28,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/login',
+    '/no-permission',
     '/dashboard/:path*',
     '/nomination_form/:path*',
     '/view_status/:path*',

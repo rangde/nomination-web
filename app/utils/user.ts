@@ -30,6 +30,8 @@ const normalizeRoles = (msg: string | string[]): string[] => {
 const userId = Cookies.get(USER_ID_COOKIE_KEY);
 
 export const getUserRoles = async (): Promise<string[]> => {
+  const userId = Cookies.get(USER_ID_COOKIE_KEY);
+
   if (!userId) return [];
 
   const key = `${LS_KEY_PREFIX}${userId}`;
@@ -59,6 +61,8 @@ export const clearUserRolesCache = (): void => {
 };
 
 export const getUserInfo = async (): Promise<string[]> => {
+  const userId = Cookies.get(USER_ID_COOKIE_KEY);
+
   if (!userId) return [];
 
   const key = `${USER_INFO_KEY_PREFIX}${userId}`;
