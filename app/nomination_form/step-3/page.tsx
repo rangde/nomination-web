@@ -30,25 +30,14 @@ function NominationStepOne() {
   const [seconds, setSeconds] = useState(60);
   const [canResend, setCanResend] = useState(false);
   const [showCredit, setShowCredit] = useState(false);
-  const [score, setScore] = useState(800);
+  const [score, setScore] = useState<number | null>(null);
 
   const { form, setStep3, submitForm } = useNominationForm();
-  const { set_credit_limit, mobile_number, credit_score } = form.step3;
-  const {
-    first_name,
-    last_name,
-    pincode,
-    district,
-    pan_number,
-    date_of_birth,
-  } = form.step1;
+  const { set_credit_limit } = form.step3;
+
   const verifyOtp = async (number: string, otp: string) => {
     const result = await verify_otp(number, otp, true);
-    if (result?.message) {
-      return result?.message?.status ? true : false;
-    } else {
-      return false;
-    }
+    return result?.message?.status ? true : false;
   };
 
   const resendOtp = () => {
@@ -60,7 +49,14 @@ function NominationStepOne() {
   };
 
   const remark = useMemo(() => {
-    if (score < 681) {
+    if (score === null || score < 0) {
+      return {
+        l1: hi?.credit_score?.needs_help,
+        l2: en?.credit_score?.needs_help
+          ? `(${en?.credit_score?.needs_help})`
+          : '',
+      };
+    } else if (score < 681) {
       return {
         l1: hi?.credit_score?.needs_help,
         l2: en?.credit_score?.needs_help
@@ -90,10 +86,10 @@ function NominationStepOne() {
           : '',
       };
     }
-  }, [score, hi, en]);
+  }, [score]);
+
   useEffect(() => {
     if (!fillOtp) return;
-
     const interval = setInterval(() => {
       setSeconds((prev) => {
         if (prev <= 1) {
@@ -104,9 +100,9 @@ function NominationStepOne() {
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(interval);
   }, [resend]);
+
   const handleRequestOTP = async () => {
     if (showCredit) {
       const okRequired = validateRequired();
@@ -135,68 +131,82 @@ function NominationStepOne() {
         `/nomination_form/view_status?name=${encodeURIComponent(res?.name)}`
       );
     } else if (fillOtp) {
-      if (fillOtp) {
-        if (otp.length >= 6 && (await verifyOtp(mobile, otp))) {
-          addToast({
-            type: 'success',
-            hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
-            en: 'OTP verified successfully',
+      if (otp.length >= 6 && (await verifyOtp(mobile, otp))) {
+        addToast({
+          type: 'success',
+          hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
+          en: 'OTP verified successfully',
+        });
+
+        try {
+          const res = await getCreditScoree({
+            first_name: form.step1.first_name,
+            last_name: form.step1.last_name,
+            dob: form.step1.date_of_birth,
+            pan_number: form.step1.pan_number,
+            mobile_number: mobile,
+            pincode: form.step1.pincode,
           });
 
-          try {
-            const res = await getCreditScoree({
-              first_name: form.step1.first_name,
-              last_name: form.step1.last_name,
-              dob: form.step1.date_of_birth,
-              pan_number: form.step1.pan_number,
-              mobile_number: mobile,
-              pincode: form.step1.pincode,
-            });
+          if (res?.message?.status === 1) {
+            const msg = res.message.msg;
 
-            if (res?.message?.status === 1) {
-              const score = Number(res.message.msg);
-              setScore(Number.isFinite(score) ? score : 0);
-              setStep3({
-                mobile_number: mobile,
-                credit_score: score.toString(),
+            // msg is an object like {"id": 3410, "score": -1}
+            const rawScore =
+              typeof msg === 'object' && msg !== null
+                ? (msg as { score: number }).score
+                : Number(msg);
+
+            // Set the actual score from API — including -1
+            const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
+            setScore(finalScore);
+            setStep3({
+              mobile_number: mobile,
+              credit_score: finalScore.toString(),
+            });
+            setShowCredit(true);
+
+            if (finalScore < 0) {
+              addToast({
+                type: 'error',
+                hi: 'क्रेडिट स्कोर उपलब्ध नहीं है',
+                en: 'Credit score not available',
               });
+            } else {
               addToast({
                 type: 'success',
                 hi: 'क्रेडिट स्कोर प्राप्त हुआ',
                 en: 'Credit score fetched successfully',
               });
-            } else {
-              addToast({
-                type: 'error',
-                hi: 'क्रेडिट स्कोर प्राप्त नहीं हुआ',
-                en:
-                  typeof res?.message?.msg === 'string'
-                    ? res.message.msg
-                    : 'Failed to fetch credit score',
-              });
-
-              setScore(0);
             }
-          } catch (err) {
-            console.error(err);
+          } else {
             addToast({
               type: 'error',
-              hi: 'क्रेडिट स्कोर त्रुटि',
-              en: 'Credit score error',
+              hi: 'क्रेडिट स्कोर प्राप्त नहीं हुआ',
+              en:
+                typeof res?.message?.msg === 'string'
+                  ? res.message.msg
+                  : 'Failed to fetch credit score',
             });
             setScore(0);
+            setShowCredit(true);
           }
-
-          setShowCredit(true);
-        } else {
+        } catch (err) {
+          console.error(err);
           addToast({
             type: 'error',
-            hi: hi?.login?.invalid,
-            en: en?.login?.invalid,
+            hi: 'क्रेडिट स्कोर त्रुटि',
+            en: 'Credit score error',
           });
+          setScore(0);
+          setShowCredit(true);
         }
       } else {
-        validteAndSendOtp();
+        addToast({
+          type: 'error',
+          hi: hi?.login?.invalid,
+          en: en?.login?.invalid,
+        });
       }
     } else {
       validteAndSendOtp();
@@ -205,11 +215,7 @@ function NominationStepOne() {
 
   const numberChecked = async (number: string) => {
     const result = await getNumberChecked(number, true);
-    if (result?.message) {
-      return result?.message?.status ? true : false;
-    } else {
-      return false;
-    }
+    return result?.message?.status ? true : false;
   };
 
   const validateRequired = (): boolean => {
@@ -260,6 +266,7 @@ function NominationStepOne() {
       });
     }
   };
+
   const mobilbumber = (value: string) => {
     const numbersOnly = value.replace(/\D/g, '');
     setMobile(numbersOnly);
@@ -287,19 +294,12 @@ function NominationStepOne() {
           overflowY: 'auto',
           px: 2,
           py: 2,
-          '&::-webkit-scrollbar': {
-            display: 'none',
-          },
+          '&::-webkit-scrollbar': { display: 'none' },
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
       >
-        <Paper
-          sx={{
-            p: 3,
-            borderRadius: 3,
-          }}
-        >
+        <Paper sx={{ p: 3, borderRadius: 3 }}>
           <NominationStepper activeStep={2} />
 
           <Title1
@@ -308,10 +308,13 @@ function NominationStepOne() {
             h1style={{ fontSize: 18, fontWeight: 700 }}
             h2style={{ mb: 2, fontSize: 14 }}
           />
+
           <Box>
             {showCredit ? (
               <Box>
-                <CreditScoreGauge score={score} label={remark} />
+                {score !== null && (
+                  <CreditScoreGauge score={score} label={remark} />
+                )}
                 <Box sx={{ mt: 2 }}>
                   <SelectField
                     label_1={hi?.credit_score?.set_credit_limit}
@@ -320,30 +323,12 @@ function NominationStepOne() {
                     value={set_credit_limit}
                     onChange={(val) => setStep3({ set_credit_limit: val })}
                     options={[
-                      {
-                        label_1: '50000',
-                        value: '50000',
-                      },
-                      {
-                        label_1: '100000',
-                        value: '100000',
-                      },
-                      {
-                        label_1: '150000',
-                        value: '150000',
-                      },
-                      {
-                        label_1: '200000',
-                        value: '200000',
-                      },
-                      {
-                        label_1: '250000',
-                        value: '250000',
-                      },
-                      {
-                        label_1: '300000',
-                        value: '300000',
-                      },
+                      { label_1: '50000', value: '50000' },
+                      { label_1: '100000', value: '100000' },
+                      { label_1: '150000', value: '150000' },
+                      { label_1: '200000', value: '200000' },
+                      { label_1: '250000', value: '250000' },
+                      { label_1: '300000', value: '300000' },
                     ]}
                   />
                 </Box>
@@ -402,7 +387,6 @@ function NominationStepOne() {
                             color: canResend ? '#000' : '#9CA3AF',
                           }}
                         />
-
                         {!canResend && (
                           <Typography
                             sx={{ ml: 1, fontSize: 13, color: '#9CA3AF' }}
@@ -447,7 +431,6 @@ function NominationStepOne() {
                     </Box>
                   )}
                 </Box>
-
                 <ImportantNote
                   h1={hi.form.important_credit_check}
                   h2={en.form.important_credit_check}
@@ -487,16 +470,8 @@ function NominationStepOne() {
                       ? en.form.submit
                       : en.login.otp
                 }
-                h1style={{
-                  fontWeight: 600,
-                  textAlign: 'center',
-                  fontSize: 15,
-                }}
-                h2style={{
-                  fontWeight: 400,
-                  fontSize: 12,
-                  textAlign: 'center',
-                }}
+                h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}
+                h2style={{ fontWeight: 400, fontSize: 12, textAlign: 'center' }}
               />
             </Box>
           </Button>

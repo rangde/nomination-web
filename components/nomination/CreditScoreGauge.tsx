@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Box, Typography, Card, CardContent } from '@mui/material';
+import { Box, Card, CardContent } from '@mui/material';
 import GaugeComponent from 'react-gauge-component';
 import InfoIcon from '@mui/icons-material/Info';
 import CreditScoreDialog from './CreditScoreDialog';
@@ -11,10 +11,9 @@ type labels = {
   l1: string;
   l2: string;
 };
+
 type Props = {
   score: number;
-  min?: number;
-  max?: number;
   label: labels;
 };
 
@@ -25,14 +24,14 @@ const getScoreColor = (score: number): string => {
   return '#525252';
 };
 
-export default function CreditScoreGauge({
-  score,
-  min = 300,
-  max = 900,
-  label,
-}: Props) {
+export default function CreditScoreGauge({ score, label }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const activeColor = useMemo(() => getScoreColor(score), [score]);
+
+  // Dynamically compute min/max based on actual score
+  const minValue = score < 0 ? score - 100 : 0;
+  const maxValue = score <= 0 ? 100 : Math.ceil(score * 1.5);
+
   return (
     <Card sx={{ maxWidth: 400, mx: 'auto', borderRadius: 4, boxShadow: 2 }}>
       <CardContent>
@@ -47,8 +46,8 @@ export default function CreditScoreGauge({
           <GaugeComponent
             type="semicircle"
             value={score}
-            minValue={min}
-            maxValue={max}
+            minValue={minValue}
+            maxValue={maxValue}
             arc={{
               width: 0.25,
               padding: 0.02,
@@ -110,13 +109,8 @@ export default function CreditScoreGauge({
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-              h1style={{
-                fontSize: 13,
-              }}
-              h2style={{
-                pl: 1,
-                fontSize: 13,
-              }}
+              h1style={{ fontSize: 13 }}
+              h2style={{ pl: 1, fontSize: 13 }}
             />
             <InfoIcon sx={{ fontSize: 16, color: '#6B7280' }} />
           </Box>
