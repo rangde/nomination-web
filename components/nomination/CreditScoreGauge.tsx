@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useMemo } from 'react';
 import { Box, Card, CardContent } from '@mui/material';
 import GaugeComponent from 'react-gauge-component';
@@ -28,7 +26,6 @@ export default function CreditScoreGauge({ score, label }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const activeColor = useMemo(() => getScoreColor(score), [score]);
 
-  // Dynamically compute min/max based on actual score
   const minValue = score < 0 ? score - 100 : 0;
   const maxValue = score <= 0 ? 100 : Math.ceil(score * 1.5);
 
@@ -52,19 +49,11 @@ export default function CreditScoreGauge({ score, label }: Props) {
               width: 0.25,
               padding: 0.02,
               subArcs: [
-                {
-                  limit: score,
-                  color: activeColor,
-                },
-                {
-                  color: '#E5E7EB',
-                },
+                { limit: score, color: activeColor },
+                { color: '#E5E7EB' },
               ],
             }}
-            pointer={{
-              type: 'blob',
-              animationDuration: 2000,
-            }}
+            pointer={{ type: 'blob', animationDuration: 2000 }}
             labels={{
               valueLabel: {
                 formatTextValue: () => `${score}`,
@@ -77,7 +66,6 @@ export default function CreditScoreGauge({ score, label }: Props) {
               },
             }}
           />
-
           <Box
             onClick={() => setDialogOpen(true)}
             sx={{
@@ -94,10 +82,7 @@ export default function CreditScoreGauge({ score, label }: Props) {
               backgroundColor: '#F9FAFB',
               cursor: 'pointer',
               transition: 'all 0.2s',
-              '&:hover': {
-                backgroundColor: '#F3F4F6',
-                borderColor: '#D1D5DB',
-              },
+              '&:hover': { backgroundColor: '#F3F4F6', borderColor: '#D1D5DB' },
             }}
           >
             <Title1
@@ -114,7 +99,6 @@ export default function CreditScoreGauge({ score, label }: Props) {
             />
             <InfoIcon sx={{ fontSize: 16, color: '#6B7280' }} />
           </Box>
-
           <CreditScoreDialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
