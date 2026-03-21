@@ -151,13 +151,11 @@ function NominationStepOne() {
           if (res?.message?.status === 1) {
             const msg = res.message.msg;
 
-            // msg is an object like {"id": 3410, "score": -1}
             const rawScore =
-              typeof msg === 'object' && msg !== null
+              typeof msg === 'object' && msg !== null && !Array.isArray(msg)
                 ? (msg as { score: number }).score
                 : Number(msg);
 
-            // Set the actual score from API — including -1
             const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
             setScore(finalScore);
             setStep3({
