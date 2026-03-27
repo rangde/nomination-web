@@ -9,7 +9,12 @@ export function middleware(request: NextRequest) {
   const isPublicRoute = publicRoutes.includes(pathname);
 
   if (!mobile && !isPublicRoute) {
-    const response = NextResponse.redirect(new URL('/login', request.url));
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set(
+      'redirect',
+      request.nextUrl.pathname + request.nextUrl.search
+    );
+    const response = NextResponse.redirect(loginUrl);
 
     request.cookies.getAll().forEach((cookie) => {
       response.cookies.delete(cookie.name);

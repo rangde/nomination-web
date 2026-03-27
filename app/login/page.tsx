@@ -13,10 +13,12 @@ import Title1 from '@/components/Titel1';
 import { addToast } from '@/components/error/toastStore';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
-import { redirect } from 'next/navigation';
+import { redirect, useSearchParams } from 'next/navigation';
 import InstallPwaDialog from '@/components/pwa/InstallPwaDialog';
 
 function LoginPage() {
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const [loading, setLoading] = useState(false);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
   const [canPromptInstall, setCanPromptInstall] = useState(false);
@@ -92,7 +94,7 @@ function LoginPage() {
           expires: 7,
           sameSite: 'strict',
         });
-        redirect('/dashboard');
+        redirect(redirectTo);
       } else {
         addToast({
           type: 'error',
