@@ -143,8 +143,8 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
       if (payload?.status === 1) {
         addToast({
           type: 'success',
-          hi: 'दस्तावेज़ सफलतापूर्वक अगले स्तर पर भेज दिया गया',
-          en: 'Document moved to next workflow state',
+          hi: hi?.workflow?.doc_moved,
+          en: en?.workflow?.doc_moved,
         });
         router.push(
           `/nomination_form/view_status?name=${encodeURIComponent(name)}`
@@ -152,8 +152,8 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
       } else {
         addToast({
           type: 'error',
-          hi: 'स्वीकृति असफल रही',
-          en: 'Approval failed',
+          hi: hi?.workflow?.approval_failed,
+          en: en?.workflow?.approval_failed,
         });
       }
     } catch (error) {
@@ -255,11 +255,19 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   ];
 
   const enterpricess_details = [
-    { h1: 'क्षेत्र का प्रकार', h2: 'Sector Type', h3: sectorType || '-' },
-    { h1: 'उद्यम का प्रकार', h2: 'Enterprise Type', h3: enterpriseType || '-' },
     {
-      h1: 'सहायता की आवश्यकता',
-      h2: 'Support Needed',
+      h1: hi?.form?.sector_type,
+      h2: en?.form?.sector_type,
+      h3: sectorType || '-',
+    },
+    {
+      h1: hi?.dashboard?.ent_type,
+      h2: en?.dashboard?.ent_type,
+      h3: enterpriseType || '-',
+    },
+    {
+      h1: hi?.workflow?.support_needed,
+      h2: en?.workflow?.support_needed,
       h3: supportNeeded || '-',
     },
   ];
@@ -417,7 +425,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           >
             <Box>
               <Title1
-                h1="Credit Score"
+                h1={hi?.workflow?.credit_score_label}
                 h2={String(creditScore)}
                 h1style={{ fontSize: 14, fontWeight: 400 }}
                 h2style={{ fontWeight: 600, fontSize: 18 }}

@@ -77,5 +77,43 @@
     "enterprises_title": "ENTERPRISE DETAILS",
     "credit_bureau": "CREDIT BUREAU ASSESSMENT",
     "approve": "Approve"
+  },
+
+  "header": {
+    "logout": "Logout",
+    "user": "User"
+  },
+
+  "workflow": {
+    "pending_review": "Pending review",
+    "reviewed_by": "Reviewed by",
+    "by": "by",
+    "on": "on",
+    "shg_review": "SHG Review - Maker",
+    "vo_approval": "VO Approval - Checker 1",
+    "clf_approval": "CLF Approval - Checker 2",
+    "doc_moved": "Document moved to next workflow state",
+    "approval_failed": "Approval failed",
+    "shg_only": "Only SHG user can create nomination",
+    "credit_score_label": "Credit Score",
+    "approved_by": "Approved by",
+    "farm_based": "Farm Based",
+    "non_farm_based": "Non - Farm Based",
+    "support_needed": "Support Needed"
+  },
+
+  "pwa": {
+    "install_title": "Install the app",
+    "install_desc": "Install this app on your phone for a better experience.",
+    "already_installed": "App is already installed",
+    "install_btn": "Install",
+    "android_steps_title": "Manual install steps",
+    "android_step1": "In Chrome, tap ⋮ (three dots)",
+    "android_step2": "Select \"Add to Home screen\"",
+    "android_step3": "Tap \"Add / Install\"",
+    "ios_steps_title": "iOS install steps",
+    "ios_step1": "In Safari, tap Share (⬆)",
+    "ios_step2": "Select \"Add to Home Screen\"",
+    "ios_step3": "Tap \"Add\""
   }
 }

@@ -78,8 +78,8 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
           <InfoOutlinedIcon sx={{ fontSize: 18, color: '#9CA3AF' }} />
 
           <Title1
-            h1="केवल SHG उपयोगकर्ता नया नामांकन बना सकते हैं"
-            h2="(Only SHG user can create nomination)"
+            h1={hi?.workflow?.shg_only}
+            h2={`(${en?.workflow?.shg_only})`}
             h1style={{
               fontSize: 12,
               fontWeight: 500,

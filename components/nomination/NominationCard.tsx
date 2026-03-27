@@ -86,7 +86,9 @@ export default function NominationCard({
   const creditLimit = n(data.set_credit_limit, 0);
 
   const entType =
-    n(data.farm_based, 0) === 1 ? 'Farm Based' : 'Non - Farm Based';
+    n(data.farm_based, 0) === 1
+      ? en?.workflow?.farm_based
+      : en?.workflow?.non_farm_based;
 
   const approval = pickApproval(data);
   const approvedBy = approval.by || 'XYZ';
@@ -175,10 +177,10 @@ export default function NominationCard({
         >
           <CheckCircleIcon sx={{ fontSize: 14 }} />
           <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
-            Approved by {approvedBy}
+            {en?.workflow?.approved_by} {approvedBy}
           </Typography>
           <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
-            on {approvedOn}
+            {en?.workflow?.on} {approvedOn}
           </Typography>
         </Box>
       )}
