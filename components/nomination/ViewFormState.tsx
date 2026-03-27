@@ -1,6 +1,6 @@
 'use client';
 
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import hi from '@/messages/hi.json';
@@ -177,6 +177,49 @@ function ViewFormStatus({ name }: FormControlProps) {
             />
           </Box>
         )}
+
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={() => {
+            const base = window.location.origin;
+            const link = `${base}/nomination_form/view_form?view=false&name=${formValues?.name ?? ''}`;
+            navigator.clipboard.writeText(link);
+          }}
+          sx={{
+            backgroundColor: '#000',
+            borderRadius: 3,
+            mt: 1,
+            py: 1.5,
+            textTransform: 'none',
+            fontWeight: 600,
+            boxShadow: '0px 6px 10px rgba(0,0,0,0.2)',
+            '&:hover': {
+              backgroundColor: '#111',
+            },
+          }}
+        >
+          <Title1
+            h1={hi?.form?.copy_link}
+            h2={`(${en?.form?.copy_link})`}
+            boxStyle={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            h1style={{
+              fontWeight: 400,
+              textAlign: 'center',
+              fontSize: 13,
+            }}
+            h2style={{
+              fontWeight: 400,
+              pl: 1,
+              fontSize: 13,
+            }}
+          />
+        </Button>
 
         <Box sx={{ p: 0.5, mt: 2 }}>
           <Title1
