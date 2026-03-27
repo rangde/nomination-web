@@ -170,6 +170,21 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   const docId = s(formValues?.name, '—');
   const workflowState = s(formValues?.workflow_state, '—');
 
+  const shgProposed =
+    n(formValues?.shg_proposed, 0) || s(formValues?.shg_proposed, '0');
+  const voProposed =
+    workflowState === 'SHG Proposed'
+      ? 'Pending'
+      : String(
+          n(formValues?.vo_proposed, 0) || s(formValues?.vo_proposed, '0')
+        );
+  const clfProposed =
+    workflowState === 'SHG Proposed' || workflowState === 'VO Approved'
+      ? 'Pending'
+      : String(
+          n(formValues?.clf_proposed, 0) || s(formValues?.clf_proposed, '0')
+        );
+
   const sectorType =
     n(formValues?.farm_based, 0) === 1
       ? 'Farm'
@@ -276,22 +291,50 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
         }}
       >
         <Paper sx={{ p: 2, borderRadius: 3 }}>
-          <Box display="flex" justifyContent="space-between">
+          <Box>
             <Box>
               <Title1
                 h1={fullName}
                 h2={`ID: ${docId}`}
-                h1style={{ fontSize: 14, fontWeight: 600 }}
-                h2style={{ fontWeight: 300, fontSize: 13 }}
+                boxStyle={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                }}
+                h1style={{ fontSize: 16, fontWeight: 600 }}
+                h2style={{ fontWeight: 600, fontSize: 16 }}
               />
             </Box>
 
-            <Box textAlign="right">
+            <Box display="flex" marginTop="5px" justifyContent="space-between">
               <Title1
-                h1={workflowState || '—'}
-                h2={`₹${creditLimit || s(formValues?.set_credit_limit, '0')}`}
-                h1style={{ fontSize: 14, fontWeight: 600 }}
-                h2style={{ fontWeight: 300, fontSize: 13 }}
+                h1="SHG Proposed"
+                h2={`₹${shgProposed}`}
+                boxStyle={{ display: 'flex', alignItems: 'center' }}
+                h1style={{ fontSize: 13, fontWeight: 600 }}
+                h2style={{ fontWeight: 300, fontSize: 12 }}
+              />
+              <Title1
+                h1="VO Proposed"
+                h2={voProposed === 'Pending' ? 'Pending' : `₹${voProposed}`}
+                boxStyle={{ display: 'flex', alignItems: 'center' }}
+                h1style={{ fontSize: 13, fontWeight: 600 }}
+                h2style={{
+                  fontWeight: 300,
+                  fontSize: 12,
+                  color: voProposed === 'Pending' ? '#9CA3AF' : undefined,
+                }}
+              />
+              <Title1
+                h1="CLF Proposed"
+                h2={clfProposed === 'Pending' ? 'Pending' : `₹${clfProposed}`}
+                boxStyle={{ display: 'flex', alignItems: 'center' }}
+                h1style={{ fontSize: 13, fontWeight: 600 }}
+                h2style={{
+                  fontWeight: 300,
+                  fontSize: 12,
+                  color: clfProposed === 'Pending' ? '#9CA3AF' : undefined,
+                }}
               />
             </Box>
           </Box>
