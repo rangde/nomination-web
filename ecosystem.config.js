@@ -14,7 +14,7 @@ module.exports = {
     },
     {
       name: 'josh-staging',
-      cwd: '/home/deploy/apps/nomination-web',
+      cwd: '/home/deploy/apps/nomination-web-staging',
       script: 'node_modules/next/dist/bin/next',
       interpreter: '/home/deploy/.nvm/versions/node/v20.20.1/bin/node',
       args: 'start -p 3001',
