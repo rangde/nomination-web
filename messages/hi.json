@@ -75,5 +75,43 @@
     "enterprises_title": "उद्यम का विवरण",
     "credit_bureau": "क्रेडिट ब्यूरो मूल्यांकन",
     "approve": "स्वीकृत करें"
+  },
+
+  "header": {
+    "logout": "लॉग आउट",
+    "user": "उपयोगकर्ता"
+  },
+
+  "workflow": {
+    "pending_review": "समीक्षा लंबित",
+    "reviewed_by": "समीक्षा की गई",
+    "by": "द्वारा",
+    "on": "को",
+    "shg_review": "SHG समीक्षा - निर्माता",
+    "vo_approval": "VO अनुमोदन - जाँचकर्ता 1",
+    "clf_approval": "CLF अनुमोदन - जाँचकर्ता 2",
+    "doc_moved": "दस्तावेज़ सफलतापूर्वक अगले स्तर पर भेज दिया गया",
+    "approval_failed": "स्वीकृति असफल रही",
+    "shg_only": "केवल SHG उपयोगकर्ता नया नामांकन बना सकते हैं",
+    "credit_score_label": "क्रेडिट स्कोर",
+    "approved_by": "स्वीकृत द्वारा",
+    "farm_based": "कृषि आधारित",
+    "non_farm_based": "गैर-कृषि आधारित",
+    "support_needed": "सहायता की आवश्यकता"
+  },
+
+  "pwa": {
+    "install_title": "ऐप इंस्टॉल करें",
+    "install_desc": "बेहतर अनुभव के लिए इस ऐप को अपने फोन में इंस्टॉल करें।",
+    "already_installed": "ऐप पहले से इंस्टॉल है",
+    "install_btn": "इंस्टॉल करें",
+    "android_steps_title": "मैनुअल इंस्टॉल स्टेप्स",
+    "android_step1": "1) Chrome में ⋮ (तीन डॉट) दबाएँ",
+    "android_step2": "2) \"Add to Home screen\" चुनें",
+    "android_step3": "3) \"Add / Install\" दबाएँ",
+    "ios_steps_title": "iPhone / iPad इंस्टॉल स्टेप्स",
+    "ios_step1": "1) Safari में Share (⬆) दबाएँ",
+    "ios_step2": "2) \"Add to Home Screen\" चुनें",
+    "ios_step3": "3) \"Add\" दबाएँ"
   }
 }

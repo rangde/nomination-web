@@ -15,6 +15,8 @@ import Title1 from '@/components/Titel1';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import hi from '@/messages/hi.json';
+import en from '@/messages/en.json';
 import {
   getUserRoles,
   getUserInfo,
@@ -164,8 +166,8 @@ export default function AppHeader({
               </ListItemIcon>
               <Typography variant="inherit" sx={{ fontWeight: 500 }}>
                 <Title1
-                  h1="लॉग आउट"
-                  h2="Logout"
+                  h1={hi?.header?.logout}
+                  h2={en?.header?.logout}
                   h1style={{ fontSize: 14, fontWeight: 600 }}
                   h2style={{ fontSize: 12 }}
                 />
@@ -176,8 +178,8 @@ export default function AppHeader({
           <Box>
             <Typography fontSize={12} color="text.secondary">
               {roles.length > 0
-                ? `${roles.join(', ')} उपयोगकर्ता`
-                : 'उपयोगकर्ता'}
+                ? `${roles.join(', ')} ${hi?.header?.user}`
+                : hi?.header?.user}
             </Typography>
             <Typography fontWeight={700}>
               {userInfo?.full_name ?? 'guest'}

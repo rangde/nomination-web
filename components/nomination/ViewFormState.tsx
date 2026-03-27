@@ -66,8 +66,8 @@ function ViewFormStatus({ name }: FormControlProps) {
     workflowState === 'VO Approved' || workflowState === 'CLF Approved';
 
   const clfActive = workflowState === 'CLF Approved';
-  const pendingEn = 'Pending review';
-  const pendingHi = 'समीक्षा लंबित';
+  const pendingEn = en?.workflow?.pending_review;
+  const pendingHi = hi?.workflow?.pending_review;
 
   const shgName = s(formValues?.owner);
   const voName = s(formValues?.vo_approval_by);
@@ -78,46 +78,48 @@ function ViewFormStatus({ name }: FormControlProps) {
 
   const voLine =
     voName && voOn
-      ? `Reviewed by: VO ${voName} on ${voOn}`
+      ? `${en?.workflow?.reviewed_by}: VO ${voName} ${en?.workflow?.on} ${voOn}`
       : voName
-        ? `Reviewed by: VO ${voName}`
+        ? `${en?.workflow?.reviewed_by}: VO ${voName}`
         : pendingEn;
 
   const voLineHi =
     voName && voOn
-      ? `समीक्षा की गई: VO ${voName} द्वारा, ${voOn}`
+      ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}, ${voOn}`
       : voName
-        ? `समीक्षा की गई: VO ${voName} द्वारा`
+        ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}`
         : pendingHi;
 
   const clfLine =
     clfName && clfOn
-      ? `Reviewed by: CLF ${clfName} on ${clfOn}`
+      ? `${en?.workflow?.reviewed_by}: CLF ${clfName} ${en?.workflow?.on} ${clfOn}`
       : clfName
-        ? `Reviewed by: CLF ${clfName}`
+        ? `${en?.workflow?.reviewed_by}: CLF ${clfName}`
         : pendingEn;
 
   const clfLineHi =
     clfName && clfOn
-      ? `समीक्षा की गई: CLF ${clfName} द्वारा, ${clfOn}`
+      ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}, ${clfOn}`
       : clfName
-        ? `समीक्षा की गई: CLF ${clfName} द्वारा`
+        ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}`
         : pendingHi;
   const steps = [
     {
-      h1: 'SHG Review - Maker',
-      h2: shgName ? `Reviewed by: SHG ${shgName}` : pendingEn,
-      h3: shgName ? `समीक्षा की गई: SHG ${shgName}` : pendingHi,
+      h1: en?.workflow?.shg_review,
+      h2: shgName ? `${en?.workflow?.reviewed_by}: SHG ${shgName}` : pendingEn,
+      h3: shgName
+        ? `${hi?.workflow?.reviewed_by}: SHG ${shgName} ${hi?.workflow?.by}`
+        : pendingHi,
       active: shgActive,
     },
     {
-      h1: 'VO Approval - Checker 1',
+      h1: en?.workflow?.vo_approval,
       h2: voLine,
       h3: voLineHi,
       active: voActive,
     },
     {
-      h1: 'CLF Approval - Checker 2',
+      h1: en?.workflow?.clf_approval,
       h2: clfLine,
       h3: clfLineHi,
       active: clfActive,

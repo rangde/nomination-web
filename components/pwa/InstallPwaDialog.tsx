@@ -14,6 +14,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 import Title1 from '@/components/Titel1';
+import hi from '@/messages/hi.json';
+import en from '@/messages/en.json';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -118,8 +120,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
           }}
         >
           <Title1
-            h1="ऐप इंस्टॉल करें"
-            h2="(Install the app)"
+            h1={hi?.pwa?.install_title}
+            h2={`(${en?.pwa?.install_title})`}
             h1style={{ fontSize: 16, fontWeight: 700, color: '#000' }}
             h2style={{ fontSize: 12, color: '#6B7280' }}
           />
@@ -131,8 +133,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
 
         <Box sx={{ mt: 2 }}>
           <Title1
-            h1="बेहतर अनुभव के लिए इस ऐप को अपने फोन में इंस्टॉल करें।"
-            h2="(Install this app on your phone for a better experience.)"
+            h1={hi?.pwa?.install_desc}
+            h2={`(${en?.pwa?.install_desc})`}
             h1style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}
             h2style={{ fontSize: 12, color: '#6B7280' }}
           />
@@ -153,8 +155,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
           >
             <InfoOutlinedIcon sx={{ color: '#111827' }} />
             <Title1
-              h1="ऐप पहले से इंस्टॉल है"
-              h2="(App is already installed)"
+              h1={hi?.pwa?.already_installed}
+              h2={`(${en?.pwa?.already_installed})`}
               boxStyle={{
                 display: 'flex',
                 flexDirection: 'row',
@@ -187,8 +189,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                 }}
               >
                 <Title1
-                  h1="इंस्टॉल करें"
-                  h2="(Install)"
+                  h1={hi?.pwa?.install_btn}
+                  h2={`(${en?.pwa?.install_btn})`}
                   boxStyle={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -216,8 +218,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
               >
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Title1
-                    h1="मैनुअल इंस्टॉल स्टेप्स"
-                    h2="(Manual install steps)"
+                    h1={hi?.pwa?.android_steps_title}
+                    h2={`(${en?.pwa?.android_steps_title})`}
                     boxStyle={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -246,8 +248,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                   }}
                 >
                   <Title1
-                    h1="1) Chrome में ⋮ (तीन डॉट) दबाएँ"
-                    h2="(In Chrome, tap ⋮ (three dots))"
+                    h1={hi?.pwa?.android_step1}
+                    h2={`(${en?.pwa?.android_step1})`}
                     h1style={{
                       fontSize: 12,
                       fontWeight: 600,
@@ -257,8 +259,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                   />
 
                   <Title1
-                    h1="2) “Add to Home screen” चुनें"
-                    h2="(Select “Add to Home screen”)"
+                    h1={hi?.pwa?.android_step2}
+                    h2={`(${en?.pwa?.android_step2})`}
                     h1style={{
                       fontSize: 12,
                       fontWeight: 600,
@@ -268,8 +270,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                   />
 
                   <Title1
-                    h1="3) “Add / Install” दबाएँ"
-                    h2="(Tap “Add / Install”)"
+                    h1={hi?.pwa?.android_step3}
+                    h2={`(${en?.pwa?.android_step3})`}
                     h1style={{
                       fontSize: 12,
                       fontWeight: 600,
@@ -291,8 +293,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
               >
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Title1
-                    h1="iPhone / iPad इंस्टॉल स्टेप्स"
-                    h2="(iOS install steps)"
+                    h1={hi?.pwa?.ios_steps_title}
+                    h2={`(${en?.pwa?.ios_steps_title})`}
                     boxStyle={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -321,8 +323,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                   }}
                 >
                   <Title1
-                    h1="1) Safari में Share (⬆️) दबाएँ"
-                    h2="(In Safari, tap Share (⬆️))"
+                    h1={hi?.pwa?.ios_step1}
+                    h2={`(${en?.pwa?.ios_step1})`}
                     h1style={{
                       fontSize: 12,
                       fontWeight: 600,
@@ -332,8 +334,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                   />
 
                   <Title1
-                    h1="2) “Add to Home Screen” चुनें"
-                    h2="(Select “Add to Home Screen”)"
+                    h1={hi?.pwa?.ios_step2}
+                    h2={`(${en?.pwa?.ios_step2})`}
                     h1style={{
                       fontSize: 12,
                       fontWeight: 600,
@@ -343,8 +345,8 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                   />
 
                   <Title1
-                    h1="3) “Add” दबाएँ"
-                    h2="(Tap “Add”)"
+                    h1={hi?.pwa?.ios_step3}
+                    h2={`(${en?.pwa?.ios_step3})`}
                     h1style={{
                       fontSize: 12,
                       fontWeight: 600,
