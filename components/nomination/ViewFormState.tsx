@@ -189,7 +189,7 @@ function ViewFormStatus({ name }: FormControlProps) {
           sx={{
             backgroundColor: '#000',
             borderRadius: 3,
-            mt: 1,
+            mt: 3,
             py: 1.5,
             textTransform: 'none',
             fontWeight: 600,
