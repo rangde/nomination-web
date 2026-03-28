@@ -4,7 +4,7 @@ import { Box, Button, Paper } from '@mui/material';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import Text from '@/components/FormComponents/Text';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
@@ -289,7 +289,7 @@ export default function NominationStepOne() {
         <Paper sx={{ p: 3, borderRadius: 3 }}>
           <NominationStepper activeStep={0} />
 
-          <Title1
+          <DualLanguageText
             h1={hi?.form?.nomi_details}
             h2={en?.form?.nomi_details}
             h1style={{ fontSize: 18, fontWeight: 700 }}
@@ -411,7 +411,7 @@ export default function NominationStepOne() {
             // onClick={() => router.push('/nomination_form/step-2')}
           >
             <Box textAlign="center">
-              <Title1
+              <DualLanguageText
                 h1={hi?.form?.next_step}
                 h2={en?.form?.next_step}
                 h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}

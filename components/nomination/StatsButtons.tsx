@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Paper, Typography } from '@mui/material';
-import Title1 from '../Titel1';
+import DualLanguageText from '../DualLanguageText';
 
 type StatusMessage = {
   h1: string;
@@ -27,7 +27,7 @@ function StatsButtons({ h1, h2, count, show, onClick }: StatusMessage) {
           borderColor: show ? '#000' : 'transparent',
         }}
       >
-        <Title1
+        <DualLanguageText
           h1={h1}
           h2={h2}
           h1style={{ fontSize: '0.8rem', fontWeight: 600 }}

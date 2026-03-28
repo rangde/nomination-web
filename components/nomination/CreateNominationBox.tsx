@@ -2,7 +2,7 @@
 
 import { Box, Button, Paper } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import Title1 from '../Titel1';
+import DualLanguageText from '../DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import { useRouter } from 'next/navigation';
@@ -27,7 +27,7 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
         backgroundColor: 'white',
       }}
     >
-      <Title1
+      <DualLanguageText
         h1={hi?.dashboard?.nomi_new}
         h2={en?.dashboard?.nomi_new}
         h1style={{ fontSize: '1.1rem', fontWeight: 600 }}
@@ -49,7 +49,7 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
             },
           }}
         >
-          <Title1
+          <DualLanguageText
             h1={hi?.dashboard?.create_nomination}
             h2={en?.dashboard?.create_nomination}
             h1style={{
@@ -77,7 +77,7 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
         >
           <InfoOutlinedIcon sx={{ fontSize: 18, color: '#9CA3AF' }} />
 
-          <Title1
+          <DualLanguageText
             h1={hi?.workflow?.shg_only}
             h2={`(${en?.workflow?.shg_only})`}
             h1style={{

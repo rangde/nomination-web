@@ -3,7 +3,7 @@ import { Box, Card, CardContent } from '@mui/material';
 import GaugeComponent from 'react-gauge-component';
 import InfoIcon from '@mui/icons-material/Info';
 import CreditScoreDialog from './CreditScoreDialog';
-import Title1 from '../Titel1';
+import DualLanguageText from '../DualLanguageText';
 
 type labels = {
   l1: string;
@@ -85,7 +85,7 @@ export default function CreditScoreGauge({ score, label }: Props) {
               '&:hover': { backgroundColor: '#F3F4F6', borderColor: '#D1D5DB' },
             }}
           >
-            <Title1
+            <DualLanguageText
               h1={label.l1}
               h2={label.l2}
               boxStyle={{

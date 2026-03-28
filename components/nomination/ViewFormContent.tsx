@@ -6,7 +6,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react';
 import AppHeader from '@/components/header/Appheader';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import SelectField from '@/components/FormComponents/SelectField';
 import { getDoc, approveDoc } from '@/services/api';
 import { addToast } from '../error/toastStore';
@@ -86,7 +86,7 @@ type SectionProps = {
 function Section({ titleHi, titleEn, children }: SectionProps) {
   return (
     <Paper sx={{ p: 2, borderRadius: 3 }}>
-      <Title1
+      <DualLanguageText
         h1={s(titleHi)}
         h2={s(titleEn)}
         boxStyle={{ pb: 2 }}
@@ -301,7 +301,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
         <Paper sx={{ p: 2, borderRadius: 3 }}>
           <Box>
             <Box>
-              <Title1
+              <DualLanguageText
                 h1={fullName}
                 h2={`ID: ${docId}`}
                 boxStyle={{
@@ -315,14 +315,14 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             </Box>
 
             <Box display="flex" marginTop="5px" justifyContent="space-between">
-              <Title1
+              <DualLanguageText
                 h1="SHG Proposed"
                 h2={`₹${shgProposed}`}
                 boxStyle={{ display: 'flex', alignItems: 'center' }}
                 h1style={{ fontSize: 13, fontWeight: 600 }}
                 h2style={{ fontWeight: 300, fontSize: 12 }}
               />
-              <Title1
+              <DualLanguageText
                 h1="VO Proposed"
                 h2={voProposed === 'Pending' ? 'Pending' : `₹${voProposed}`}
                 boxStyle={{ display: 'flex', alignItems: 'center' }}
@@ -333,7 +333,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
                   color: voProposed === 'Pending' ? '#9CA3AF' : undefined,
                 }}
               />
-              <Title1
+              <DualLanguageText
                 h1="CLF Proposed"
                 h2={clfProposed === 'Pending' ? 'Pending' : `₹${clfProposed}`}
                 boxStyle={{ display: 'flex', alignItems: 'center' }}
@@ -360,7 +360,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             }}
           >
             {nomi_details.map((item, index) => (
-              <Title1
+              <DualLanguageText
                 key={index}
                 h1={item.h1}
                 h2={item.h2}
@@ -395,7 +395,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
                       : 'auto',
                 }}
               >
-                <Title1
+                <DualLanguageText
                   h1={item.h1}
                   h2={item.h2}
                   h3={item.h3 || '-'}
@@ -424,7 +424,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             }}
           >
             <Box>
-              <Title1
+              <DualLanguageText
                 h1={hi?.workflow?.credit_score_label}
                 h2={String(creditScore)}
                 h1style={{ fontSize: 14, fontWeight: 400 }}
@@ -483,7 +483,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             {loading ? (
               <CircularProgress size={18} sx={{ color: '#fff' }} />
             ) : (
-              <Title1
+              <DualLanguageText
                 h1={hi.nomi_form.approve}
                 h2={en.nomi_form.approve}
                 h1style={{

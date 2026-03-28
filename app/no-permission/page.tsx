@@ -3,7 +3,7 @@
 import { Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import { storage } from '@/app/utils/localStorage';
 import { clearAllUserCaches } from '../utils/user';
 export default function NoPermissionPage() {
@@ -31,14 +31,14 @@ export default function NoPermissionPage() {
         textAlign: 'center',
       }}
     >
-      <Title1
+      <DualLanguageText
         h1="आपके पास अनुमति नहीं है"
         h2="You don’t have permission"
         h1style={{ fontSize: 22, fontWeight: 700 }}
         h2style={{ mt: 0.5, color: '#6B7280', fontSize: 14 }}
       />
 
-      <Title1
+      <DualLanguageText
         h1="कृपया SHG / VO / CLF भूमिका देने के लिए अपने एडमिन से संपर्क करें।"
         h2="Please contact your admin to assign SHG / VO / CLF role."
         h1style={{ mt: 2, fontSize: 16 }}
@@ -61,7 +61,7 @@ export default function NoPermissionPage() {
           },
         }}
       >
-        <Title1
+        <DualLanguageText
           h1="लॉग आउट"
           h2="Logout"
           h1style={{ fontSize: 14, fontWeight: 600 }}

@@ -2,7 +2,7 @@
 
 import { Box, Button, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import AppHeader from '@/components/header/Appheader';
@@ -145,7 +145,7 @@ export default function NominationStepTwoPage() {
         <Paper sx={{ p: 3, borderRadius: 3 }}>
           <NominationStepper activeStep={1} />
 
-          <Title1
+          <DualLanguageText
             h1={hi?.form?.enterprise}
             h2={en?.form?.enterprise}
             h1style={{ fontSize: 18, fontWeight: 700 }}
@@ -235,7 +235,7 @@ export default function NominationStepTwoPage() {
             onClick={handleNext}
           >
             <Box textAlign="center">
-              <Title1
+              <DualLanguageText
                 h1={hi?.form?.next_step}
                 h2={en?.form?.save_and_next}
                 h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}

@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import AppHeader from '@/components/header/Appheader';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import NominationCard from '@/components/nomination/NominationCard';
 import NextTimeline from '@/components/nomination/NextTimeline';
@@ -151,7 +151,7 @@ function ViewFormStatus({ name }: FormControlProps) {
           }}
         >
           <CheckCircleIcon sx={{ fontSize: '5rem', color: '#6B7280' }} />
-          <Title1
+          <DualLanguageText
             h1={hi?.form?.nomi_approved}
             h2={en?.form?.nomi_approved}
             boxStyle={{
@@ -201,7 +201,7 @@ function ViewFormStatus({ name }: FormControlProps) {
             },
           }}
         >
-          <Title1
+          <DualLanguageText
             h1={hi?.form?.copy_link}
             h2={`(${en?.form?.copy_link})`}
             boxStyle={{
@@ -224,7 +224,7 @@ function ViewFormStatus({ name }: FormControlProps) {
         </Button>
 
         <Box sx={{ p: 0.5, mt: 2 }}>
-          <Title1
+          <DualLanguageText
             h1={hi?.credit_score?.next}
             h2={en?.credit_score?.next}
             h1style={{ fontSize: 20, fontWeight: 700 }}

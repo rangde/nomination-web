@@ -13,7 +13,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 
@@ -119,7 +119,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
             gap: 2,
           }}
         >
-          <Title1
+          <DualLanguageText
             h1={hi?.pwa?.install_title}
             h2={`(${en?.pwa?.install_title})`}
             h1style={{ fontSize: 16, fontWeight: 700, color: '#000' }}
@@ -132,7 +132,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
         </Box>
 
         <Box sx={{ mt: 2 }}>
-          <Title1
+          <DualLanguageText
             h1={hi?.pwa?.install_desc}
             h2={`(${en?.pwa?.install_desc})`}
             h1style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}
@@ -154,7 +154,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
             }}
           >
             <InfoOutlinedIcon sx={{ color: '#111827' }} />
-            <Title1
+            <DualLanguageText
               h1={hi?.pwa?.already_installed}
               h2={`(${en?.pwa?.already_installed})`}
               boxStyle={{
@@ -188,7 +188,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                   '&:hover': { bgcolor: '#111' },
                 }}
               >
-                <Title1
+                <DualLanguageText
                   h1={hi?.pwa?.install_btn}
                   h2={`(${en?.pwa?.install_btn})`}
                   boxStyle={{
@@ -217,7 +217,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.android_steps_title}
                     h2={`(${en?.pwa?.android_steps_title})`}
                     boxStyle={{
@@ -247,7 +247,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                     gap: 1,
                   }}
                 >
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.android_step1}
                     h2={`(${en?.pwa?.android_step1})`}
                     h1style={{
@@ -258,7 +258,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                     h2style={{ pl: 1.7, fontSize: 12, color: '#4B5563' }}
                   />
 
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.android_step2}
                     h2={`(${en?.pwa?.android_step2})`}
                     h1style={{
@@ -269,7 +269,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                     h2style={{ pl: 1.7, fontSize: 12, color: '#4B5563' }}
                   />
 
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.android_step3}
                     h2={`(${en?.pwa?.android_step3})`}
                     h1style={{
@@ -292,7 +292,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.ios_steps_title}
                     h2={`(${en?.pwa?.ios_steps_title})`}
                     boxStyle={{
@@ -322,7 +322,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                     gap: 1,
                   }}
                 >
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.ios_step1}
                     h2={`(${en?.pwa?.ios_step1})`}
                     h1style={{
@@ -333,7 +333,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                     h2style={{ pl: 1.7, fontSize: 12, color: '#4B5563' }}
                   />
 
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.ios_step2}
                     h2={`(${en?.pwa?.ios_step2})`}
                     h1style={{
@@ -344,7 +344,7 @@ export default function InstallPwaDialog({ open, onClose }: Props) {
                     h2style={{ pl: 1.7, fontSize: 12, color: '#4B5563' }}
                   />
 
-                  <Title1
+                  <DualLanguageText
                     h1={hi?.pwa?.ios_step3}
                     h2={`(${en?.pwa?.ios_step3})`}
                     h1style={{
