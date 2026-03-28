@@ -81,25 +81,25 @@ export const verifyOtpApi = (
   );
 };
 
-export const validatAadhar = (aadhar_number: string) => {
+export const validateAadhaar = (aadhaarNumber: string) => {
   return postFrappe<CustomApiMessage>(
     '/api/method/nomination.api.form.validate_aadhaar',
     {
-      aadhaar_number: aadhar_number,
+      aadhaar_number: aadhaarNumber,
     }
   );
 };
 
-export const validatPan = (pan_number: string) => {
+export const validatePan = (panNumber: string) => {
   return postFrappe<CustomApiMessage>(
     '/api/method/nomination.api.form.validate_pan',
     {
-      pan_number: pan_number,
+      pan_number: panNumber,
     }
   );
 };
 
-export const validatDob = (dob: string) => {
+export const validateDob = (dob: string) => {
   return postFrappe<CustomApiMessage>(
     '/api/method/nomination.api.form.validate_dob',
     {
@@ -114,7 +114,7 @@ export const getRoles = () => {
   );
 };
 
-export const getNominationsform = () => {
+export const getNominationsForm = () => {
   return getFrappe<CustomApiMessage>(
     '/api/method/nomination.api.dashboard.get_nomination_list'
   );
@@ -152,7 +152,7 @@ export const approveDoc = (name: string, credit_limit: string) => {
   );
 };
 
-export const getCreditScoree = (payload: CreditScorePayload) => {
+export const getCreditScore = (payload: CreditScorePayload) => {
   return postFrappe<CustomApiMessage>(
     '/api/method/nomination.api.credit_check.credit_score',
     payload

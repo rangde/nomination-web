@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
-import AppHeader from '@/components/header/Appheader';
+import AppHeader from '@/components/header/AppHeader';
 import DualLanguageText from '@/components/DualLanguageText';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import NominationCard from '@/components/nomination/NominationCard';

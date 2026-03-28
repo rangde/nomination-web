@@ -9,8 +9,12 @@ import Text from '@/components/FormComponents/Text';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import { addToast } from '@/components/error/toastStore';
-import AppHeader from '@/components/header/Appheader';
-import { validatAadhar, validatPan, validatDob } from '@/services/api';
+import AppHeader from '@/components/header/AppHeader';
+import {
+  validateAadhaar as validateAadhaarApi,
+  validatePan as validatePanApi,
+  validateDob as validateDobApi,
+} from '@/services/api';
 import NominationStepper from '@/components/nomination/NominationStepper';
 import { useNominationForm } from '../NominationFormProvider';
 
@@ -65,7 +69,7 @@ export default function NominationStepOne() {
         setDobValidate(false);
         return false;
       }
-      const res = await validatDob(dob);
+      const res = await validateDobApi(dob);
 
       const isValid = Boolean(res?.message?.status);
 
@@ -111,7 +115,7 @@ export default function NominationStepOne() {
         return false;
       }
 
-      const res = await validatAadhar(aadhaar);
+      const res = await validateAadhaarApi(aadhaar);
       const isValid = Boolean(res?.message?.status);
 
       setAadhaarValidated(isValid);
@@ -150,7 +154,7 @@ export default function NominationStepOne() {
         return false;
       }
 
-      const res = await validatPan(pan);
+      const res = await validatePanApi(pan);
       const isValid = Boolean(res?.message?.status);
 
       setPanValidated(isValid);

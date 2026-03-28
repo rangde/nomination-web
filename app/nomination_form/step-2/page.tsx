@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import DualLanguageText from '@/components/DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
-import AppHeader from '@/components/header/Appheader';
+import AppHeader from '@/components/header/AppHeader';
 import CheckBoxSingleSelect from '@/components/FormComponents/CheckBoxSingleSelect';
 import NominationStepper from '@/components/nomination/NominationStepper';
 import SelectField from '@/components/FormComponents/SelectField';
