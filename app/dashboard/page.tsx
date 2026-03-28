@@ -3,7 +3,7 @@
 import { Box } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 
-import AppHeader from '@/components/header/Appheader';
+import AppHeader from '@/components/header/AppHeader';
 import CreateNominationBox from '@/components/nomination/CreateNominationBox';
 import StatsButtons from '@/components/nomination/StatsButtons';
 import NominationCard from '@/components/nomination/NominationCard';
@@ -17,7 +17,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 
 import { getUserRoles } from '../utils/user';
 import { addToast } from '@/components/error/toastStore';
-import { getNominationsform } from '@/services/api';
+import { getNominationsForm } from '@/services/api';
 
 type ShowState = {
   submitted: boolean;
@@ -104,7 +104,7 @@ export default function DashboardPage() {
       try {
         setLoadingNominations(true);
 
-        const res = await getNominationsform();
+        const res = await getNominationsForm();
         const msg: unknown = res.message.msg;
 
         const first: NominationBuckets | undefined =

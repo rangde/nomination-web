@@ -9,7 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import hi from '@/messages/hi.json';
 import { addToast } from '@/components/error/toastStore';
 import en from '@/messages/en.json';
-import AppHeader from '@/components/header/Appheader';
+import AppHeader from '@/components/header/AppHeader';
 import NominationStepper from '@/components/nomination/NominationStepper';
 import ImportantNote from '@/components/nomination/ImportantNote';
 import CreditScoreGauge from '@/components/nomination/CreditScoreGauge';
@@ -18,7 +18,7 @@ import { useNominationForm } from '../NominationFormProvider';
 import {
   getNumberChecked,
   verifyOtpApi as verify_otp,
-  getCreditScoree,
+  getCreditScore,
 } from '@/services/api';
 
 function NominationStepOne() {
@@ -139,7 +139,7 @@ function NominationStepOne() {
         });
 
         try {
-          const res = await getCreditScoree({
+          const res = await getCreditScore({
             first_name: form.step1.first_name,
             last_name: form.step1.last_name,
             dob: form.step1.date_of_birth,
