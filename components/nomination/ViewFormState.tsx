@@ -185,7 +185,7 @@ function ViewFormStatus({ name }: FormControlProps) {
           variant="contained"
           onClick={() => {
             const base = window.location.origin;
-            const link = `${base}/nomination_form/view_form?view=false&name=${formValues?.name ?? ''}`;
+            const link = `${base}/nomination_form/view_form?view=true&name=${formValues?.name ?? ''}`;
             navigator.clipboard.writeText(link);
           }}
           sx={{
