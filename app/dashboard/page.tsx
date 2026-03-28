@@ -8,7 +8,7 @@ import CreateNominationBox from '@/components/nomination/CreateNominationBox';
 import StatsButtons from '@/components/nomination/StatsButtons';
 import NominationCard from '@/components/nomination/NominationCard';
 import ApprovedCard from '@/components/nomination/ApprovedCard';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
@@ -170,7 +170,7 @@ export default function DashboardPage() {
         mt: 10,
       }}
     >
-      <Title1
+      <DualLanguageText
         h1={hi.dashboard.no_data}
         h2={en.dashboard.no_data}
         boxStyle={{ alignItems: 'center' }}

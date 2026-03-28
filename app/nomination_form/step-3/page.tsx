@@ -4,7 +4,7 @@ import { Box, Typography, Button, TextField, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import { useState, useEffect, useMemo } from 'react';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import InputAdornment from '@mui/material/InputAdornment';
 import hi from '@/messages/hi.json';
 import { addToast } from '@/components/error/toastStore';
@@ -300,7 +300,7 @@ function NominationStepOne() {
         <Paper sx={{ p: 3, borderRadius: 3 }}>
           <NominationStepper activeStep={2} />
 
-          <Title1
+          <DualLanguageText
             h1={hi?.form?.check_credit}
             h2={en?.form?.check_credit}
             h1style={{ fontSize: 18, fontWeight: 700 }}
@@ -363,7 +363,7 @@ function NominationStepOne() {
                         }}
                         onClick={resendOtp}
                       >
-                        <Title1
+                        <DualLanguageText
                           h1={`${hi.login.resend}`}
                           h2={`(${en.login.resend})`}
                           boxStyle={{
@@ -396,7 +396,7 @@ function NominationStepOne() {
                     </Box>
                   ) : (
                     <Box>
-                      <Title1
+                      <DualLanguageText
                         h1={hi.login.mobile}
                         h2={en.login.mobile}
                         h1style={{ fontSize: 18, fontWeight: 600 }}
@@ -453,7 +453,7 @@ function NominationStepOne() {
             onClick={handleRequestOTP}
           >
             <Box textAlign="center">
-              <Title1
+              <DualLanguageText
                 h1={
                   showCredit
                     ? hi?.form?.submit_credit

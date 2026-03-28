@@ -2,7 +2,7 @@
 
 import { Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 
 export default function NotFound() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function NotFound() {
           gap: 2,
         }}
       >
-        <Title1
+        <DualLanguageText
           h1="404 - पेज नहीं मिला"
           h2="404 - Page Not Found"
           boxStyle={{ alignItems: 'center' }}
@@ -42,7 +42,7 @@ export default function NotFound() {
           }}
         />
 
-        <Title1
+        <DualLanguageText
           h1="आप जिस पेज को खोज रहे हैं वह मौजूद नहीं है"
           h2="The page you are looking for does not exist"
           boxStyle={{ alignItems: 'center' }}
@@ -70,7 +70,7 @@ export default function NotFound() {
             },
           }}
         >
-          <Title1
+          <DualLanguageText
             h1="होम पेज पर जाएं"
             h2="Go to Home Page"
             h1style={{

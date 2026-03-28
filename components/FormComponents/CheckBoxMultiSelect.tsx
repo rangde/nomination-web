@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, Checkbox } from '@mui/material';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 
 type Option = {
   label_1: string;
@@ -44,7 +44,7 @@ function CheckBoxMultiSelect({
 
   return (
     <Box sx={{ mt: 1 }}>
-      <Title1
+      <DualLanguageText
         h1={label_1}
         h2={label_2}
         boxStyle={{ ml: 0.5 }}
@@ -83,7 +83,7 @@ function CheckBoxMultiSelect({
                 }}
               />
 
-              <Title1
+              <DualLanguageText
                 h1={opt.label_1}
                 h2={`(${opt.label_2})`}
                 boxStyle={{ display: 'flex', flexDirection: 'row' }}

@@ -3,7 +3,7 @@
 import { Box, Typography, Paper, Button, SxProps, Theme } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useRouter } from 'next/navigation';
-import Title1 from '../Titel1';
+import DualLanguageText from '../DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 
@@ -111,7 +111,7 @@ export default function NominationCard({
         ...cardSx,
       }}
     >
-      <Title1
+      <DualLanguageText
         h1={fullName}
         h2={`ID: ${docId}`}
         h1style={{ fontSize: '1rem', fontWeight: 600 }}
@@ -129,7 +129,7 @@ export default function NominationCard({
         alignItems="center"
         sx={{ mt: 0.5 }}
       >
-        <Title1
+        <DualLanguageText
           h1={s(
             (hi as unknown as Record<string, unknown>)?.dashboard &&
               hi.dashboard?.credit_limit
@@ -152,7 +152,7 @@ export default function NominationCard({
         alignItems="center"
         sx={{ mt: 0.5 }}
       >
-        <Title1
+        <DualLanguageText
           h1={s(hi?.dashboard?.ent_type)}
           h2={s(en?.dashboard?.ent_type)}
           h1style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6B7280' }}
@@ -202,7 +202,7 @@ export default function NominationCard({
               openViewForm();
             }}
           >
-            <Title1
+            <DualLanguageText
               h1={s(hi?.dashboard?.review)}
               h2={s(en?.dashboard?.review)}
               h1style={{ fontWeight: 600, fontSize: '0.8rem' }}

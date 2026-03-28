@@ -13,7 +13,7 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 
 type Step = {
   h1: string;
@@ -77,7 +77,7 @@ function NextTimeline({ steps }: Props) {
 
             <TimelineContent sx={{ py: 0, mt: 0.5 }}>
               <Box sx={{ opacity: isActive ? 1 : 0.55 }}>
-                <Title1
+                <DualLanguageText
                   h1={item.h1}
                   h2={item.h2}
                   h3={item.h3 || '-'}

@@ -1,7 +1,7 @@
 'use client';
 
 import { Box, CircularProgress } from '@mui/material';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 
 export default function Loading() {
   return (
@@ -33,7 +33,7 @@ export default function Loading() {
           }}
         />
 
-        <Title1
+        <DualLanguageText
           h1="लोड हो रहा है..."
           h2="Loading..."
           boxStyle={{ alignItems: 'center' }}

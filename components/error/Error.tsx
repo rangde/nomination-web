@@ -5,7 +5,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import Title1 from '../Titel1';
+import DualLanguageText from '../DualLanguageText';
 
 type MessageType = 'error' | 'warning' | 'success';
 
@@ -56,7 +56,7 @@ function Error({ type, hi, en, onClose }: ErrorProps) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>{current.icon}</Box>
 
-        <Title1
+        <DualLanguageText
           h1={hi}
           h2={en ? `(${en})` : ''}
           h1style={{ fontSize: 14, fontWeight: 600 }}

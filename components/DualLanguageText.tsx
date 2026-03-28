@@ -2,7 +2,7 @@
 
 import { Box, Typography, SxProps, Theme } from '@mui/material';
 
-type Title1Props = {
+type DualLanguageTextProps = {
   h1: string;
   h2?: string;
   h3?: string;
@@ -12,7 +12,7 @@ type Title1Props = {
   h3style?: SxProps<Theme>;
 };
 
-function Title1({
+function DualLanguageText({
   h1,
   h2,
   h3,
@@ -20,7 +20,7 @@ function Title1({
   h1style,
   h2style,
   h3style,
-}: Title1Props) {
+}: DualLanguageTextProps) {
   return (
     <Box
       component="span"
@@ -54,4 +54,4 @@ function Title1({
   );
 }
 
-export default Title1;
+export default DualLanguageText;

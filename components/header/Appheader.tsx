@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LogoutIcon from '@mui/icons-material/Logout';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -165,7 +165,7 @@ export default function AppHeader({
                 <LogoutIcon fontSize="small" />
               </ListItemIcon>
               <Typography variant="inherit" sx={{ fontWeight: 500 }}>
-                <Title1
+                <DualLanguageText
                   h1={hi?.header?.logout}
                   h2={en?.header?.logout}
                   h1style={{ fontSize: 14, fontWeight: 600 }}
@@ -190,7 +190,7 @@ export default function AppHeader({
 
       {!showUser && h1 && (
         <Box>
-          <Title1
+          <DualLanguageText
             h1={h1}
             h2={h2}
             h1style={{ fontSize: 14, fontWeight: 600 }}

@@ -11,7 +11,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 
 type TextValue = {
   label_1: string;
@@ -46,7 +46,7 @@ function Text({
 
   return (
     <Box>
-      <Title1
+      <DualLanguageText
         h1={label_1}
         boxStyle={{ ml: 0.5 }}
         h2={label_2}

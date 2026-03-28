@@ -8,7 +8,7 @@ import {
   SelectChangeEvent,
   Typography,
 } from '@mui/material';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 
 type Option = {
   label_1: string;
@@ -43,7 +43,7 @@ function SelectField({
 
   return (
     <Box sx={{ mt: 1 }}>
-      <Title1
+      <DualLanguageText
         h1={label_1}
         h2={label_2}
         boxStyle={{ ml: 0.5 }}

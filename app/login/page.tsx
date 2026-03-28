@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { getNumberChecked, verifyOtpApi as verify_otp } from '@/services/api';
 import Cookies from 'js-cookie';
 import { MuiOtpInput } from 'mui-one-time-password-input';
-import Title1 from '@/components/Titel1';
+import DualLanguageText from '@/components/DualLanguageText';
 import { addToast } from '@/components/error/toastStore';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
@@ -207,7 +207,7 @@ function LoginPage() {
             <AccountBalanceIcon sx={{ fontSize: 32 }} />
           </Box>
 
-          <Title1
+          <DualLanguageText
             h1={hi.login.title}
             h2={en.login.title}
             h1style={{ fontSize: 20, fontWeight: 700 }}
@@ -244,7 +244,7 @@ function LoginPage() {
                   }}
                   onClick={resendOtp}
                 >
-                  <Title1
+                  <DualLanguageText
                     h1={`${hi.login.resend}`}
                     h2={`(${en.login.resend})`}
                     boxStyle={{
@@ -276,7 +276,7 @@ function LoginPage() {
               </Box>
             ) : (
               <Box>
-                <Title1
+                <DualLanguageText
                   h1={hi.login.mobile}
                   h2={en.login.mobile}
                   h1style={{ fontSize: 18, fontWeight: 600 }}
@@ -332,7 +332,7 @@ function LoginPage() {
               <CircularProgress size={24} sx={{ color: '#fff' }} />
             ) : (
               <Box textAlign="center">
-                <Title1
+                <DualLanguageText
                   h1={fillOtp ? hi.login.login : hi.login.otp}
                   h2={fillOtp ? en.login.login : en.login.otp}
                   h1style={{
