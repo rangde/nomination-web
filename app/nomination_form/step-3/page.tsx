@@ -3,7 +3,7 @@
 import { Box, Typography, Button, TextField, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { MuiOtpInput } from 'mui-one-time-password-input';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import DualLanguageText from '@/components/DualLanguageText';
 import InputAdornment from '@mui/material/InputAdornment';
 import hi from '@/messages/hi.json';
@@ -31,6 +31,7 @@ function NominationStepOne() {
   const [canResend, setCanResend] = useState(false);
   const [showCredit, setShowCredit] = useState(false);
   const [score, setScore] = useState<number | null>(null);
+  const otpContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { form, setStep3, submitForm } = useNominationForm();
   const { set_credit_limit } = form.step3;
@@ -101,7 +102,18 @@ function NominationStepOne() {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [resend]);
+  }, [fillOtp, resend]);
+
+  useEffect(() => {
+    if (!fillOtp) return;
+
+    const focusTimer = window.setTimeout(() => {
+      const firstOtpInput = otpContainerRef.current?.querySelector('input');
+      firstOtpInput?.focus();
+    }, 150);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [fillOtp]);
 
   const handleRequestOTP = async () => {
     if (showCredit) {
@@ -336,25 +348,34 @@ function NominationStepOne() {
                 <Box sx={{ mt: 2 }}>
                   {fillOtp ? (
                     <Box>
-                      <MuiOtpInput
-                        value={otp}
-                        onChange={(val) => setOtp(val.replace(/\D/g, ''))}
-                        length={6}
-                        autoFocus
-                        sx={{
-                          gap: 1,
-                          mb: 2,
-                          py: 1,
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 3,
-                            backgroundColor: '#F9FAFB',
-                          },
-                          '& .MuiOutlinedInput-input': {
-                            fontSize: 16,
-                            py: 1.5,
-                          },
-                        }}
-                      />
+                      <Box ref={otpContainerRef}>
+                        <MuiOtpInput
+                          value={otp}
+                          onChange={(val) => setOtp(val.replace(/\D/g, ''))}
+                          length={6}
+                          TextFieldsProps={() => ({
+                            type: 'tel',
+                            autoComplete: 'one-time-code',
+                            inputProps: {
+                              inputMode: 'numeric',
+                              pattern: '[0-9]*',
+                            },
+                          })}
+                          sx={{
+                            gap: 1,
+                            mb: 2,
+                            py: 1,
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              backgroundColor: '#F9FAFB',
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              fontSize: 16,
+                              py: 1.5,
+                            },
+                          }}
+                        />
+                      </Box>
                       <Box
                         sx={{
                           display: 'flex',
@@ -404,8 +425,10 @@ function NominationStepOne() {
                       />
                       <TextField
                         fullWidth
+                        value={mobile}
                         placeholder="0123456789"
                         variant="outlined"
+                        type="tel"
                         sx={{
                           mb: 3,
                           '& .MuiOutlinedInput-root': {
@@ -423,6 +446,11 @@ function NominationStepOne() {
                               <Typography sx={{ fontSize: 15 }}>+91</Typography>
                             </InputAdornment>
                           ),
+                        }}
+                        inputProps={{
+                          inputMode: 'numeric',
+                          pattern: '[0-9]*',
+                          maxLength: 10,
                         }}
                         onChange={(e) => mobilbumber(e.target.value)}
                       />
