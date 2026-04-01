@@ -5,7 +5,7 @@ import { Box, Typography, TextField, Button, Paper } from '@mui/material';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CircularProgress from '@mui/material/CircularProgress';
 import InputAdornment from '@mui/material/InputAdornment';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getNumberChecked, verifyOtpApi as verify_otp } from '@/services/api';
 import Cookies from 'js-cookie';
 import { MuiOtpInput } from 'mui-one-time-password-input';
@@ -29,6 +29,7 @@ function LoginPage() {
   const [resend, SetResend] = useState(false);
   const [seconds, setSeconds] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const otpContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!fillOtp) return;
@@ -45,7 +46,18 @@ function LoginPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [resend]);
+  }, [fillOtp, resend]);
+
+  useEffect(() => {
+    if (!fillOtp) return;
+
+    const focusTimer = window.setTimeout(() => {
+      const firstOtpInput = otpContainerRef.current?.querySelector('input');
+      firstOtpInput?.focus();
+    }, 150);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [fillOtp]);
 
   useEffect(() => {
     const isAndroid = /Android/i.test(navigator.userAgent);
@@ -57,7 +69,7 @@ function LoginPage() {
 
     if (isStandalone) return;
 
-    const onBip = (e: Event) => {
+    const onBip = () => {
       setCanPromptInstall(true);
       setShowInstallDialog(true);
     };
@@ -217,25 +229,34 @@ function LoginPage() {
           <Box sx={{ mt: 2 }}>
             {fillOtp ? (
               <Box>
-                <MuiOtpInput
-                  value={otp}
-                  onChange={(val) => setOtp(val.replace(/\D/g, ''))}
-                  length={6}
-                  autoFocus
-                  sx={{
-                    gap: 1,
-                    mb: 2,
-                    py: 1,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 3,
-                      backgroundColor: '#F9FAFB',
-                    },
-                    '& .MuiOutlinedInput-input': {
-                      fontSize: 16,
-                      py: 1.5,
-                    },
-                  }}
-                />
+                <Box ref={otpContainerRef}>
+                  <MuiOtpInput
+                    value={otp}
+                    onChange={(val) => setOtp(val.replace(/\D/g, ''))}
+                    length={6}
+                    TextFieldsProps={() => ({
+                      type: 'tel',
+                      autoComplete: 'one-time-code',
+                      inputProps: {
+                        inputMode: 'numeric',
+                        pattern: '[0-9]*',
+                      },
+                    })}
+                    sx={{
+                      gap: 1,
+                      mb: 2,
+                      py: 1,
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 3,
+                        backgroundColor: '#F9FAFB',
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        fontSize: 16,
+                        py: 1.5,
+                      },
+                    }}
+                  />
+                </Box>
                 <Box
                   sx={{
                     display: 'flex',
