@@ -425,8 +425,10 @@ function NominationStepOne() {
                       />
                       <TextField
                         fullWidth
+                        value={mobile}
                         placeholder="0123456789"
                         variant="outlined"
+                        type="tel"
                         sx={{
                           mb: 3,
                           '& .MuiOutlinedInput-root': {
@@ -444,6 +446,11 @@ function NominationStepOne() {
                               <Typography sx={{ fontSize: 15 }}>+91</Typography>
                             </InputAdornment>
                           ),
+                        }}
+                        inputProps={{
+                          inputMode: 'numeric',
+                          pattern: '[0-9]*',
+                          maxLength: 10,
                         }}
                         onChange={(e) => mobilbumber(e.target.value)}
                       />
