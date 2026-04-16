@@ -1,11 +1,11 @@
 import { NominationSubmitPayload } from '@/app/nomination_form/NominationFormProvider';
 
-export type FrappeCustomResponse<T> = {
-  message: T;
+export type FrappeCustomResponse<ResponseType> = {
+  message: ResponseType;
 };
 
-export type FrappeRestApiResponse<T> = {
-  data: T;
+export type FrappeRestApiResponse<ResponseType> = {
+  data: ResponseType;
 };
 
 export type CreditScorePayload = {
@@ -39,9 +39,9 @@ export type FrappeGetRequestHeader = {
   url: string;
 };
 
-async function postFrappe<T>(
+async function postFrappe<ResponseType>(
   request: FrappePostRequestHeader
-): Promise<FrappeCustomResponse<T>> {
+): Promise<FrappeCustomResponse<ResponseType>> {
   const response = await fetch(request.url, {
     method: 'POST',
     headers: {
@@ -53,15 +53,15 @@ async function postFrappe<T>(
 
   if (!response.ok) {
     const text = await response.text().catch(() => '');
-    throw new Error(`Request failed (${response.status}): ${text}`);
+    console.error(`Request failed (${response.status}): ${text}`);
   }
 
-  return (await response.json()) as FrappeCustomResponse<T>;
+  return (await response.json()) as FrappeCustomResponse<ResponseType>;
 }
 
-async function getFrappe<T>(
+async function getFrappe<ResponseType>(
   request: FrappeGetRequestHeader
-): Promise<FrappeCustomResponse<T>> {
+): Promise<FrappeCustomResponse<ResponseType>> {
   const response = await fetch(request.url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
@@ -69,10 +69,10 @@ async function getFrappe<T>(
 
   if (!response.ok) {
     const text = await response.text().catch(() => '');
-    throw new Error(`Request failed (${response.status}): ${text}`);
+    console.error(`Request failed (${response.status}): ${text}`);
   }
 
-  return (await response.json()) as FrappeCustomResponse<T>;
+  return (await response.json()) as FrappeCustomResponse<ResponseType>;
 }
 
 export const getNumberChecked = (
