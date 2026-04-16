@@ -6,17 +6,46 @@ import Cookies from 'js-cookie';
 import DualLanguageText from '@/components/DualLanguageText';
 import { storage } from '@/app/utils/localStorage';
 import { clearAllUserCaches } from '../utils/user';
+import { logoutUser } from '@/services/api';
+import { addToast } from '@/components/error/toastStore';
+import hi from '@/messages/hi.json';
+import en from '@/messages/en.json';
 export default function NoPermissionPage() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    Object.keys(Cookies.get()).forEach((cookieName) => {
-      Cookies.remove(cookieName);
-    });
-    clearAllUserCaches();
-    storage.clear();
-    sessionStorage.clear();
-    router.push('/login');
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
+
+      if (result.message.status) {
+        addToast({
+          type: 'success',
+          hi: hi?.header?.logout_success,
+          en: en?.header?.logout_success,
+        });
+      } else {
+        addToast({
+          type: 'error',
+          hi: hi?.header?.logout_failed,
+          en: en?.header?.logout_failed,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to logout from backend', error);
+      addToast({
+        type: 'error',
+        hi: hi?.header?.logout_server_failed,
+        en: en?.header?.logout_server_failed,
+      });
+    } finally {
+      Object.keys(Cookies.get()).forEach((cookieName) => {
+        Cookies.remove(cookieName);
+      });
+      clearAllUserCaches();
+      storage.clear();
+      sessionStorage.clear();
+      router.push('/login');
+    }
   };
 
   return (

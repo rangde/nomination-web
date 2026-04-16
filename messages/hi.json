@@ -79,6 +79,9 @@
 
   "header": {
     "logout": "लॉग आउट",
+    "logout_success": "लॉग आउट सफल रहा",
+    "logout_failed": "लॉग आउट विफल रहा",
+    "logout_server_failed": "सर्वर लॉगआउट पूरा नहीं हुआ",
     "user": "उपयोगकर्ता"
   },
 

@@ -81,6 +81,9 @@
 
   "header": {
     "logout": "Logout",
+    "logout_success": "Logout successful",
+    "logout_failed": "Logout failed",
+    "logout_server_failed": "Server logout did not complete",
     "user": "User"
   },
 

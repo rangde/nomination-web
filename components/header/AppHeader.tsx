@@ -17,12 +17,14 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
+import { addToast } from '@/components/error/toastStore';
 import {
   getUserRoles,
   getUserInfo,
   clearAllUserCaches,
 } from '@/app/utils/user';
 import { storage } from '@/app/utils/localStorage';
+import { logoutUser } from '@/services/api';
 
 type AppHeaderProps = {
   showBack?: boolean;
@@ -62,16 +64,41 @@ export default function AppHeader({
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    Object.keys(Cookies.get()).forEach((cookieName) => {
-      Cookies.remove(cookieName);
-    });
-    clearAllUserCaches();
-    storage.clear();
-    sessionStorage.clear();
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
 
-    handleClose();
-    router.push('/login');
+      if (result.message.status) {
+        addToast({
+          type: 'success',
+          hi: hi?.header?.logout_success,
+          en: en?.header?.logout_success,
+        });
+      } else {
+        addToast({
+          type: 'error',
+          hi: hi?.header?.logout_failed,
+          en: en?.header?.logout_failed,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to logout from backend', error);
+      addToast({
+        type: 'error',
+        hi: hi?.header?.logout_server_failed,
+        en: en?.header?.logout_server_failed,
+      });
+    } finally {
+      Object.keys(Cookies.get()).forEach((cookieName) => {
+        Cookies.remove(cookieName);
+      });
+      clearAllUserCaches();
+      storage.clear();
+      sessionStorage.clear();
+
+      handleClose();
+      router.push('/login');
+    }
   };
 
   useEffect(() => {

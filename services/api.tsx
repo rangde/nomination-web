@@ -24,14 +24,22 @@ export type CustomApiMessage = {
   msg: string | string[];
 };
 
+export type FrappePostRequestHeader = {
+  url: string;
+  body: unknown;
+};
+
+export type FrappeGetRequestHeader = {
+  url: string;
+};
+
 async function postFrappe<T>(
-  url: string,
-  body: unknown
+  request: FrappePostRequestHeader
 ): Promise<FrappeCustomResponse<T>> {
-  const response = await fetch(url, {
+  const response = await fetch(request.url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify(request.body),
   });
 
   if (!response.ok) {
@@ -42,8 +50,10 @@ async function postFrappe<T>(
   return (await response.json()) as FrappeCustomResponse<T>;
 }
 
-async function getFrappe<T>(url: string): Promise<FrappeCustomResponse<T>> {
-  const response = await fetch(url, {
+async function getFrappe<T>(
+  request: FrappeGetRequestHeader
+): Promise<FrappeCustomResponse<T>> {
+  const response = await fetch(request.url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -60,10 +70,10 @@ export const getNumberChecked = (
   number: string,
   credit_check: boolean = false
 ) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.login.user_validation',
-    { mobile_number: number, credit_check: credit_check }
-  );
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.login.user_validation',
+    body: { mobile_number: number, credit_check: credit_check },
+  });
 };
 
 export const verifyOtpApi = (
@@ -71,90 +81,97 @@ export const verifyOtpApi = (
   otp: string,
   credit_check: boolean = false
 ) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.login.verify_user_otp',
-    {
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.login.verify_user_otp',
+    body: {
       mobile_number: number,
       otp,
       credit_check: credit_check,
-    }
-  );
+    },
+  });
 };
 
 export const validateAadhaar = (aadhaarNumber: string) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.form.validate_aadhaar',
-    {
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.form.validate_aadhaar',
+    body: {
       aadhaar_number: aadhaarNumber,
-    }
-  );
+    },
+  });
 };
 
 export const validatePan = (panNumber: string) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.form.validate_pan',
-    {
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.form.validate_pan',
+    body: {
       pan_number: panNumber,
-    }
-  );
+    },
+  });
 };
 
 export const validateDob = (dob: string) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.form.validate_dob',
-    {
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.form.validate_dob',
+    body: {
       dob: dob,
-    }
-  );
+    },
+  });
 };
 
 export const getRoles = () => {
-  return getFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.user.get_roles'
-  );
+  return getFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.user.get_roles',
+  });
 };
 
 export const getNominationsForm = () => {
-  return getFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.dashboard.get_nomination_list'
-  );
+  return getFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.dashboard.get_nomination_list',
+  });
 };
 
 export const getUserDetails = () => {
-  return getFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.user.get_user_info'
-  );
+  return getFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.user.get_user_info',
+  });
 };
 
 export const submitNominationForm = (payload: NominationSubmitPayload) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.form.submit_nomination',
-    { payload: payload }
-  );
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.form.submit_nomination',
+    body: { payload: payload },
+  });
 };
 
 export const getDoc = (name: string) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.form.get_nomination_form',
-    {
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.form.get_nomination_form',
+    body: {
       name: name,
-    }
-  );
+    },
+  });
 };
 
 export const approveDoc = (name: string, credit_limit: string) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.form.approve_form',
-    {
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.form.approve_form',
+    body: {
       name: name,
       credit_limit: credit_limit,
-    }
-  );
+    },
+  });
 };
 
 export const getCreditScore = (payload: CreditScorePayload) => {
-  return postFrappe<CustomApiMessage>(
-    '/api/method/nomination.api.credit_check.credit_score',
-    payload
-  );
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.credit_check.credit_score',
+    body: payload,
+  });
+};
+
+export const logoutUser = async () => {
+  return await postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.login.logout',
+    body: {},
+  });
 };
