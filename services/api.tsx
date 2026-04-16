@@ -24,9 +24,15 @@ export type CustomApiMessage = {
   msg: string | string[];
 };
 
+export type FrappeCsrfMessage = {
+  csrf_token: string;
+  user: string;
+};
+
 export type FrappePostRequestHeader = {
   url: string;
   body: unknown;
+  headers?: HeadersInit;
 };
 
 export type FrappeGetRequestHeader = {
@@ -38,7 +44,10 @@ async function postFrappe<T>(
 ): Promise<FrappeCustomResponse<T>> {
   const response = await fetch(request.url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...request.headers,
+    },
     body: JSON.stringify(request.body),
   });
 
@@ -169,9 +178,20 @@ export const getCreditScore = (payload: CreditScorePayload) => {
   });
 };
 
+export const getCsrfToken = () => {
+  return getFrappe<FrappeCsrfMessage>({
+    url: '/api/method/nomination.api.login.get_csrf',
+  });
+};
+
 export const logoutUser = async () => {
+  const csrf = await getCsrfToken();
+
   return await postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.login.logout',
     body: {},
+    headers: {
+      'X-Frappe-CSRF-Token': csrf.message.csrf_token,
+    },
   });
 };
