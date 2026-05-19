@@ -12,8 +12,9 @@ export type CreditScorePayload = {
   first_name: string;
   last_name: string;
   dob: string;
-  pan_number: string;
   mobile_number: string;
+  id_number?: string;
+  id_type?: 'PAN' | 'AADHAAR' | 'VOTERID';
   district?: string;
   state_code?: string;
   pincode?: string;
