@@ -21,17 +21,6 @@ import { useNominationForm } from '../NominationFormProvider';
 export default function NominationStepOne() {
   const router = useRouter();
   const { form, setStep1 } = useNominationForm();
-  const {
-    first_name,
-    last_name,
-    pincode,
-    district,
-    townvillage,
-    permanent_address,
-    aadhaar_number,
-    pan_number,
-    date_of_birth,
-  } = form.step1;
 
   const [aadhaarValidated, setAadhaarValidated] = useState(false);
   const [panValidated, setPanValidated] = useState(false);
@@ -54,6 +43,13 @@ export default function NominationStepOne() {
     if (key === 'date_of_birth') setDobValidate(false);
 
     setStep1({ [key]: value });
+  };
+
+  const getAvailableIdType = (): 'AADHAAR' | 'PAN' | 'VOTERID' | null => {
+    if (!isEmpty(form.step1.aadhaar_number)) return 'AADHAAR';
+    if (!isEmpty(form.step1.pan_number)) return 'PAN';
+    if (!isEmpty(form.step1.voter_id)) return 'VOTERID';
+    return null;
   };
 
   const validateDob = async (): Promise<boolean> => {
@@ -202,27 +198,19 @@ export default function NominationStepOne() {
       });
       return false;
     }
-    if (isEmpty(form.step1.aadhaar_number)) {
-      addToast({
-        type: 'error',
-        hi: 'आधार नंबर आवश्यक है',
-        en: 'Aadhaar is required',
-      });
-      return false;
-    }
-    if (isEmpty(form.step1.pan_number)) {
-      addToast({
-        type: 'error',
-        hi: 'पैन नंबर आवश्यक है',
-        en: 'PAN is required',
-      });
-      return false;
-    }
     if (isEmpty(form.step1.date_of_birth)) {
       addToast({
         type: 'error',
         hi: 'जन्म तिथि आवश्यक है',
         en: 'Date of Birth is required',
+      });
+      return false;
+    }
+    if (!getAvailableIdType()) {
+      addToast({
+        type: 'error',
+        hi: 'आधार, पैन या वोटर आईडी में से कोई एक आवश्यक है',
+        en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
       });
       return false;
     }
@@ -238,12 +226,14 @@ export default function NominationStepOne() {
     try {
       setNextLoading(true);
 
-      let aOk = aadhaarValidated;
-      let pOk = panValidated;
+      const shouldValidateAadhaar = !isEmpty(form.step1.aadhaar_number);
+      const shouldValidatePan = !isEmpty(form.step1.pan_number);
+      let aOk = !shouldValidateAadhaar || aadhaarValidated;
+      let pOk = !shouldValidatePan || panValidated;
       let dobOk = dobValidate;
 
-      if (!aOk) aOk = await validateAadhaar();
-      if (!pOk) pOk = await validatePan();
+      if (shouldValidateAadhaar && !aOk) aOk = await validateAadhaar();
+      if (shouldValidatePan && !pOk) pOk = await validatePan();
       if (!dobOk) dobOk = await validateDob();
 
       if (!aOk || !pOk || !dobOk) {
@@ -384,6 +374,15 @@ export default function NominationStepOne() {
               validate
               validated={panValidated}
               onValidateClick={validatePan}
+            />
+
+            <Text
+              name="voter_id"
+              value={form.step1.voter_id}
+              onChange={handleChange}
+              label_1={hi?.form?.voter_id}
+              label_2={en?.form?.voter_id}
+              placeholder="Voter ID"
             />
 
             <Text

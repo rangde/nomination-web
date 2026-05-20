@@ -36,6 +36,23 @@ function NominationStepOne() {
   const { form, setStep3, submitForm } = useNominationForm();
   const { set_credit_limit } = form.step3;
 
+  const getCreditCheckId = () => {
+    const aadhaar = form.step1.aadhaar_number.trim();
+    const pan = form.step1.pan_number.trim().toUpperCase();
+    const voterId = form.step1.voter_id.trim().toUpperCase();
+
+    if (aadhaar) {
+      return { id_number: aadhaar, id_type: 'AADHAAR' as const };
+    }
+    if (pan) {
+      return { id_number: pan, id_type: 'PAN' as const };
+    }
+    if (voterId) {
+      return { id_number: voterId, id_type: 'VOTERID' as const };
+    }
+    return null;
+  };
+
   const verifyOtp = async (number: string, otp: string) => {
     const result = await verify_otp(number, otp, true);
     return result?.message?.status ? true : false;
@@ -151,12 +168,24 @@ function NominationStepOne() {
         });
 
         try {
+          const creditCheckId = getCreditCheckId();
+
+          if (!creditCheckId) {
+            addToast({
+              type: 'error',
+              hi: 'आधार, पैन या वोटर आईडी में से कोई एक आवश्यक है',
+              en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
+            });
+            return;
+          }
+
           const res = await getCreditScore({
             first_name: form.step1.first_name,
             last_name: form.step1.last_name,
             dob: form.step1.date_of_birth,
-            pan_number: form.step1.pan_number,
             mobile_number: mobile,
+            id_number: creditCheckId.id_number,
+            id_type: creditCheckId.id_type,
             pincode: form.step1.pincode,
           });
 

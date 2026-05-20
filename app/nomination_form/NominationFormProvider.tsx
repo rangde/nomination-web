@@ -18,6 +18,7 @@ export type NominationStep1Form = {
   permanent_address: string;
   aadhaar_number: string;
   pan_number: string;
+  voter_id: string;
   date_of_birth: string;
 };
 
@@ -53,6 +54,7 @@ const initialState: NominationFormState = {
     permanent_address: '',
     aadhaar_number: '',
     pan_number: '',
+    voter_id: '',
     date_of_birth: '',
   },
   step2: {

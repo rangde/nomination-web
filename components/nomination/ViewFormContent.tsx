@@ -43,40 +43,6 @@ const getScoreBandKey = (score: number): ScoreBandKey => {
   return 'excellent';
 };
 
-type ScoreLegendRow = { r: string; t: string };
-
-const buildScoreLegend = (lang: 'hi' | 'en'): ScoreLegendRow[] => {
-  const dict = lang === 'hi' ? hi : en;
-
-  return lang === 'hi'
-    ? [
-        {
-          r: `681 ${s(dict?.credit_score?.below)}`,
-          t: s(dict?.credit_score?.needs_help),
-        },
-        { r: '681 - 730', t: s(dict?.credit_score?.average) },
-        { r: '731 - 770', t: s(dict?.credit_score?.fair) },
-        { r: '771 - 790', t: s(dict?.credit_score?.good) },
-        {
-          r: `790 ${s(dict?.credit_score?.above)}`,
-          t: s(dict?.credit_score?.excellent),
-        },
-      ]
-    : [
-        {
-          r: `${s(dict?.credit_score?.below)} 681`,
-          t: s(dict?.credit_score?.needs_help),
-        },
-        { r: '681 - 730', t: s(dict?.credit_score?.average) },
-        { r: '731 - 770', t: s(dict?.credit_score?.fair) },
-        { r: '771 - 790', t: s(dict?.credit_score?.good) },
-        {
-          r: `${s(dict?.credit_score?.above)} 790`,
-          t: s(dict?.credit_score?.excellent),
-        },
-      ];
-};
-
 type SectionProps = {
   titleHi?: unknown;
   titleEn?: unknown;
@@ -208,8 +174,6 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   const scoreBandKey = getScoreBandKey(creditScore);
 
   const legendLang: 'hi' | 'en' = 'hi';
-  const legendRows = buildScoreLegend(legendLang);
-
   const scoreLabel =
     legendLang === 'hi'
       ? s(hi?.credit_score?.[scoreBandKey], '')
@@ -226,6 +190,11 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
       h1: hi?.form?.pan,
       h2: en?.form?.pan,
       h3: s(formValues?.pan_number, '-'),
+    },
+    {
+      h1: hi?.form?.voter_id,
+      h2: en?.form?.voter_id,
+      h3: s(formValues?.voter_id, '-'),
     },
     {
       h1: hi?.form?.dob,
