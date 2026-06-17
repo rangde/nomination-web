@@ -32,6 +32,7 @@ export type NominationStep3Form = {
   credit_score: string;
   mobile_number: string;
   set_credit_limit: string;
+  reportBase64: string;
 };
 
 type NominationFormState = {
@@ -66,6 +67,7 @@ const initialState: NominationFormState = {
     credit_score: '',
     mobile_number: '',
     set_credit_limit: '',
+    reportBase64: '',
   },
 };
 
