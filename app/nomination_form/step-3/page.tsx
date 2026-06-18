@@ -192,16 +192,23 @@ function NominationStepOne() {
           if (res?.message?.status === 1) {
             const msg = res.message.msg;
 
-            const rawScore =
-              typeof msg === 'object' && msg !== null && !Array.isArray(msg)
-                ? (msg as { score: number }).score
-                : Number(msg);
+            const isMsgObject =
+              typeof msg === 'object' && msg !== null && !Array.isArray(msg);
+
+            const rawScore = isMsgObject
+              ? (msg as { score: number }).score
+              : Number(msg);
+
+            const reportBase64 = isMsgObject
+              ? ((msg as { reportBase64?: string }).reportBase64 ?? '')
+              : '';
 
             const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
             setScore(finalScore);
             setStep3({
               mobile_number: mobile,
               credit_score: finalScore.toString(),
+              reportBase64,
             });
             setShowCredit(true);
 
