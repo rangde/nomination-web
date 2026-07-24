@@ -4,7 +4,7 @@ import { Box, Typography, Paper, Button, SxProps, Theme } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useRouter } from 'next/navigation';
 import DualLanguageText from '../DualLanguageText';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 
 type NominationData = Record<string, unknown>;

@@ -10,7 +10,7 @@ import NominationCard from '@/components/nomination/NominationCard';
 import ApprovedCard from '@/components/nomination/ApprovedCard';
 import DualLanguageText from '@/components/DualLanguageText';
 
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
@@ -133,7 +133,7 @@ export default function DashboardPage() {
       } catch {
         addToast({
           type: 'error',
-          hi: 'नामांकन लोड नहीं हो पाया',
+          hi: 'ନାମାଙ୍କନ ଲୋଡ୍ ହୋଇପାରିଲା ନାହିଁ',
           en: 'Failed to load nominations',
         });
       } finally {

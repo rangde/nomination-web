@@ -3,7 +3,7 @@
 import { Box, Button, Paper } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DualLanguageText from '../DualLanguageText';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import { useRouter } from 'next/navigation';
 

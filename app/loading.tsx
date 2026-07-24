@@ -34,7 +34,7 @@ export default function Loading() {
         />
 
         <DualLanguageText
-          h1="लोड हो रहा है..."
+          h1="ଲୋଡ୍ ହେଉଛି..."
           h2="Loading..."
           boxStyle={{ alignItems: 'center' }}
           h1style={{ color: '#111111', fontSize: 24, fontWeight: 700 }}
