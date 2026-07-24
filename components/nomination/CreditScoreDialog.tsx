@@ -12,7 +12,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 
 import en from '@/messages/en.json';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 
 type Props = {
   open: boolean;

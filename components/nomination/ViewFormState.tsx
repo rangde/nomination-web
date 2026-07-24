@@ -3,7 +3,7 @@
 import { Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import AppHeader from '@/components/header/AppHeader';
 import DualLanguageText from '@/components/DualLanguageText';

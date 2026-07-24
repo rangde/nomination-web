@@ -11,7 +11,7 @@ import Cookies from 'js-cookie';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import DualLanguageText from '@/components/DualLanguageText';
 import { addToast } from '@/components/error/toastStore';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import { redirect, useSearchParams } from 'next/navigation';
 import InstallPwaDialog from '@/components/pwa/InstallPwaDialog';

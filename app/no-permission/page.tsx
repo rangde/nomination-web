@@ -8,7 +8,7 @@ import { storage } from '@/app/utils/localStorage';
 import { clearAllUserCaches } from '../utils/user';
 import { logoutUser } from '@/services/api';
 import { addToast } from '@/components/error/toastStore';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 export default function NoPermissionPage() {
   const router = useRouter();
@@ -61,14 +61,14 @@ export default function NoPermissionPage() {
       }}
     >
       <DualLanguageText
-        h1="आपके पास अनुमति नहीं है"
+        h1="ଆପଣଙ୍କ ପାଖରେ ଅନୁମତି ନାହିଁ"
         h2="You don’t have permission"
         h1style={{ fontSize: 22, fontWeight: 700 }}
         h2style={{ mt: 0.5, color: '#6B7280', fontSize: 14 }}
       />
 
       <DualLanguageText
-        h1="कृपया SHG / VO / CLF भूमिका देने के लिए अपने एडमिन से संपर्क करें।"
+        h1="ଦୟାକରି SHG / VO / CLF ଭୂମିକା ନ୍ୟସ୍ତ କରିବା ପାଇଁ ଆପଣଙ୍କ ଆଡମିନ୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"
         h2="Please contact your admin to assign SHG / VO / CLF role."
         h1style={{ mt: 2, fontSize: 16 }}
         h2style={{ mt: 0.5, fontSize: 13, color: '#6B7280' }}
@@ -91,7 +91,7 @@ export default function NoPermissionPage() {
         }}
       >
         <DualLanguageText
-          h1="लॉग आउट"
+          h1="ଲଗ୍‌ଆଉଟ୍"
           h2="Logout"
           h1style={{ fontSize: 14, fontWeight: 600 }}
           h2style={{ fontSize: 12 }}
