@@ -133,8 +133,8 @@ export default function DashboardPage() {
       } catch {
         addToast({
           type: 'error',
-          hi: 'ନାମାଙ୍କନ ଲୋଡ୍ ହୋଇପାରିଲା ନାହିଁ',
-          en: 'Failed to load nominations',
+          hi: hi?.toast?.nominations_load_failed,
+          en: en?.toast?.nominations_load_failed,
         });
       } finally {
         if (mounted) setLoadingNominations(false);

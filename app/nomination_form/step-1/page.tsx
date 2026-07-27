@@ -59,8 +59,8 @@ export default function NominationStepOne() {
       if (!dob) {
         addToast({
           type: 'error',
-          hi: 'ଦୟାକରି ଜନ୍ମ ତାରିଖ ପ୍ରବେଶ କରନ୍ତୁ',
-          en: 'Please enter date of birth',
+          hi: hi?.toast?.dob_enter,
+          en: en?.toast?.dob_enter,
         });
         setDobValidate(false);
         return false;
@@ -73,12 +73,8 @@ export default function NominationStepOne() {
 
       addToast({
         type: isValid ? 'success' : 'error',
-        hi: isValid
-          ? 'ଜନ୍ମ ତାରିଖ ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି'
-          : 'ବୟସ 18 ବର୍ଷରୁ ଅଧିକ ହେବା ଆବଶ୍ୟକ',
-        en: isValid
-          ? 'Date of birth validated successfully'
-          : 'Age must be greater than 18',
+        hi: isValid ? hi?.toast?.dob_validated : hi?.toast?.dob_age_limit,
+        en: isValid ? en?.toast?.dob_validated : en?.toast?.dob_age_limit,
       });
 
       return isValid;
@@ -89,8 +85,8 @@ export default function NominationStepOne() {
 
       addToast({
         type: 'error',
-        hi: 'ଜନ୍ମ ତାରିଖ ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି',
-        en: 'Date of birth validation failed',
+        hi: hi?.toast?.dob_validation_failed,
+        en: en?.toast?.dob_validation_failed,
       });
 
       return false;
@@ -104,8 +100,8 @@ export default function NominationStepOne() {
       if (!aadhaar) {
         addToast({
           type: 'error',
-          hi: 'ଦୟାକରି ଆଧାର ନମ୍ବର ପ୍ରବେଶ କରନ୍ତୁ',
-          en: 'Please enter Aadhaar number',
+          hi: hi?.toast?.aadhaar_enter,
+          en: en?.toast?.aadhaar_enter,
         });
         setAadhaarValidated(false);
         return false;
@@ -118,10 +114,12 @@ export default function NominationStepOne() {
 
       addToast({
         type: isValid ? 'success' : 'error',
-        hi: isValid ? 'ଆଧାର ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି' : 'ଆଧାର ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି',
+        hi: isValid
+          ? hi?.toast?.aadhaar_validated
+          : hi?.toast?.aadhaar_validation_failed,
         en: isValid
-          ? 'Aadhaar validated successfully'
-          : 'Aadhaar validation failed',
+          ? en?.toast?.aadhaar_validated
+          : en?.toast?.aadhaar_validation_failed,
       });
 
       return isValid;
@@ -129,8 +127,8 @@ export default function NominationStepOne() {
       setAadhaarValidated(false);
       addToast({
         type: 'error',
-        hi: 'ଆଧାର ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି',
-        en: 'Aadhaar validation failed',
+        hi: hi?.toast?.aadhaar_validation_failed,
+        en: en?.toast?.aadhaar_validation_failed,
       });
       return false;
     }
@@ -143,8 +141,8 @@ export default function NominationStepOne() {
       if (!pan) {
         addToast({
           type: 'error',
-          hi: 'ଦୟାକରି PAN ନମ୍ବର ପ୍ରବେଶ କରନ୍ତୁ',
-          en: 'Please enter PAN number',
+          hi: hi?.toast?.pan_enter,
+          en: en?.toast?.pan_enter,
         });
         setPanValidated(false);
         return false;
@@ -157,8 +155,12 @@ export default function NominationStepOne() {
 
       addToast({
         type: isValid ? 'success' : 'error',
-        hi: isValid ? 'PAN ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି' : 'PAN ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି',
-        en: isValid ? 'PAN validated successfully' : 'PAN validation failed',
+        hi: isValid
+          ? hi?.toast?.pan_validated
+          : hi?.toast?.pan_validation_failed,
+        en: isValid
+          ? en?.toast?.pan_validated
+          : en?.toast?.pan_validation_failed,
       });
 
       return isValid;
@@ -166,8 +168,8 @@ export default function NominationStepOne() {
       setPanValidated(false);
       addToast({
         type: 'error',
-        hi: 'PAN ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି',
-        en: 'PAN validation failed',
+        hi: hi?.toast?.pan_validation_failed,
+        en: en?.toast?.pan_validation_failed,
       });
       return false;
     }
@@ -177,40 +179,40 @@ export default function NominationStepOne() {
     if (isEmpty(form.step1.first_name)) {
       addToast({
         type: 'error',
-        hi: 'ପ୍ରଥମ ନାମ ଆବଶ୍ୟକ',
-        en: 'First name is required',
+        hi: hi?.toast?.first_name_required,
+        en: en?.toast?.first_name_required,
       });
       return false;
     }
     if (isEmpty(form.step1.last_name)) {
       addToast({
         type: 'error',
-        hi: 'ଶେଷ ନାମ ଆବଶ୍ୟକ',
-        en: 'Last name is required',
+        hi: hi?.toast?.last_name_required,
+        en: en?.toast?.last_name_required,
       });
       return false;
     }
     if (isEmpty(form.step1.pincode)) {
       addToast({
         type: 'error',
-        hi: 'ପିନ୍ କୋଡ୍ ଆବଶ୍ୟକ',
-        en: 'Pincode is required',
+        hi: hi?.toast?.pincode_required,
+        en: en?.toast?.pincode_required,
       });
       return false;
     }
     if (isEmpty(form.step1.date_of_birth)) {
       addToast({
         type: 'error',
-        hi: 'ଜନ୍ମ ତାରିଖ ଆବଶ୍ୟକ',
-        en: 'Date of Birth is required',
+        hi: hi?.toast?.dob_required,
+        en: en?.toast?.dob_required,
       });
       return false;
     }
     if (!getAvailableIdType()) {
       addToast({
         type: 'error',
-        hi: 'ଆଧାର, PAN କିମ୍ବା ଭୋଟର ID ମଧ୍ୟରୁ ଯେକୌଣସି ଗୋଟିଏ ଆବଶ୍ୟକ',
-        en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
+        hi: hi?.toast?.id_required,
+        en: en?.toast?.id_required,
       });
       return false;
     }
@@ -242,8 +244,8 @@ export default function NominationStepOne() {
 
       addToast({
         type: 'success',
-        hi: 'ପର୍ଯ୍ୟାୟ 1 ସଫଳତାର ସହ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି',
-        en: 'Step 1 completed successfully',
+        hi: hi?.toast?.step1_completed,
+        en: en?.toast?.step1_completed,
       });
 
       router.push('/nomination_form/step-2');

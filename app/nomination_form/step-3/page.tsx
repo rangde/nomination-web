@@ -150,8 +150,8 @@ function NominationStepOne() {
       if (!res.ok) {
         addToast({
           type: 'error',
-          hi: 'ଫର୍ମ ଦାଖଲ ହୋଇନାହିଁ',
-          en: `Submit failed: ${res.error}`,
+          hi: hi?.toast?.submit_failed,
+          en: `${en?.toast?.submit_failed}: ${res.error}`,
         });
         return;
       }
@@ -176,8 +176,8 @@ function NominationStepOne() {
 
       addToast({
         type: 'success',
-        hi: 'OTP ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି',
-        en: 'OTP verified successfully',
+        hi: hi?.toast?.otp_verified,
+        en: en?.toast?.otp_verified,
       });
 
       try {
@@ -186,8 +186,8 @@ function NominationStepOne() {
         if (!creditCheckId) {
           addToast({
             type: 'error',
-            hi: 'ଆଧାର, PAN କିମ୍ବା ଭୋଟର ID ମଧ୍ୟରୁ ଯେକୌଣସି ଗୋଟିଏ ଆବଶ୍ୟକ',
-            en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
+            hi: hi?.toast?.id_required,
+            en: en?.toast?.id_required,
           });
           return;
         }
@@ -228,24 +228,24 @@ function NominationStepOne() {
           if (finalScore < 0) {
             addToast({
               type: 'error',
-              hi: 'କ୍ରେଡିଟ୍ ସ୍କୋର ଉପଲବ୍ଧ ନାହିଁ',
-              en: 'Credit score not available',
+              hi: hi?.toast?.credit_score_unavailable,
+              en: en?.toast?.credit_score_unavailable,
             });
           } else {
             addToast({
               type: 'success',
-              hi: 'କ୍ରେଡିଟ୍ ସ୍କୋର ପ୍ରାପ୍ତ ହୋଇଛି',
-              en: 'Credit score fetched successfully',
+              hi: hi?.toast?.credit_score_fetched,
+              en: en?.toast?.credit_score_fetched,
             });
           }
         } else {
           addToast({
             type: 'error',
-            hi: 'କ୍ରେଡିଟ୍ ସ୍କୋର ପ୍ରାପ୍ତ ହୋଇନାହିଁ',
+            hi: hi?.toast?.credit_check_failed,
             en:
               typeof res?.message?.msg === 'string'
                 ? res.message.msg
-                : 'Failed to fetch credit score',
+                : en?.toast?.credit_check_failed,
           });
           setScore(0);
           setShowCredit(true);
@@ -254,8 +254,8 @@ function NominationStepOne() {
         console.error(err);
         addToast({
           type: 'error',
-          hi: 'କ୍ରେଡିଟ୍ ସ୍କୋର ତ୍ରୁଟି',
-          en: 'Credit score error',
+          hi: hi?.toast?.credit_check_failed,
+          en: en?.toast?.credit_check_failed,
         });
         setScore(0);
         setShowCredit(true);
@@ -278,16 +278,16 @@ function NominationStepOne() {
     if (mobileToCheck.length < 10) {
       addToast({
         type: 'error',
-        hi: 'ଦୟାକରି ବୈଧ ମୋବାଇଲ୍ ନମ୍ବର ପ୍ରବେଶ କରନ୍ତୁ',
-        en: 'Please enter a valid mobile number',
+        hi: hi?.toast?.mobile_required,
+        en: en?.toast?.mobile_required,
       });
       return false;
     }
     if (!set_credit_limit) {
       addToast({
         type: 'error',
-        hi: 'ଦୟାକରି କ୍ରେଡିଟ୍ ସୀମା ବାଛନ୍ତୁ',
-        en: 'Please select credit limit',
+        hi: hi?.toast?.credit_limit_required,
+        en: en?.toast?.credit_limit_required,
       });
       return false;
     }
