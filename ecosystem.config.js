@@ -9,7 +9,7 @@ module.exports = {
       env_staging: {
         NODE_ENV: 'production',
         PORT: 3002,
-        BACKEND_URL: 'https://rdb-staging.m.frappe.cloud',
+        BACKEND_URL: 'https://rdb-odisha-staging.m.frappe.cloud/',
       },
     },
   ],
