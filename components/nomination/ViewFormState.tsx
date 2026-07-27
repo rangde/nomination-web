@@ -60,21 +60,21 @@ function ViewFormStatus({ name }: FormControlProps) {
   const shgActive =
     workflowState === 'SHG Proposed' ||
     workflowState === 'VO Approved' ||
-    workflowState === 'CLF Approved';
+    workflowState === 'GPLF Approved';
 
   const voActive =
-    workflowState === 'VO Approved' || workflowState === 'CLF Approved';
+    workflowState === 'VO Approved' || workflowState === 'GPLF Approved';
 
-  const clfActive = workflowState === 'CLF Approved';
+  const gplfActive = workflowState === 'GPLF Approved';
   const pendingEn = en?.workflow?.pending_review;
   const pendingHi = hi?.workflow?.pending_review;
 
   const shgName = s(formValues?.owner);
   const voName = s(formValues?.vo_approval_by);
-  const clfName = s(formValues?.clf_approval_by);
+  const gplfName = s(formValues?.gplf_approval_by);
 
   const voOn = formatApprovalDateTime(formValues?.vo_approved_on);
-  const clfOn = formatApprovalDateTime(formValues?.clf_approval_on);
+  const gplfOn = formatApprovalDateTime(formValues?.gplf_approval_on);
 
   const voLine =
     voName && voOn
@@ -90,18 +90,18 @@ function ViewFormStatus({ name }: FormControlProps) {
         ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}`
         : pendingHi;
 
-  const clfLine =
-    clfName && clfOn
-      ? `${en?.workflow?.reviewed_by}: CLF ${clfName} ${en?.workflow?.on} ${clfOn}`
-      : clfName
-        ? `${en?.workflow?.reviewed_by}: CLF ${clfName}`
+  const gplfLine =
+    gplfName && gplfOn
+      ? `${en?.workflow?.reviewed_by}: GPLF ${gplfName} ${en?.workflow?.on} ${gplfOn}`
+      : gplfName
+        ? `${en?.workflow?.reviewed_by}: GPLF ${gplfName}`
         : pendingEn;
 
-  const clfLineHi =
-    clfName && clfOn
-      ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}, ${clfOn}`
-      : clfName
-        ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}`
+  const gplfLineHi =
+    gplfName && gplfOn
+      ? `${hi?.workflow?.reviewed_by}: GPLF ${gplfName} ${hi?.workflow?.by}, ${gplfOn}`
+      : gplfName
+        ? `${hi?.workflow?.reviewed_by}: GPLF ${gplfName} ${hi?.workflow?.by}`
         : pendingHi;
   const steps = [
     {
@@ -119,10 +119,10 @@ function ViewFormStatus({ name }: FormControlProps) {
       active: voActive,
     },
     {
-      h1: en?.workflow?.clf_approval,
-      h2: clfLine,
-      h3: clfLineHi,
-      active: clfActive,
+      h1: en?.workflow?.gplf_approval,
+      h2: gplfLine,
+      h3: gplfLineHi,
+      active: gplfActive,
     },
   ];
   return (

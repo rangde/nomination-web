@@ -15,10 +15,10 @@ const s = (v: unknown, fallback = ''): string =>
 const pickApproval = (fv: NominationData) => {
   const voOn = s(fv.vo_approved_on);
 
-  const clfOn = s(fv.clf_approved_on);
+  const gplfOn = s(fv.gplf_approved_on);
 
   if (voOn) return { on: voOn, level: 'VO' as const };
-  if (clfOn) return { on: clfOn, level: 'CLF' as const };
+  if (gplfOn) return { on: gplfOn, level: 'GPLF' as const };
 
   return { on: '', level: 'NONE' as const };
 };

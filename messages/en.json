@@ -95,7 +95,7 @@
     "on": "on",
     "shg_review": "SHG Review - Maker",
     "vo_approval": "VO Approval - Checker 1",
-    "clf_approval": "CLF Approval - Checker 2",
+    "gplf_approval": "GPLF Approval - Checker 2",
     "doc_moved": "Document moved to next workflow state",
     "approval_failed": "Approval failed",
     "shg_only": "Only SHG user can create nomination",
