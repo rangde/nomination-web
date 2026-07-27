@@ -40,6 +40,13 @@ export type FrappeGetRequestHeader = {
   url: string;
 };
 
+export class ApiError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 async function postFrappe<ResponseType>(
   request: FrappePostRequestHeader
 ): Promise<FrappeCustomResponse<ResponseType>> {
@@ -86,12 +93,12 @@ export const getNumberChecked = (
   });
 };
 
-export const verifyOtpApi = (
+export const verifyOtpApi = async (
   number: string,
   otp: string,
   credit_check: boolean = false
 ) => {
-  return postFrappe<CustomApiMessage>({
+  const result = await postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.login.verify_user_otp',
     body: {
       mobile_number: number,
@@ -99,6 +106,13 @@ export const verifyOtpApi = (
       credit_check: credit_check,
     },
   });
+
+  if (!result?.message?.status) {
+    const msg = result?.message?.msg;
+    throw new ApiError(typeof msg === 'string' ? msg : 'Invalid OTP');
+  }
+
+  return result;
 };
 
 export const validateAadhaar = (aadhaarNumber: string) => {
