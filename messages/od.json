@@ -67,7 +67,7 @@
     "dialog_content": "ଆପଣଙ୍କର କ୍ରେଡିଟ୍ ସ୍କୋର ହେଉଛି ଏକ 3-ଅଙ୍କ ବିଶିଷ୍ଟ ସଂଖ୍ୟା, ଯାହା ଆପଣଙ୍କର କ୍ରେଡିଟ୍ ରିପୋର୍ଟରେ ଦେଖାଯାଏ। ସାଧାରଣତଃ ଏହାର ପରିସର 300 ରୁ 900 ମଧ୍ୟରେ ରହେ।",
     "below": "ରୁ କମ୍",
     "above": "ରୁ ଅଧିକ",
-    "lang": "ଓଡ଼ିଆରେ ପଢ଼ନ୍ତୁ",
+    "lang": "ଓଡ଼ିଆରେ",
     "set_credit_limit": "କ୍ରେଡିଟ୍ ସୀମା ନିର୍ଧାରଣ କରନ୍ତୁ",
     "next": "ପରବର୍ତ୍ତୀ ଠାରେ କଣ ହେବ?",
     "nomniee_title": "ନାମିତ ବ୍ୟକ୍ତିଙ୍କ ସୂଚନା"
@@ -119,5 +119,36 @@
     "ios_step1": "Safari ରେ, Share (⬆) ଟାପ୍ କରନ୍ତୁ",
     "ios_step2": "\"Add to Home Screen\" ବାଛନ୍ତୁ",
     "ios_step3": "\"Add\" ଟାପ୍ କରନ୍ତୁ"
+  },
+
+  "toast": {
+    "first_name_required": "ପ୍ରଥମ ନାମ ଆବଶ୍ୟକ",
+    "last_name_required": "ଶେଷ ନାମ ଆବଶ୍ୟକ",
+    "pincode_required": "ପିନ୍ କୋଡ୍ ଆବଶ୍ୟକ",
+    "dob_required": "ଜନ୍ମ ତାରିଖ ଆବଶ୍ୟକ",
+    "id_required": "ଆଧାର, PAN କିମ୍ବା ଭୋଟର ID ମଧ୍ୟରୁ ଯେକୌଣସି ଗୋଟିଏ ଆବଶ୍ୟକ",
+    "dob_enter": "ଦୟାକରି ଜନ୍ମ ତାରିଖ ପ୍ରବେଶ କରନ୍ତୁ",
+    "dob_validated": "ଜନ୍ମ ତାରିଖ ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି",
+    "dob_age_limit": "ବୟସ 18 ବର୍ଷରୁ ଅଧିକ ହେବା ଆବଶ୍ୟକ",
+    "dob_validation_failed": "ଜନ୍ମ ତାରିଖ ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି",
+    "aadhaar_enter": "ଦୟାକରି ଆଧାର ନମ୍ବର ପ୍ରବେଶ କରନ୍ତୁ",
+    "aadhaar_validated": "ଆଧାର ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି",
+    "aadhaar_validation_failed": "ଆଧାର ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି",
+    "pan_enter": "ଦୟାକରି PAN ନମ୍ବର ପ୍ରବେଶ କରନ୍ତୁ",
+    "pan_validated": "PAN ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି",
+    "pan_validation_failed": "PAN ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି",
+    "step1_completed": "ପର୍ଯ୍ୟାୟ 1 ସଫଳତାର ସହ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି",
+    "sector_required": "ଦୟାକରି କ୍ଷେତ୍ର ବାଛନ୍ତୁ",
+    "business_type_required": "ଦୟାକରି ବ୍ୟବସାୟର ପ୍ରକାର ବାଛନ୍ତୁ",
+    "support_required": "ଦୟାକରି ଆବଶ୍ୟକ ସହାୟତା ବାଛନ୍ତୁ",
+    "step2_completed": "ପର୍ଯ୍ୟାୟ 2 ସଫଳତାର ସହ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି",
+    "mobile_required": "ଦୟାକରି ବୈଧ ମୋବାଇଲ୍ ନମ୍ବର ପ୍ରବେଶ କରନ୍ତୁ",
+    "credit_limit_required": "ଦୟାକରି କ୍ରେଡିଟ୍ ସୀମା ବାଛନ୍ତୁ",
+    "otp_verified": "OTP ସଫଳତାର ସହ ଯାଞ୍ଚ ହୋଇଛି",
+    "credit_score_unavailable": "କ୍ରେଡିଟ୍ ସ୍କୋର ଉପଲବ୍ଧ ନାହିଁ",
+    "credit_score_fetched": "କ୍ରେଡିଟ୍ ସ୍କୋର ପ୍ରାପ୍ତ ହୋଇଛି",
+    "credit_check_failed": "କ୍ରେଡିଟ୍ ଯାଞ୍ଚ ବିଫଳ ହୋଇଛି, ଦୟାକରି ପରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।",
+    "submit_failed": "ଫର୍ମ ଦାଖଲ ହୋଇନାହିଁ",
+    "nominations_load_failed": "ନାମାଙ୍କନ ଲୋଡ୍ ହୋଇପାରିଲା ନାହିଁ"
   }
 }

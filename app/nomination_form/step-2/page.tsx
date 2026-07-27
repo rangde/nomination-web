@@ -74,8 +74,8 @@ export default function NominationStepTwoPage() {
     if (!sector) {
       addToast({
         type: 'error',
-        hi: 'ଦୟାକରି କ୍ଷେତ୍ର ବାଛନ୍ତୁ',
-        en: 'Please select sector',
+        hi: hi?.toast?.sector_required,
+        en: en?.toast?.sector_required,
       });
       return false;
     }
@@ -83,8 +83,8 @@ export default function NominationStepTwoPage() {
     if (!business_category) {
       addToast({
         type: 'error',
-        hi: 'ଦୟାକରି ବ୍ୟବସାୟର ପ୍ରକାର ବାଛନ୍ତୁ',
-        en: 'Please select business type',
+        hi: hi?.toast?.business_type_required,
+        en: en?.toast?.business_type_required,
       });
       return false;
     }
@@ -92,8 +92,8 @@ export default function NominationStepTwoPage() {
     if (!supportNeeded || supportNeeded.length === 0) {
       addToast({
         type: 'error',
-        hi: 'ଦୟାକରି ଆବଶ୍ୟକ ସହାୟତା ବାଛନ୍ତୁ',
-        en: 'Please select support needed',
+        hi: hi?.toast?.support_required,
+        en: en?.toast?.support_required,
       });
       return false;
     }
@@ -107,8 +107,8 @@ export default function NominationStepTwoPage() {
 
     addToast({
       type: 'success',
-      hi: 'ପର୍ଯ୍ୟାୟ 2 ସଫଳତାର ସହ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି',
-      en: 'Step 2 completed successfully',
+      hi: hi?.toast?.step2_completed,
+      en: en?.toast?.step2_completed,
     });
 
     router.push('/nomination_form/step-3');
@@ -236,7 +236,7 @@ export default function NominationStepTwoPage() {
           >
             <Box textAlign="center">
               <DualLanguageText
-                h1={hi?.form?.next_step}
+                h1={hi?.form?.save_and_next}
                 h2={en?.form?.save_and_next}
                 h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}
                 h2style={{ fontWeight: 400, fontSize: 12, textAlign: 'center' }}
