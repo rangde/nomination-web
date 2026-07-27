@@ -38,7 +38,7 @@ export default function RoleGuard({ children }: Props) {
         const roles = await getUserRoles();
 
         const hasAllowedRole =
-          roles.includes('CLF') ||
+          roles.includes('GPLF') ||
           roles.includes('VO') ||
           roles.includes('SHG');
 

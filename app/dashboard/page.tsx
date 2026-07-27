@@ -87,7 +87,7 @@ export default function DashboardPage() {
         const r = await getUserRoles();
         if (!mounted) return;
 
-        setCanReview(r.includes('CLF') || r.includes('VO'));
+        setCanReview(r.includes('GPLF') || r.includes('VO'));
         setDisableCreation(!r.includes('SHG'));
       } catch {}
     })();

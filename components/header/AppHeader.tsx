@@ -106,7 +106,7 @@ export default function AppHeader({
       try {
         const r = await getUserRoles();
 
-        const allowedRoles = ['SHG', 'VO', 'CLF'];
+        const allowedRoles = ['SHG', 'VO', 'GPLF'];
 
         const filtered = r.filter((role) => allowedRoles.includes(role));
 

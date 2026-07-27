@@ -144,11 +144,11 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
       : String(
           n(formValues?.vo_proposed, 0) || s(formValues?.vo_proposed, '0')
         );
-  const clfProposed =
+  const gplfProposed =
     workflowState === 'SHG Proposed' || workflowState === 'VO Approved'
       ? 'Pending'
       : String(
-          n(formValues?.clf_proposed, 0) || s(formValues?.clf_proposed, '0')
+          n(formValues?.gplf_proposed, 0) || s(formValues?.gplf_proposed, '0')
         );
 
   const sectorType =
@@ -303,14 +303,14 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
                 }}
               />
               <DualLanguageText
-                h1="CLF Proposed"
-                h2={clfProposed === 'Pending' ? 'Pending' : `₹${clfProposed}`}
+                h1="GPLF Proposed"
+                h2={gplfProposed === 'Pending' ? 'Pending' : `₹${gplfProposed}`}
                 boxStyle={{ display: 'flex', alignItems: 'center' }}
                 h1style={{ fontSize: 13, fontWeight: 600 }}
                 h2style={{
                   fontWeight: 300,
                   fontSize: 12,
-                  color: clfProposed === 'Pending' ? '#9CA3AF' : undefined,
+                  color: gplfProposed === 'Pending' ? '#9CA3AF' : undefined,
                 }}
               />
             </Box>
