@@ -59,35 +59,35 @@ function ViewFormStatus({ name }: FormControlProps) {
   const workflowState = s(formValues?.workflow_state);
   const shgActive =
     workflowState === 'SHG Proposed' ||
-    workflowState === 'VO Approved' ||
+    workflowState === 'CLF Approved' ||
     workflowState === 'GPLF Approved';
 
-  const voActive =
-    workflowState === 'VO Approved' || workflowState === 'GPLF Approved';
+  const clfActive =
+    workflowState === 'CLF Approved' || workflowState === 'GPLF Approved';
 
   const gplfActive = workflowState === 'GPLF Approved';
   const pendingEn = en?.workflow?.pending_review;
   const pendingHi = hi?.workflow?.pending_review;
 
   const shgName = s(formValues?.owner);
-  const voName = s(formValues?.vo_approval_by);
+  const clfName = s(formValues?.clf_approval_by);
   const gplfName = s(formValues?.gplf_approval_by);
 
-  const voOn = formatApprovalDateTime(formValues?.vo_approved_on);
+  const clfOn = formatApprovalDateTime(formValues?.clf_approved_on);
   const gplfOn = formatApprovalDateTime(formValues?.gplf_approval_on);
 
-  const voLine =
-    voName && voOn
-      ? `${en?.workflow?.reviewed_by}: VO ${voName} ${en?.workflow?.on} ${voOn}`
-      : voName
-        ? `${en?.workflow?.reviewed_by}: VO ${voName}`
+  const clfLine =
+    clfName && clfOn
+      ? `${en?.workflow?.reviewed_by}: CLF ${clfName} ${en?.workflow?.on} ${clfOn}`
+      : clfName
+        ? `${en?.workflow?.reviewed_by}: CLF ${clfName}`
         : pendingEn;
 
-  const voLineHi =
-    voName && voOn
-      ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}, ${voOn}`
-      : voName
-        ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}`
+  const clfLineHi =
+    clfName && clfOn
+      ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}, ${clfOn}`
+      : clfName
+        ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}`
         : pendingHi;
 
   const gplfLine =
@@ -113,10 +113,10 @@ function ViewFormStatus({ name }: FormControlProps) {
       active: shgActive,
     },
     {
-      h1: en?.workflow?.vo_approval,
-      h2: voLine,
-      h3: voLineHi,
-      active: voActive,
+      h1: en?.workflow?.clf_approval,
+      h2: clfLine,
+      h3: clfLineHi,
+      active: clfActive,
     },
     {
       h1: en?.workflow?.gplf_approval,

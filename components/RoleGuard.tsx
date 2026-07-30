@@ -39,7 +39,7 @@ export default function RoleGuard({ children }: Props) {
 
         const hasAllowedRole =
           roles.includes('GPLF') ||
-          roles.includes('VO') ||
+          roles.includes('CLF') ||
           roles.includes('SHG');
 
         if (!hasAllowedRole && pathname !== '/no-permission') {

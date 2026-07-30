@@ -68,8 +68,8 @@ export default function NoPermissionPage() {
       />
 
       <DualLanguageText
-        h1="ଦୟାକରି SHG / VO / GPLF ଭୂମିକା ନ୍ୟସ୍ତ କରିବା ପାଇଁ ଆପଣଙ୍କ ଆଡମିନ୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"
-        h2="Please contact your admin to assign SHG / VO / GPLF role."
+        h1="ଦୟାକରି SHG / CLF / GPLF ଭୂମିକା ନ୍ୟସ୍ତ କରିବା ପାଇଁ ଆପଣଙ୍କ ଆଡମିନ୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"
+        h2="Please contact your admin to assign SHG / CLF / GPLF role."
         h1style={{ mt: 2, fontSize: 16 }}
         h2style={{ mt: 0.5, fontSize: 13, color: '#6B7280' }}
       />
