@@ -51,9 +51,9 @@ const pickApproval = (fv: NominationData) => {
   const gplfBy = s(fv.gplf_approval_by);
   const gplfOn = s(fv.gplf_approved_on);
 
-  if (clfBy && clfOn) return { by: clfBy, on: clfOn, level: 'CLF' as const };
   if (gplfBy && gplfOn)
     return { by: gplfBy, on: gplfOn, level: 'GPLF' as const };
+  if (clfBy && clfOn) return { by: clfBy, on: clfOn, level: 'CLF' as const };
 
   return { by: '', on: '', level: 'NONE' as const };
 };

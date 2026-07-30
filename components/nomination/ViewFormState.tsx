@@ -74,7 +74,7 @@ function ViewFormStatus({ name }: FormControlProps) {
   const gplfName = s(formValues?.gplf_approval_by);
 
   const clfOn = formatApprovalDateTime(formValues?.clf_approved_on);
-  const gplfOn = formatApprovalDateTime(formValues?.gplf_approval_on);
+  const gplfOn = formatApprovalDateTime(formValues?.gplf_approved_on);
 
   const clfLine =
     clfName && clfOn
