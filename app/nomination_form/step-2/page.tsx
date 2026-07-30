@@ -32,7 +32,7 @@ export default function NominationStepTwoPage() {
       value: 'poultry_farming',
     },
     {
-      label_1: 'ମଶ୍ରୁମ ଚାଷ',
+      label_1: 'ଛତୁ ଚାଷ',
       label_2: 'Mushroom cultivation',
       value: 'mushroom_cultivation',
     },
@@ -44,7 +44,7 @@ export default function NominationStepTwoPage() {
   ];
   const nonFarmSelectOptions = [
     {
-      label_1: 'ହସ୍ତଶିଳ୍ପ',
+      label_1: 'କାରିଗରୀ',
       label_2: 'Handicraft',
       value: 'handicraft',
     },
