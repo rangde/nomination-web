@@ -47,165 +47,24 @@ export class ApiError extends Error {
   }
 }
 
-const CSRF_URL = '/api/method/nomination.api.login.get_csrf';
-
-let csrfTokenPromise: Promise<string> | null = null;
-
-async function fetchCsrfToken(): Promise<string> {
-  try {
-    const response = await fetch(CSRF_URL, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (!response.ok) return '';
-
-    const body = (await response.json()) as FrappeCustomResponse<
-      Partial<FrappeCsrfMessage>
-    >;
-    return body?.message?.csrf_token ?? '';
-  } catch {
-    return '';
-  }
-}
-
-// Frappe only enforces CSRF once a token exists in the session, and the token is
-// tied to the session id — so it has to be refetched whenever the session
-// rotates (login/logout).
-async function getCsrfTokenCached(): Promise<string> {
-  if (!csrfTokenPromise) {
-    csrfTokenPromise = fetchCsrfToken();
-  }
-
-  const token = await csrfTokenPromise;
-  if (!token) csrfTokenPromise = null;
-
-  return token;
-}
-
-export function resetCsrfToken() {
-  csrfTokenPromise = null;
-}
-
-/**
- * Pulls a human-readable reason out of an error response. Frappe returns JSON
- * (`_server_messages` / `exc_type`), but a proxy in front of it returns HTML
- * (413 too large, 502/504), so the raw text is the fallback.
- */
-function extractErrorDetail(raw: string): string {
-  // Proxy error pages are HTML — flattened, "413 Request Entity Too Large nginx"
-  // stays useful in a toast the user can read back to us.
-  const fallback =
-    raw
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 200) || 'No response body';
-
-  try {
-    const parsed = JSON.parse(raw) as {
-      _server_messages?: string;
-      exception?: string;
-      exc_type?: string;
-      message?: unknown;
-    };
-
-    if (parsed._server_messages) {
-      const messages = JSON.parse(parsed._server_messages) as string[];
-      const first = messages
-        .map((entry) => {
-          try {
-            return (JSON.parse(entry) as { message?: string }).message;
-          } catch {
-            return entry;
-          }
-        })
-        .find(Boolean);
-      if (first) return first;
-    }
-
-    return parsed.exception || parsed.exc_type || fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function isCsrfFailure(status: number, raw: string): boolean {
-  return status === 400 && raw.includes('CSRFTokenError');
-}
-
-/**
- * Returns the normal `{ message: ... }` envelope, or null when the body is a
- * Frappe traceback / a proxy error page instead. Some endpoints report domain
- * errors as a non-2xx status *plus* a valid envelope (417 for a wrong OTP), so
- * the envelope is what decides how a response is handled, not the status.
- */
-function parseEnvelope<ResponseType>(
-  raw: string
-): FrappeCustomResponse<ResponseType> | null {
-  try {
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    const isEnvelope =
-      !!parsed &&
-      typeof parsed === 'object' &&
-      'message' in parsed &&
-      !('exc_type' in parsed) &&
-      !('_server_messages' in parsed) &&
-      !('exception' in parsed);
-
-    return isEnvelope ? (parsed as FrappeCustomResponse<ResponseType>) : null;
-  } catch {
-    return null;
-  }
-}
-
-function resolve<ResponseType>(
-  raw: string,
-  response: Response
-): FrappeCustomResponse<ResponseType> {
-  const envelope = parseEnvelope<ResponseType>(raw);
-  if (envelope) return envelope;
-
-  console.error(`Request failed (${response.status}) ${response.url}: ${raw}`);
-
-  if (!response.ok) {
-    throw new ApiError(`${response.status}: ${extractErrorDetail(raw)}`);
-  }
-
-  throw new ApiError(`Malformed response (${response.status})`);
-}
-
 async function postFrappe<ResponseType>(
   request: FrappePostRequestHeader
 ): Promise<FrappeCustomResponse<ResponseType>> {
-  const send = (csrfToken: string) =>
-    fetch(request.url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(csrfToken ? { 'X-Frappe-CSRF-Token': csrfToken } : {}),
-        ...request.headers,
-      },
-      body: JSON.stringify(request.body),
-    });
+  const response = await fetch(request.url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...request.headers,
+    },
+    body: JSON.stringify(request.body),
+  });
 
-  const token = await getCsrfTokenCached();
-  let response = await send(token);
-  // Read the body exactly once — a Response body is a stream, so a second read
-  // throws "body stream already read" and hides the real failure.
-  let raw = await response.text();
-
-  // A CSRF rejection happens before the whitelisted method runs, so nothing was
-  // committed and this retry cannot duplicate a submission.
-  if (isCsrfFailure(response.status, raw)) {
-    resetCsrfToken();
-    const freshToken = await getCsrfTokenCached();
-    if (freshToken && freshToken !== token) {
-      response = await send(freshToken);
-      raw = await response.text();
-    }
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    console.error(`Request failed (${response.status}): ${text}`);
   }
 
-  return resolve<ResponseType>(raw, response);
+  return (await response.json()) as FrappeCustomResponse<ResponseType>;
 }
 
 async function getFrappe<ResponseType>(
@@ -216,9 +75,12 @@ async function getFrappe<ResponseType>(
     headers: { 'Content-Type': 'application/json' },
   });
 
-  const raw = await response.text();
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    console.error(`Request failed (${response.status}): ${text}`);
+  }
 
-  return resolve<ResponseType>(raw, response);
+  return (await response.json()) as FrappeCustomResponse<ResponseType>;
 }
 
 export const getNumberChecked = (
@@ -249,9 +111,6 @@ export const verifyOtpApi = async (
     const msg = result?.message?.msg;
     throw new ApiError(typeof msg === 'string' ? msg : 'Invalid OTP');
   }
-
-  // login_as() starts a new session, so any cached token is now stale.
-  resetCsrfToken();
 
   return result;
 };
@@ -335,16 +194,19 @@ export const getCreditScore = (payload: CreditScorePayload) => {
 };
 
 export const getCsrfToken = () => {
-  return getFrappe<FrappeCsrfMessage>({ url: CSRF_URL });
+  return getFrappe<FrappeCsrfMessage>({
+    url: '/api/method/nomination.api.login.get_csrf',
+  });
 };
 
 export const logoutUser = async () => {
-  try {
-    return await postFrappe<CustomApiMessage>({
-      url: '/api/method/nomination.api.login.logout',
-      body: {},
-    });
-  } finally {
-    resetCsrfToken();
-  }
+  const csrf = await getCsrfToken();
+
+  return await postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.login.logout',
+    body: {},
+    headers: {
+      'X-Frappe-CSRF-Token': csrf.message.csrf_token,
+    },
+  });
 };
