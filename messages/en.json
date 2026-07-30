@@ -13,8 +13,8 @@
   },
 
   "dashboard": {
-    "create_nomination": "Create New Nomination",
-    "nomi_new": "Create Nomination",
+    "create_nomination": "Create Nomination",
+    "create_new_nomination": "Create New Nomination",
     "submitted_nominatio": "Nomination Submitted",
     "training": "Ready for Training",
     "credit_limit": "Credit Limit",
