@@ -59,12 +59,15 @@ async function postFrappe<ResponseType>(
     body: JSON.stringify(request.body),
   });
 
+  // Read the body exactly once — it is a stream, so a second read throws
+  // "body stream already read" and hides the actual response.
+  const text = await response.text();
+
   if (!response.ok) {
-    const text = await response.text().catch(() => '');
     console.error(`Request failed (${response.status}): ${text}`);
   }
 
-  return (await response.json()) as FrappeCustomResponse<ResponseType>;
+  return JSON.parse(text) as FrappeCustomResponse<ResponseType>;
 }
 
 async function getFrappe<ResponseType>(
@@ -75,12 +78,13 @@ async function getFrappe<ResponseType>(
     headers: { 'Content-Type': 'application/json' },
   });
 
+  const text = await response.text();
+
   if (!response.ok) {
-    const text = await response.text().catch(() => '');
     console.error(`Request failed (${response.status}): ${text}`);
   }
 
-  return (await response.json()) as FrappeCustomResponse<ResponseType>;
+  return JSON.parse(text) as FrappeCustomResponse<ResponseType>;
 }
 
 export const getNumberChecked = (
