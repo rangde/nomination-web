@@ -74,7 +74,7 @@ function ViewFormStatus({ name }: FormControlProps) {
   const clfName = s(formValues?.clf_approval_by);
 
   const voOn = formatApprovalDateTime(formValues?.vo_approved_on);
-  const clfOn = formatApprovalDateTime(formValues?.clf_approval_on);
+  const clfOn = formatApprovalDateTime(formValues?.clf_approved_on);
 
   const voLine =
     voName && voOn

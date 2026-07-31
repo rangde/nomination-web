@@ -17,8 +17,8 @@ const pickApproval = (fv: NominationData) => {
 
   const clfOn = s(fv.clf_approved_on);
 
-  if (voOn) return { on: voOn, level: 'VO' as const };
   if (clfOn) return { on: clfOn, level: 'CLF' as const };
+  if (voOn) return { on: voOn, level: 'VO' as const };
 
   return { on: '', level: 'NONE' as const };
 };
