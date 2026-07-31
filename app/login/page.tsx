@@ -6,7 +6,11 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CircularProgress from '@mui/material/CircularProgress';
 import InputAdornment from '@mui/material/InputAdornment';
 import { useState, useEffect, useRef } from 'react';
-import { getNumberChecked, verifyOtpApi as verify_otp } from '@/services/api';
+import {
+  ApiError,
+  getNumberChecked,
+  verifyOtpApi as verify_otp,
+} from '@/services/api';
 import Cookies from 'js-cookie';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import DualLanguageText from '@/components/DualLanguageText';
@@ -94,30 +98,43 @@ function LoginPage() {
   };
 
   const handleRequestOTP = async () => {
-    setLoading(true);
-    if (fillOtp) {
-      if (otp.length >= 6 && (await verifyOtp(mobile, otp))) {
-        addToast({
-          type: 'success',
-          hi: hi?.login?.login_success,
-          en: en?.login?.login_success,
-        });
-        Cookies.set('mobile', mobile, {
-          expires: 7,
-          sameSite: 'strict',
-        });
-        redirect(redirectTo);
-      } else {
-        addToast({
-          type: 'error',
-          hi: hi?.login?.invalid,
-          en: en?.login?.invalid,
-        });
+    if (!fillOtp) {
+      setLoading(true);
+      try {
+        await validteAndSendOtp();
+      } finally {
+        setLoading(false);
       }
-    } else {
-      validteAndSendOtp();
+      return;
     }
-    setLoading(false);
+
+    setLoading(true);
+    try {
+      if (otp.length < 6) {
+        throw new ApiError(en?.login?.invalid);
+      }
+      await verifyOtp(mobile, otp);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        hi: hi?.login?.invalid,
+        en: err instanceof ApiError ? err.message : en?.login?.invalid,
+      });
+      return;
+    } finally {
+      setLoading(false);
+    }
+
+    addToast({
+      type: 'success',
+      hi: hi?.login?.login_success,
+      en: en?.login?.login_success,
+    });
+    Cookies.set('mobile', mobile, {
+      expires: 7,
+      sameSite: 'strict',
+    });
+    redirect(redirectTo);
   };
 
   const numberChecked = async (number: string) => {
@@ -130,12 +147,7 @@ function LoginPage() {
   };
 
   const verifyOtp = async (number: string, otp: string) => {
-    const result = await verify_otp(number, otp);
-    if (result?.message) {
-      return result?.message?.status ? true : false;
-    } else {
-      return false;
-    }
+    await verify_otp(number, otp);
   };
 
   const validteAndSendOtp = async () => {

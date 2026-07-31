@@ -16,6 +16,7 @@ import CreditScoreGauge from '@/components/nomination/CreditScoreGauge';
 import SelectField from '@/components/FormComponents/SelectField';
 import { useNominationForm } from '../NominationFormProvider';
 import {
+  ApiError,
   getNumberChecked,
   verifyOtpApi as verify_otp,
   getCreditScore,
@@ -54,8 +55,7 @@ function NominationStepOne() {
   };
 
   const verifyOtp = async (number: string, otp: string) => {
-    const result = await verify_otp(number, otp, true);
-    return result?.message?.status ? true : false;
+    await verify_otp(number, otp, true);
   };
 
   const resendOtp = () => {
@@ -160,99 +160,105 @@ function NominationStepOne() {
         `/nomination_form/view_status?name=${encodeURIComponent(res?.name)}`
       );
     } else if (fillOtp) {
-      if (otp.length >= 6 && (await verifyOtp(mobile, otp))) {
+      try {
+        if (otp.length < 6) {
+          throw new ApiError(en?.login?.invalid);
+        }
+        await verifyOtp(mobile, otp);
+      } catch (err) {
         addToast({
-          type: 'success',
-          hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
-          en: 'OTP verified successfully',
+          type: 'error',
+          hi: hi?.login?.invalid,
+          en: err instanceof ApiError ? err.message : en?.login?.invalid,
         });
+        return;
+      }
 
-        try {
-          const creditCheckId = getCreditCheckId();
+      addToast({
+        type: 'success',
+        hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
+        en: 'OTP verified successfully',
+      });
 
-          if (!creditCheckId) {
-            addToast({
-              type: 'error',
-              hi: 'आधार, पैन या वोटर आईडी में से कोई एक आवश्यक है',
-              en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
-            });
-            return;
-          }
+      try {
+        const creditCheckId = getCreditCheckId();
 
-          const res = await getCreditScore({
-            first_name: form.step1.first_name,
-            last_name: form.step1.last_name,
-            dob: form.step1.date_of_birth,
-            mobile_number: mobile,
-            id_number: creditCheckId.id_number,
-            id_type: creditCheckId.id_type,
-            pincode: form.step1.pincode,
-          });
-
-          if (res?.message?.status === 1) {
-            const msg = res.message.msg;
-
-            const isMsgObject =
-              typeof msg === 'object' && msg !== null && !Array.isArray(msg);
-
-            const rawScore = isMsgObject
-              ? (msg as { score: number }).score
-              : Number(msg);
-
-            const reportBase64 = isMsgObject
-              ? ((msg as { reportBase64?: string }).reportBase64 ?? '')
-              : '';
-
-            const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
-            setScore(finalScore);
-            setStep3({
-              mobile_number: mobile,
-              credit_score: finalScore.toString(),
-              reportBase64,
-            });
-            setShowCredit(true);
-
-            if (finalScore < 0) {
-              addToast({
-                type: 'error',
-                hi: 'क्रेडिट स्कोर उपलब्ध नहीं है',
-                en: 'Credit score not available',
-              });
-            } else {
-              addToast({
-                type: 'success',
-                hi: 'क्रेडिट स्कोर प्राप्त हुआ',
-                en: 'Credit score fetched successfully',
-              });
-            }
-          } else {
-            addToast({
-              type: 'error',
-              hi: 'क्रेडिट स्कोर प्राप्त नहीं हुआ',
-              en:
-                typeof res?.message?.msg === 'string'
-                  ? res.message.msg
-                  : 'Failed to fetch credit score',
-            });
-            setScore(0);
-            setShowCredit(true);
-          }
-        } catch (err) {
-          console.error(err);
+        if (!creditCheckId) {
           addToast({
             type: 'error',
-            hi: 'क्रेडिट स्कोर त्रुटि',
-            en: 'Credit score error',
+            hi: 'आधार, पैन या वोटर आईडी में से कोई एक आवश्यक है',
+            en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
+          });
+          return;
+        }
+
+        const res = await getCreditScore({
+          first_name: form.step1.first_name,
+          last_name: form.step1.last_name,
+          dob: form.step1.date_of_birth,
+          mobile_number: mobile,
+          id_number: creditCheckId.id_number,
+          id_type: creditCheckId.id_type,
+          pincode: form.step1.pincode,
+        });
+
+        if (res?.message?.status === 1) {
+          const msg = res.message.msg;
+
+          const isMsgObject =
+            typeof msg === 'object' && msg !== null && !Array.isArray(msg);
+
+          const rawScore = isMsgObject
+            ? (msg as { score: number }).score
+            : Number(msg);
+
+          const reportBase64 = isMsgObject
+            ? ((msg as { reportBase64?: string }).reportBase64 ?? '')
+            : '';
+
+          const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
+          setScore(finalScore);
+          setStep3({
+            mobile_number: mobile,
+            credit_score: finalScore.toString(),
+            reportBase64,
+          });
+          setShowCredit(true);
+
+          if (finalScore < 0) {
+            addToast({
+              type: 'error',
+              hi: 'क्रेडिट स्कोर उपलब्ध नहीं है',
+              en: 'Credit score not available',
+            });
+          } else {
+            addToast({
+              type: 'success',
+              hi: 'क्रेडिट स्कोर प्राप्त हुआ',
+              en: 'Credit score fetched successfully',
+            });
+          }
+        } else {
+          addToast({
+            type: 'error',
+            hi: 'क्रेडिट स्कोर प्राप्त नहीं हुआ',
+            en:
+              typeof res?.message?.msg === 'string'
+                ? res.message.msg
+                : 'Failed to fetch credit score',
           });
           setScore(0);
           setShowCredit(true);
         }
-      } else {
+      } catch (err) {
+        console.error(err);
         addToast({
           type: 'error',
-          hi: hi?.login?.invalid,
-          en: en?.login?.invalid,
+          hi: 'क्रेडिट स्कोर त्रुटि',
+          en: 'Credit score error',
         });
+        setScore(0);
+        setShowCredit(true);
       }
     } else {
       validteAndSendOtp();
