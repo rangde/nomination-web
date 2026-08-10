@@ -13,11 +13,11 @@ const s = (v: unknown, fallback = ''): string =>
   typeof v === 'string' ? v : fallback;
 
 const pickApproval = (fv: NominationData) => {
-  const voOn = s(fv.vo_approved_on);
-
   const clfOn = s(fv.clf_approved_on);
 
-  if (voOn) return { on: voOn, level: 'VO' as const };
+  const gplfOn = s(fv.gplf_approved_on);
+
+  if (gplfOn) return { on: gplfOn, level: 'GPLF' as const };
   if (clfOn) return { on: clfOn, level: 'CLF' as const };
 
   return { on: '', level: 'NONE' as const };

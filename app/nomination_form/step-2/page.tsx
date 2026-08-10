@@ -3,7 +3,7 @@
 import { Box, Button, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import DualLanguageText from '@/components/DualLanguageText';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import AppHeader from '@/components/header/AppHeader';
 import CheckBoxSingleSelect from '@/components/FormComponents/CheckBoxSingleSelect';
@@ -23,48 +23,48 @@ export default function NominationStepTwoPage() {
   const { sector, business_category, supportNeeded } = form.step2;
 
   const farmSelectOptions = [
-    { label_1: 'कृषि', label_2: 'Agriculture', value: 'agriculture' },
-    { label_1: 'डेयरी', label_2: 'Dairy', value: 'dairy' },
-    { label_1: 'बकरी पालन', label_2: 'Goat rearing', value: 'goat_rearing' },
+    { label_1: 'କୃଷି', label_2: 'Agriculture', value: 'agriculture' },
+    { label_1: 'ଡେୟାରୀ', label_2: 'Dairy', value: 'dairy' },
+    { label_1: 'ଛେଳି ପାଳନ', label_2: 'Goat rearing', value: 'goat_rearing' },
     {
-      label_1: 'मुर्गी पालन',
+      label_1: 'କୁକୁଡ଼ା ପାଳନ',
       label_2: 'Poultry farming',
       value: 'poultry_farming',
     },
     {
-      label_1: 'मशरूम उत्पादन',
+      label_1: 'ଛତୁ ଚାଷ',
       label_2: 'Mushroom cultivation',
       value: 'mushroom_cultivation',
     },
     {
-      label_1: 'कृषि इनपुट दुकान',
+      label_1: 'କୃଷି ଉପକରଣ ଦୋକାନ',
       label_2: 'Agri input shop',
       value: 'agri_input_shop',
     },
   ];
   const nonFarmSelectOptions = [
     {
-      label_1: 'हस्तशिल्प',
+      label_1: 'କାରିଗରୀ',
       label_2: 'Handicraft',
       value: 'handicraft',
     },
     {
-      label_1: 'सिलाई',
+      label_1: 'ସିଲେଇ',
       label_2: 'Tailoring',
       value: 'tailoring',
     },
     {
-      label_1: 'ब्यूटी पार्लर',
+      label_1: 'ବ୍ୟୁଟି ପାର୍ଲର',
       label_2: 'Beauty Parlour',
       value: 'beauty_parlour',
     },
     {
-      label_1: 'किराना दुकान',
+      label_1: 'କିରାଣା ଦୋକାନ',
       label_2: 'Grocery Store',
       value: 'grocery_store',
     },
     {
-      label_1: 'सब्जी विक्रेता',
+      label_1: 'ପନିପରିବା ବିକ୍ରେତା',
       label_2: 'Vegetable Vendor',
       value: 'vegetable_vendor',
     },
@@ -74,8 +74,8 @@ export default function NominationStepTwoPage() {
     if (!sector) {
       addToast({
         type: 'error',
-        hi: 'कृपया सेक्टर चुनें',
-        en: 'Please select sector',
+        hi: hi?.toast?.sector_required,
+        en: en?.toast?.sector_required,
       });
       return false;
     }
@@ -83,8 +83,8 @@ export default function NominationStepTwoPage() {
     if (!business_category) {
       addToast({
         type: 'error',
-        hi: 'कृपया बिज़नेस टाइप चुनें',
-        en: 'Please select business type',
+        hi: hi?.toast?.business_type_required,
+        en: en?.toast?.business_type_required,
       });
       return false;
     }
@@ -92,8 +92,8 @@ export default function NominationStepTwoPage() {
     if (!supportNeeded || supportNeeded.length === 0) {
       addToast({
         type: 'error',
-        hi: 'कृपया सपोर्ट विकल्प चुनें',
-        en: 'Please select support needed',
+        hi: hi?.toast?.support_required,
+        en: en?.toast?.support_required,
       });
       return false;
     }
@@ -107,8 +107,8 @@ export default function NominationStepTwoPage() {
 
     addToast({
       type: 'success',
-      hi: 'दूसरा चरण सफलतापूर्वक पूरा हुआ',
-      en: 'Step 2 completed successfully',
+      hi: hi?.toast?.step2_completed,
+      en: en?.toast?.step2_completed,
     });
 
     router.push('/nomination_form/step-3');
@@ -162,12 +162,12 @@ export default function NominationStepTwoPage() {
               }}
               options={[
                 {
-                  label_1: 'कृषि आधारित',
+                  label_1: 'କୃଷି-ଆଧାରିତ',
                   label_2: 'Farm-based',
                   value: 'farm_based',
                 },
                 {
-                  label_1: 'गैर-कृषि आधारित',
+                  label_1: 'ଅଣ-କୃଷି',
                   label_2: 'Non-farm',
                   value: 'non_farm',
                 },
@@ -198,17 +198,17 @@ export default function NominationStepTwoPage() {
               onChange={(vals) => setStep2({ supportNeeded: vals })}
               options={[
                 {
-                  label_1: 'बाजार तक पहुंच',
+                  label_1: 'ବଜାର ପ୍ରବେଶ',
                   label_2: 'Market Access',
                   value: 'market_access',
                 },
-                { label_1: 'विपणन', label_2: 'Marketing', value: 'marketing' },
+                { label_1: 'ବିପଣନ', label_2: 'Marketing', value: 'marketing' },
                 {
-                  label_1: 'मांग का आकलन',
+                  label_1: 'ଚାହିଦା ମୂଲ୍ୟାଙ୍କନ',
                   label_2: 'Demand Assessment',
                   value: 'demand_assessment',
                 },
-                { label_1: 'कोई नहीं', label_2: 'None', value: 'none' },
+                { label_1: 'କିଛି ନାହିଁ', label_2: 'None', value: 'none' },
               ]}
             />
 
@@ -236,7 +236,7 @@ export default function NominationStepTwoPage() {
           >
             <Box textAlign="center">
               <DualLanguageText
-                h1={hi?.form?.next_step}
+                h1={hi?.form?.save_and_next}
                 h2={en?.form?.save_and_next}
                 h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}
                 h2style={{ fontWeight: 400, fontSize: 12, textAlign: 'center' }}

@@ -4,7 +4,7 @@ import { Box, Paper, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import AppHeader from '@/components/header/AppHeader';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import DualLanguageText from '@/components/DualLanguageText';
 import SelectField from '@/components/FormComponents/SelectField';
@@ -138,17 +138,17 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
   const shgProposed =
     n(formValues?.shg_proposed, 0) || s(formValues?.shg_proposed, '0');
-  const voProposed =
+  const clfProposed =
     workflowState === 'SHG Proposed'
       ? 'Pending'
       : String(
-          n(formValues?.vo_proposed, 0) || s(formValues?.vo_proposed, '0')
+          n(formValues?.clf_proposed, 0) || s(formValues?.clf_proposed, '0')
         );
-  const clfProposed =
-    workflowState === 'SHG Proposed' || workflowState === 'VO Approved'
+  const gplfProposed =
+    workflowState === 'SHG Proposed' || workflowState === 'CLF Approved'
       ? 'Pending'
       : String(
-          n(formValues?.clf_proposed, 0) || s(formValues?.clf_proposed, '0')
+          n(formValues?.gplf_proposed, 0) || s(formValues?.gplf_proposed, '0')
         );
 
   const sectorType =
@@ -292,17 +292,6 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
                 h2style={{ fontWeight: 300, fontSize: 12 }}
               />
               <DualLanguageText
-                h1="VO Proposed"
-                h2={voProposed === 'Pending' ? 'Pending' : `₹${voProposed}`}
-                boxStyle={{ display: 'flex', alignItems: 'center' }}
-                h1style={{ fontSize: 13, fontWeight: 600 }}
-                h2style={{
-                  fontWeight: 300,
-                  fontSize: 12,
-                  color: voProposed === 'Pending' ? '#9CA3AF' : undefined,
-                }}
-              />
-              <DualLanguageText
                 h1="CLF Proposed"
                 h2={clfProposed === 'Pending' ? 'Pending' : `₹${clfProposed}`}
                 boxStyle={{ display: 'flex', alignItems: 'center' }}
@@ -311,6 +300,17 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
                   fontWeight: 300,
                   fontSize: 12,
                   color: clfProposed === 'Pending' ? '#9CA3AF' : undefined,
+                }}
+              />
+              <DualLanguageText
+                h1="GPLF Proposed"
+                h2={gplfProposed === 'Pending' ? 'Pending' : `₹${gplfProposed}`}
+                boxStyle={{ display: 'flex', alignItems: 'center' }}
+                h1style={{ fontSize: 13, fontWeight: 600 }}
+                h2style={{
+                  fontWeight: 300,
+                  fontSize: 12,
+                  color: gplfProposed === 'Pending' ? '#9CA3AF' : undefined,
                 }}
               />
             </Box>

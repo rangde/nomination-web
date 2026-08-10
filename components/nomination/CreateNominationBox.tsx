@@ -3,7 +3,7 @@
 import { Box, Button, Paper } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import DualLanguageText from '../DualLanguageText';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import { useRouter } from 'next/navigation';
 
@@ -28,8 +28,8 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
       }}
     >
       <DualLanguageText
-        h1={hi?.dashboard?.nomi_new}
-        h2={en?.dashboard?.nomi_new}
+        h1={hi?.dashboard?.create_nomination}
+        h2={en?.dashboard?.create_nomination}
         h1style={{ fontSize: '1.1rem', fontWeight: 600 }}
         h2style={{ fontWeight: 400, fontSize: '0.8rem', mb: 1 }}
       />
@@ -50,8 +50,8 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
           }}
         >
           <DualLanguageText
-            h1={hi?.dashboard?.create_nomination}
-            h2={en?.dashboard?.create_nomination}
+            h1={hi?.dashboard?.create_new_nomination}
+            h2={en?.dashboard?.create_new_nomination}
             h1style={{
               fontWeight: 600,
               fontSize: '0.9rem',

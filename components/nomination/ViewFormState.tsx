@@ -3,7 +3,7 @@
 import { Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import AppHeader from '@/components/header/AppHeader';
 import DualLanguageText from '@/components/DualLanguageText';
@@ -59,36 +59,22 @@ function ViewFormStatus({ name }: FormControlProps) {
   const workflowState = s(formValues?.workflow_state);
   const shgActive =
     workflowState === 'SHG Proposed' ||
-    workflowState === 'VO Approved' ||
-    workflowState === 'CLF Approved';
+    workflowState === 'CLF Approved' ||
+    workflowState === 'GPLF Approved';
 
-  const voActive =
-    workflowState === 'VO Approved' || workflowState === 'CLF Approved';
+  const clfActive =
+    workflowState === 'CLF Approved' || workflowState === 'GPLF Approved';
 
-  const clfActive = workflowState === 'CLF Approved';
+  const gplfActive = workflowState === 'GPLF Approved';
   const pendingEn = en?.workflow?.pending_review;
   const pendingHi = hi?.workflow?.pending_review;
 
   const shgName = s(formValues?.owner);
-  const voName = s(formValues?.vo_approval_by);
   const clfName = s(formValues?.clf_approval_by);
+  const gplfName = s(formValues?.gplf_approval_by);
 
-  const voOn = formatApprovalDateTime(formValues?.vo_approved_on);
-  const clfOn = formatApprovalDateTime(formValues?.clf_approval_on);
-
-  const voLine =
-    voName && voOn
-      ? `${en?.workflow?.reviewed_by}: VO ${voName} ${en?.workflow?.on} ${voOn}`
-      : voName
-        ? `${en?.workflow?.reviewed_by}: VO ${voName}`
-        : pendingEn;
-
-  const voLineHi =
-    voName && voOn
-      ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}, ${voOn}`
-      : voName
-        ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}`
-        : pendingHi;
+  const clfOn = formatApprovalDateTime(formValues?.clf_approved_on);
+  const gplfOn = formatApprovalDateTime(formValues?.gplf_approved_on);
 
   const clfLine =
     clfName && clfOn
@@ -103,6 +89,20 @@ function ViewFormStatus({ name }: FormControlProps) {
       : clfName
         ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}`
         : pendingHi;
+
+  const gplfLine =
+    gplfName && gplfOn
+      ? `${en?.workflow?.reviewed_by}: GPLF ${gplfName} ${en?.workflow?.on} ${gplfOn}`
+      : gplfName
+        ? `${en?.workflow?.reviewed_by}: GPLF ${gplfName}`
+        : pendingEn;
+
+  const gplfLineHi =
+    gplfName && gplfOn
+      ? `${hi?.workflow?.reviewed_by}: GPLF ${gplfName} ${hi?.workflow?.by}, ${gplfOn}`
+      : gplfName
+        ? `${hi?.workflow?.reviewed_by}: GPLF ${gplfName} ${hi?.workflow?.by}`
+        : pendingHi;
   const steps = [
     {
       h1: en?.workflow?.shg_review,
@@ -113,16 +113,16 @@ function ViewFormStatus({ name }: FormControlProps) {
       active: shgActive,
     },
     {
-      h1: en?.workflow?.vo_approval,
-      h2: voLine,
-      h3: voLineHi,
-      active: voActive,
-    },
-    {
       h1: en?.workflow?.clf_approval,
       h2: clfLine,
       h3: clfLineHi,
       active: clfActive,
+    },
+    {
+      h1: en?.workflow?.gplf_approval,
+      h2: gplfLine,
+      h3: gplfLineHi,
+      active: gplfActive,
     },
   ];
   return (

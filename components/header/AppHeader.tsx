@@ -15,7 +15,7 @@ import DualLanguageText from '@/components/DualLanguageText';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 import { addToast } from '@/components/error/toastStore';
 import {
@@ -106,7 +106,7 @@ export default function AppHeader({
       try {
         const r = await getUserRoles();
 
-        const allowedRoles = ['SHG', 'VO', 'CLF'];
+        const allowedRoles = ['SHG', 'CLF', 'GPLF'];
 
         const filtered = r.filter((role) => allowedRoles.includes(role));
 

@@ -28,7 +28,7 @@ export default function NotFound() {
         }}
       >
         <DualLanguageText
-          h1="404 - पेज नहीं मिला"
+          h1="404 - ପେଜ୍ ମିଳିଲା ନାହିଁ"
           h2="404 - Page Not Found"
           boxStyle={{ alignItems: 'center' }}
           h1style={{
@@ -43,7 +43,7 @@ export default function NotFound() {
         />
 
         <DualLanguageText
-          h1="आप जिस पेज को खोज रहे हैं वह मौजूद नहीं है"
+          h1="ଆପଣ ଖୋଜୁଥିବା ପେଜ୍ ଉପଲବ୍ଧ ନାହିଁ"
           h2="The page you are looking for does not exist"
           boxStyle={{ alignItems: 'center' }}
           h1style={{
@@ -71,7 +71,7 @@ export default function NotFound() {
           }}
         >
           <DualLanguageText
-            h1="होम पेज पर जाएं"
+            h1="ହୋମ୍ ପେଜ୍‌କୁ ଯାଆନ୍ତୁ"
             h2="Go to Home Page"
             h1style={{
               fontWeight: 600,

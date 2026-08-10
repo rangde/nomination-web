@@ -13,8 +13,8 @@
   },
 
   "dashboard": {
-    "create_nomination": "Create New Nomination",
-    "nomi_new": "Create Nomination",
+    "create_nomination": "Create Nomination",
+    "create_new_nomination": "Create New Nomination",
     "submitted_nominatio": "Nomination Submitted",
     "training": "Ready for Training",
     "credit_limit": "Credit Limit",
@@ -94,8 +94,8 @@
     "by": "by",
     "on": "on",
     "shg_review": "SHG Review - Maker",
-    "vo_approval": "VO Approval - Checker 1",
-    "clf_approval": "CLF Approval - Checker 2",
+    "clf_approval": "CLF Approval - Checker 1",
+    "gplf_approval": "GPLF Approval - Checker 2",
     "doc_moved": "Document moved to next workflow state",
     "approval_failed": "Approval failed",
     "shg_only": "Only SHG user can create nomination",
@@ -119,5 +119,36 @@
     "ios_step1": "In Safari, tap Share (⬆)",
     "ios_step2": "Select \"Add to Home Screen\"",
     "ios_step3": "Tap \"Add\""
+  },
+
+  "toast": {
+    "first_name_required": "First name is required",
+    "last_name_required": "Last name is required",
+    "pincode_required": "Pincode is required",
+    "dob_required": "Date of birth is required",
+    "id_required": "Enter any one ID: Aadhaar, PAN, or Voter ID",
+    "dob_enter": "Please enter date of birth",
+    "dob_validated": "Date of birth validated successfully",
+    "dob_age_limit": "Age must be greater than 18",
+    "dob_validation_failed": "Date of birth validation failed",
+    "aadhaar_enter": "Please enter Aadhaar number",
+    "aadhaar_validated": "Aadhaar validated successfully",
+    "aadhaar_validation_failed": "Aadhaar validation failed",
+    "pan_enter": "Please enter PAN number",
+    "pan_validated": "PAN validated successfully",
+    "pan_validation_failed": "PAN validation failed",
+    "step1_completed": "Step 1 completed successfully",
+    "sector_required": "Please select sector",
+    "business_type_required": "Please select business type",
+    "support_required": "Please select support needed",
+    "step2_completed": "Step 2 completed successfully",
+    "mobile_required": "Please enter a valid mobile number",
+    "credit_limit_required": "Please select credit limit",
+    "otp_verified": "OTP verified successfully",
+    "credit_score_unavailable": "Credit score not available",
+    "credit_score_fetched": "Credit score fetched successfully",
+    "credit_check_failed": "Credit check failed, please try again later",
+    "submit_failed": "Submit failed",
+    "nominations_load_failed": "Failed to load nominations"
   }
 }

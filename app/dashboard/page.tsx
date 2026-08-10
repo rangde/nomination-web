@@ -10,7 +10,7 @@ import NominationCard from '@/components/nomination/NominationCard';
 import ApprovedCard from '@/components/nomination/ApprovedCard';
 import DualLanguageText from '@/components/DualLanguageText';
 
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
@@ -87,7 +87,7 @@ export default function DashboardPage() {
         const r = await getUserRoles();
         if (!mounted) return;
 
-        setCanReview(r.includes('CLF') || r.includes('VO'));
+        setCanReview(r.includes('GPLF') || r.includes('CLF'));
         setDisableCreation(!r.includes('SHG'));
       } catch {}
     })();
@@ -133,8 +133,8 @@ export default function DashboardPage() {
       } catch {
         addToast({
           type: 'error',
-          hi: 'नामांकन लोड नहीं हो पाया',
-          en: 'Failed to load nominations',
+          hi: hi?.toast?.nominations_load_failed,
+          en: en?.toast?.nominations_load_failed,
         });
       } finally {
         if (mounted) setLoadingNominations(false);

@@ -4,7 +4,7 @@ import { Box, Typography, Paper, Button, SxProps, Theme } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useRouter } from 'next/navigation';
 import DualLanguageText from '../DualLanguageText';
-import hi from '@/messages/hi.json';
+import hi from '@/messages/od.json';
 import en from '@/messages/en.json';
 
 type NominationData = Record<string, unknown>;
@@ -45,13 +45,14 @@ const formatApprovalDateTime = (dateTimeStr: string): string => {
 };
 
 const pickApproval = (fv: NominationData) => {
-  const voBy = s(fv.vo_approval_by);
-  const voOn = s(fv.vo_approved_on);
-
   const clfBy = s(fv.clf_approval_by);
   const clfOn = s(fv.clf_approved_on);
 
-  if (voBy && voOn) return { by: voBy, on: voOn, level: 'VO' as const };
+  const gplfBy = s(fv.gplf_approval_by);
+  const gplfOn = s(fv.gplf_approved_on);
+
+  if (gplfBy && gplfOn)
+    return { by: gplfBy, on: gplfOn, level: 'GPLF' as const };
   if (clfBy && clfOn) return { by: clfBy, on: clfOn, level: 'CLF' as const };
 
   return { by: '', on: '', level: 'NONE' as const };
