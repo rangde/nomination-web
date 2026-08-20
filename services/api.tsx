@@ -47,6 +47,55 @@ export class ApiError extends Error {
   }
 }
 
+const GENERIC_ERROR = 'Something went wrong. Please try again.';
+
+const parseJson = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+};
+
+// frappe puts the user facing text in _server_messages and the raw traceback in
+// exception, so only the former is safe to show
+const frappeErrorMessage = (body: unknown): string => {
+  const raw = (body as { _server_messages?: unknown })?._server_messages;
+  const messages = typeof raw === 'string' ? parseJson(raw) : null;
+  const first = Array.isArray(messages) ? messages[0] : null;
+  const parsed = typeof first === 'string' ? parseJson(first) : first;
+  const message = (parsed as { message?: unknown })?.message;
+
+  return typeof message === 'string' && message.trim()
+    ? message
+    : GENERIC_ERROR;
+};
+
+// the body can only be read once, so failures are parsed from the same text
+async function readFrappe<ResponseType>(
+  response: Response
+): Promise<FrappeCustomResponse<ResponseType>> {
+  const text = await response.text().catch(() => '');
+  const body = parseJson(text);
+  const hasPayload =
+    !!body && typeof body === 'object' && 'message' in (body as object);
+
+  if (!response.ok) {
+    console.error(`Request failed (${response.status}): ${text}`);
+
+    // a whitelisted method that returns {status: 0, msg} still answers with a
+    // non-2xx status, so hand it back and let the caller read the payload
+    if (!hasPayload) {
+      throw new ApiError(frappeErrorMessage(body));
+    }
+  } else if (!hasPayload) {
+    console.error(`Unexpected response for ${response.url}: ${text}`);
+    throw new ApiError(GENERIC_ERROR);
+  }
+
+  return body as FrappeCustomResponse<ResponseType>;
+}
+
 async function postFrappe<ResponseType>(
   request: FrappePostRequestHeader
 ): Promise<FrappeCustomResponse<ResponseType>> {
@@ -59,12 +108,7 @@ async function postFrappe<ResponseType>(
     body: JSON.stringify(request.body),
   });
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    console.error(`Request failed (${response.status}): ${text}`);
-  }
-
-  return (await response.json()) as FrappeCustomResponse<ResponseType>;
+  return readFrappe<ResponseType>(response);
 }
 
 async function getFrappe<ResponseType>(
@@ -75,12 +119,7 @@ async function getFrappe<ResponseType>(
     headers: { 'Content-Type': 'application/json' },
   });
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    console.error(`Request failed (${response.status}): ${text}`);
-  }
-
-  return (await response.json()) as FrappeCustomResponse<ResponseType>;
+  return readFrappe<ResponseType>(response);
 }
 
 export const getNumberChecked = (
@@ -115,10 +154,14 @@ export const verifyOtpApi = async (
   return result;
 };
 
-export const sendLeaderOtp = async (number: string, role: string) => {
+export const sendLeaderOtp = async (
+  number: string,
+  role: string,
+  level: string = 'SHG'
+) => {
   const result = await postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.leader_approval.send_leader_otp',
-    body: { mobile_number: number, role },
+    body: { mobile_number: number, role, level },
   });
 
   if (!result?.message?.status) {
@@ -132,11 +175,12 @@ export const sendLeaderOtp = async (number: string, role: string) => {
 export const verifyLeaderOtp = async (
   number: string,
   otp: string,
-  role: string
+  role: string,
+  level: string = 'SHG'
 ) => {
   const result = await postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.leader_approval.verify_leader_otp',
-    body: { mobile_number: number, otp, role },
+    body: { mobile_number: number, otp, role, level },
   });
 
   if (!result?.message?.status) {
@@ -147,10 +191,10 @@ export const verifyLeaderOtp = async (
   return result;
 };
 
-export const getLeaderApprovals = () => {
+export const getLeaderApprovals = (level: string = 'SHG') => {
   return postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.leader_approval.get_leader_approvals',
-    body: {},
+    body: { level },
   });
 };
 
