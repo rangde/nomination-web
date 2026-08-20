@@ -18,6 +18,7 @@ import {
 } from '@/services/api';
 import NominationStepper from '@/components/nomination/NominationStepper';
 import { useNominationForm } from '../NominationFormProvider';
+import { getStep1Issue } from '../requiredFields';
 
 export default function NominationStepOne() {
   const router = useRouter();
@@ -44,13 +45,6 @@ export default function NominationStepOne() {
     if (key === 'date_of_birth') setDobValidate(false);
 
     setStep1({ [key]: value });
-  };
-
-  const getAvailableIdType = (): 'AADHAAR' | 'PAN' | 'VOTERID' | null => {
-    if (!isEmpty(form.step1.aadhaar_number)) return 'AADHAAR';
-    if (!isEmpty(form.step1.pan_number)) return 'PAN';
-    if (!isEmpty(form.step1.voter_id)) return 'VOTERID';
-    return null;
   };
 
   const validateDob = async (): Promise<boolean> => {
@@ -175,39 +169,11 @@ export default function NominationStepOne() {
   };
 
   const validateRequired = (): boolean => {
-    if (isEmpty(form.step1.full_name)) {
-      addToast({
-        type: 'error',
-        hi: 'पूरा नाम आवश्यक है',
-        en: 'Full name is required',
-      });
-      return false;
-    }
-    if (isEmpty(form.step1.pincode)) {
-      addToast({
-        type: 'error',
-        hi: 'पिनकोड आवश्यक है',
-        en: 'Pincode is required',
-      });
-      return false;
-    }
-    if (isEmpty(form.step1.date_of_birth)) {
-      addToast({
-        type: 'error',
-        hi: 'जन्म तिथि आवश्यक है',
-        en: 'Date of Birth is required',
-      });
-      return false;
-    }
-    if (!getAvailableIdType()) {
-      addToast({
-        type: 'error',
-        hi: 'आधार, पैन या वोटर आईडी में से कोई एक आवश्यक है',
-        en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
-      });
-      return false;
-    }
-    return true;
+    const issue = getStep1Issue(form);
+    if (!issue) return true;
+
+    addToast({ type: 'error', hi: issue.hi, en: issue.en });
+    return false;
   };
 
   const handleNext = async () => {
@@ -311,6 +277,7 @@ export default function NominationStepOne() {
               label_1={hi?.form?.dictrict}
               label_2={en?.form?.dictrict}
               placeholder="District"
+              required
             />
 
             <Text
@@ -320,6 +287,7 @@ export default function NominationStepOne() {
               label_1={hi?.form?.area}
               label_2={en?.form?.area}
               placeholder="Area"
+              required
             />
 
             <Text
@@ -382,6 +350,7 @@ export default function NominationStepOne() {
             />
 
             <PhotoCapture
+              required
               value={form.step1.photo_of_didi}
               onChange={(base64) => setStep1({ photo_of_didi: base64 })}
               label_1={hi?.form?.photo_of_didi}

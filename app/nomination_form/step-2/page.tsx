@@ -13,13 +13,19 @@ import { addToast } from '@/components/error/toastStore';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import { useNominationForm } from '../NominationFormProvider';
+import { getShgIssue } from '../requiredFields';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const yearOptions = Array.from({ length: 30 }, (_, i) => {
-  const year = String(CURRENT_YEAR - i);
-  return { label_1: year, value: year };
-});
+const FIRST_JOINING_YEAR = 2000;
+
+const yearOptions = Array.from(
+  { length: CURRENT_YEAR - FIRST_JOINING_YEAR + 1 },
+  (_, i) => {
+    const year = String(CURRENT_YEAR - i);
+    return { label_1: year, value: year };
+  }
+);
 
 const attendanceOptions = [
   { label_1: '10 या अधिक', label_2: '10 or more', value: '10_or_more' },
@@ -54,8 +60,6 @@ export default function NominationShgRecordPage() {
     total_savings,
   } = form.shg;
 
-  const isEmpty = (v: unknown) => String(v ?? '').trim().length === 0;
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -68,55 +72,11 @@ export default function NominationShgRecordPage() {
   };
 
   const validateRequired = (): boolean => {
-    if (isEmpty(vo_name)) {
-      addToast({
-        type: 'error',
-        hi: 'ग्राम संगठन का नाम आवश्यक है',
-        en: 'Name of the VO is required',
-      });
-      return false;
-    }
-    if (isEmpty(shg_name)) {
-      addToast({
-        type: 'error',
-        hi: 'समूह का नाम आवश्यक है',
-        en: 'Name of the SHG is required',
-      });
-      return false;
-    }
-    if (isEmpty(year_of_joining_shg)) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया समूह में शामिल होने का वर्ष चुनें',
-        en: 'Please select the year of joining SHG',
-      });
-      return false;
-    }
-    if (isEmpty(attendance_last_12_meetings)) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया पिछली 12 बैठकों में उपस्थिति चुनें',
-        en: 'Please select attendance in last 12 meetings',
-      });
-      return false;
-    }
-    if (isEmpty(repayment_record)) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया चुकौती रिकॉर्ड चुनें',
-        en: 'Please select repayment record',
-      });
-      return false;
-    }
-    if (isEmpty(total_savings)) {
-      addToast({
-        type: 'error',
-        hi: 'कुल बचत राशि आवश्यक है',
-        en: 'Total savings in SHG is required',
-      });
-      return false;
-    }
-    return true;
+    const issue = getShgIssue(form);
+    if (!issue) return true;
+
+    addToast({ type: 'error', hi: issue.hi, en: issue.en });
+    return false;
   };
 
   const handleNext = () => {

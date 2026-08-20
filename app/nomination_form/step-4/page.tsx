@@ -18,6 +18,7 @@ import ShgLeaderApproval, {
   LeaderRole,
 } from '@/components/nomination/ShgLeaderApproval';
 import { splitFullName, useNominationForm } from '../NominationFormProvider';
+import { getFormIssue } from '../requiredFields';
 import {
   ApiError,
   getNumberChecked,
@@ -306,14 +307,6 @@ function NominationStepOne() {
       });
       return false;
     }
-    if (!set_credit_limit) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया क्रेडिट लिमिट चुनें',
-        en: 'Please select credit limit',
-      });
-      return false;
-    }
     const enteredLeaderNumbers = [
       president_mobile,
       secretary_mobile,
@@ -341,6 +334,19 @@ function NominationStepOne() {
   };
 
   const validteAndSendOtp = async () => {
+    // the credit pull uses answers from steps 1-3, so refuse to start it
+    // while any mandatory answer is still missing
+    const issue = getFormIssue(form);
+    if (issue) {
+      addToast({
+        type: 'error',
+        hi: `${issue.hi} (चरण ${issue.step})`,
+        en: `${issue.en} (Step ${issue.step})`,
+      });
+      router.push(`/nomination_form/step-${issue.step}`);
+      return;
+    }
+
     if (mobile.length > 10) {
       addToast({
         type: 'error',

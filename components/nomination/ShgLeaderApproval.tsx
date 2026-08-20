@@ -14,6 +14,8 @@ import en from '@/messages/en.json';
 
 export type LeaderRole = 'president' | 'secretary' | 'treasurer';
 
+export type LeaderLevel = 'SHG' | 'VO' | 'CLF';
+
 const LEADERS: { role: LeaderRole; label_1: string; label_2: string }[] = [
   { role: 'president', label_1: hi.form.president, label_2: en.form.president },
   { role: 'secretary', label_1: hi.form.secretary, label_2: en.form.secretary },
@@ -25,6 +27,10 @@ type Props = {
   approved: string[];
   onNumberChange: (role: LeaderRole, value: string) => void;
   onApproved: (role: LeaderRole) => void;
+  // the same three cards approve at the SHG, VO and CLF stages
+  level?: LeaderLevel;
+  heading_1?: string;
+  heading_2?: string;
 };
 
 function ShgLeaderApproval({
@@ -32,6 +38,9 @@ function ShgLeaderApproval({
   approved,
   onNumberChange,
   onApproved,
+  level = 'SHG',
+  heading_1 = hi?.form?.shg_leader_approval,
+  heading_2 = en?.form?.shg_leader_approval,
 }: Props) {
   const [otpSentTo, setOtpSentTo] = useState<LeaderRole[]>([]);
   const [otps, setOtps] = useState<Record<string, string>>({});
@@ -64,7 +73,7 @@ function ShgLeaderApproval({
 
     try {
       setBusy(role);
-      await sendLeaderOtp(number, role);
+      await sendLeaderOtp(number, role, level);
 
       setOtpSentTo((prev) => (prev.includes(role) ? prev : [...prev, role]));
       addToast({
@@ -92,7 +101,7 @@ function ShgLeaderApproval({
       if (otp.length < 6) {
         throw new ApiError(en?.login?.invalid);
       }
-      await verifyLeaderOtp(numbers[role], otp, role);
+      await verifyLeaderOtp(numbers[role], otp, role, level);
 
       onApproved(role);
       addToast({
@@ -114,8 +123,8 @@ function ShgLeaderApproval({
   return (
     <Box sx={{ mt: 3 }}>
       <DualLanguageText
-        h1={hi?.form?.shg_leader_approval}
-        h2={en?.form?.shg_leader_approval}
+        h1={heading_1}
+        h2={heading_2}
         h1style={{ fontSize: 16, fontWeight: 700 }}
         h2style={{ fontSize: 13, fontWeight: 600 }}
       />
