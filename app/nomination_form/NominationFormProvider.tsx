@@ -44,6 +44,12 @@ export type NominationStep2Form = {
   supportNeeded: string[];
 };
 
+export type LeaderApproval = {
+  role: string;
+  mobile_number: string;
+  verified_on: string;
+};
+
 export type NominationStep3Form = {
   credit_score: string;
   mobile_number: string;
@@ -52,7 +58,7 @@ export type NominationStep3Form = {
   president_mobile: string;
   secretary_mobile: string;
   treasurer_mobile: string;
-  approved_leaders: string[];
+  approved_leaders: LeaderApproval[];
 };
 
 export type NominationFormState = {
