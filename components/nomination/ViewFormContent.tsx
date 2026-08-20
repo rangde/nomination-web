@@ -99,10 +99,22 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
   const handleApprove = async () => {
     if (!name) return;
+
+    const limitToApprove = creditLimit || s(formValues?.set_credit_limit);
+
+    if (!limitToApprove) {
+      addToast({
+        type: 'error',
+        hi: 'कृपया क्रेडिट सीमा चुनें',
+        en: 'Please select a credit limit before approving',
+      });
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const res = await approveDoc(name, creditLimit);
+      const res = await approveDoc(name, limitToApprove);
 
       const payload = res?.message ?? res;
 
@@ -420,8 +432,10 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           <SelectField
             label_1={s(hi?.credit_score?.set_credit_limit)}
             label_2={s(en?.credit_score?.set_credit_limit)}
-            placeholder="Set Credit Limit"
-            value={creditLimit || s(formValues?.set_credit_limit, '50000')}
+            placeholder={`${s(hi?.dashboard?.not_set)} (${s(
+              en?.dashboard?.not_set
+            )})`}
+            value={creditLimit || s(formValues?.set_credit_limit)}
             onChange={setCreditLimit}
             view={view}
             options={[

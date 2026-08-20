@@ -83,7 +83,10 @@ export default function NominationCard({
 
   const docId = s(data.name);
 
+  // the SHG credit limit step is optional, so an unset limit is expected
   const creditLimit = n(data.set_credit_limit, 0);
+  const hasCreditLimit = creditLimit > 0;
+  const notSetLabel = `${s(hi?.dashboard?.not_set)} (${s(en?.dashboard?.not_set)})`;
 
   const entType =
     n(data.farm_based, 0) === 1
@@ -141,8 +144,14 @@ export default function NominationCard({
           h1style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6B7280' }}
           h2style={{ fontWeight: 400, fontSize: '0.65rem', color: '#6B7280' }}
         />
-        <Typography fontWeight={600} sx={{ fontSize: '0.9rem' }}>
-          ₹{creditLimit}
+        <Typography
+          fontWeight={600}
+          sx={{
+            fontSize: '0.9rem',
+            color: hasCreditLimit ? 'inherit' : '#6B7280',
+          }}
+        >
+          {hasCreditLimit ? `₹${creditLimit}` : notSetLabel}
         </Typography>
       </Box>
 
