@@ -10,6 +10,7 @@ import React, {
 import { submitNominationForm } from '@/services/api';
 
 export type NominationStep1Form = {
+  full_name: string;
   first_name: string;
   last_name: string;
   pincode: string;
@@ -20,11 +21,26 @@ export type NominationStep1Form = {
   pan_number: string;
   voter_id: string;
   date_of_birth: string;
+  photo_of_didi: string;
+};
+
+export type NominationShgForm = {
+  vo_name: string;
+  shg_name: string;
+  year_of_joining_shg: string;
+  attendance_last_12_meetings: string;
+  repayment_record: string;
+  total_savings: string;
 };
 
 export type NominationStep2Form = {
   sector: 'farm_based' | 'non_farm';
   business_category: string;
+  business_category_other: string;
+  years_of_experience: string;
+  number_of_businesses: string;
+  family_support: string;
+  business_helpers: string[];
   supportNeeded: string[];
 };
 
@@ -33,20 +49,37 @@ export type NominationStep3Form = {
   mobile_number: string;
   set_credit_limit: string;
   reportBase64: string;
+  president_mobile: string;
+  secretary_mobile: string;
+  treasurer_mobile: string;
+  approved_leaders: string[];
 };
 
 type NominationFormState = {
   step1: NominationStep1Form;
+  shg: NominationShgForm;
   step2: NominationStep2Form;
   step3: NominationStep3Form;
 };
 
 export type NominationSubmitPayload = NominationStep1Form &
+  NominationShgForm &
   NominationStep2Form &
   NominationStep3Form;
 
+// the form collects a single Full Name, the backend stores first + last
+export const splitFullName = (fullName: string) => {
+  const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
+
+  return {
+    first_name: parts[0] || '',
+    last_name: parts.slice(1).join(' '),
+  };
+};
+
 const initialState: NominationFormState = {
   step1: {
+    full_name: '',
     first_name: '',
     last_name: '',
     pincode: '',
@@ -57,10 +90,24 @@ const initialState: NominationFormState = {
     pan_number: '',
     voter_id: '',
     date_of_birth: '',
+    photo_of_didi: '',
+  },
+  shg: {
+    vo_name: '',
+    shg_name: '',
+    year_of_joining_shg: '',
+    attendance_last_12_meetings: '',
+    repayment_record: '',
+    total_savings: '',
   },
   step2: {
     sector: 'farm_based',
     business_category: '',
+    business_category_other: '',
+    years_of_experience: '',
+    number_of_businesses: '',
+    family_support: '',
+    business_helpers: [],
     supportNeeded: [],
   },
   step3: {
@@ -68,6 +115,10 @@ const initialState: NominationFormState = {
     mobile_number: '',
     set_credit_limit: '',
     reportBase64: '',
+    president_mobile: '',
+    secretary_mobile: '',
+    treasurer_mobile: '',
+    approved_leaders: [],
   },
 };
 
@@ -77,6 +128,7 @@ type Ctx = {
   form: NominationFormState;
 
   setStep1: (patch: Partial<NominationStep1Form>) => void;
+  setShg: (patch: Partial<NominationShgForm>) => void;
   setStep2: (patch: Partial<NominationStep2Form>) => void;
   setStep3: (patch: Partial<NominationStep3Form>) => void;
 
@@ -100,6 +152,10 @@ export function NominationFormProvider({
     setForm((prev) => ({ ...prev, step1: { ...prev.step1, ...patch } }));
   }, []);
 
+  const setShg = useCallback((patch: Partial<NominationShgForm>) => {
+    setForm((prev) => ({ ...prev, shg: { ...prev.shg, ...patch } }));
+  }, []);
+
   const setStep2 = useCallback((patch: Partial<NominationStep2Form>) => {
     setForm((prev) => ({ ...prev, step2: { ...prev.step2, ...patch } }));
   }, []);
@@ -119,8 +175,10 @@ export function NominationFormProvider({
       try {
         const payload: NominationSubmitPayload = {
           ...form.step1,
+          ...form.shg,
           ...form.step2,
           ...form.step3,
+          ...splitFullName(form.step1.full_name),
           ...overrides,
         };
         if (payload.mobile_number) {
@@ -148,12 +206,13 @@ export function NominationFormProvider({
     () => ({
       form,
       setStep1,
+      setShg,
       setStep2,
       setStep3,
       resetAll,
       submitForm,
     }),
-    [form, setStep1, setStep2, setStep3, resetAll, submitForm]
+    [form, setStep1, setShg, setStep2, setStep3, resetAll, submitForm]
   );
 
   return (
