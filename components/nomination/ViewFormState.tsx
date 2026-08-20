@@ -36,6 +36,45 @@ const formatApprovalDateTime = (dateTimeStr: unknown): string => {
   }).format(dt);
 };
 
+type LeaderRole = 'president' | 'secretary' | 'treasurer';
+
+const LEADER_ROLES: LeaderRole[] = ['president', 'secretary', 'treasurer'];
+
+const leaderLabel = (role: LeaderRole) => ({
+  en: s(en?.form?.[role], role),
+  hi: s(hi?.form?.[role], role),
+});
+
+// the doctype stores one checkbox per role: president_approved, ...
+const checkedLeaders = (values: FormValues | null): LeaderRole[] =>
+  LEADER_ROLES.filter((role) => {
+    const flag = values?.[`${role}_approved`];
+    return flag === 1 || flag === true || flag === '1';
+  });
+
+// older payloads may carry the verified roles as an array, a JSON array, or a csv
+const parseApprovedLeaders = (raw: unknown): LeaderRole[] => {
+  let list: unknown[] = [];
+
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      list = Array.isArray(parsed) ? parsed : raw.split(',');
+    } catch {
+      list = raw.split(',');
+    }
+  }
+
+  const roles = list
+    .map((v) => s(v).trim().toLowerCase())
+    .filter((v): v is LeaderRole => LEADER_ROLES.includes(v as LeaderRole));
+
+  // keep a stable president → secretary → treasurer order, without duplicates
+  return LEADER_ROLES.filter((role) => roles.includes(role));
+};
+
 function ViewFormStatus({ name }: FormControlProps) {
   const router = useRouter();
   const [formValues, setFormValues] = useState<FormValues | null>(null);
@@ -103,6 +142,29 @@ function ViewFormStatus({ name }: FormControlProps) {
       : clfName
         ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}`
         : pendingHi;
+  const checkedApprovals = checkedLeaders(formValues);
+  const approvedLeaders =
+    checkedApprovals.length > 0
+      ? checkedApprovals
+      : parseApprovedLeaders(formValues?.approved_leaders);
+  const shgOn = formatApprovalDateTime(formValues?.creation);
+
+  const shgLines =
+    approvedLeaders.length > 0
+      ? approvedLeaders.map((role) => {
+          const label = leaderLabel(role);
+
+          return {
+            h2: shgOn
+              ? `${en?.workflow?.reviewed_by}: ${label.en} ${en?.workflow?.on} ${shgOn}`
+              : `${en?.workflow?.reviewed_by}: ${label.en}`,
+            h3: shgOn
+              ? `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}, ${shgOn}`
+              : `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}`,
+          };
+        })
+      : undefined;
+
   const steps = [
     {
       h1: en?.workflow?.shg_review,
@@ -110,6 +172,7 @@ function ViewFormStatus({ name }: FormControlProps) {
       h3: shgName
         ? `${hi?.workflow?.reviewed_by}: SHG ${shgName} ${hi?.workflow?.by}`
         : pendingHi,
+      lines: shgLines,
       active: shgActive,
     },
     {
