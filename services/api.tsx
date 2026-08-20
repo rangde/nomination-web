@@ -115,6 +115,45 @@ export const verifyOtpApi = async (
   return result;
 };
 
+export const sendLeaderOtp = async (number: string, role: string) => {
+  const result = await postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.leader_approval.send_leader_otp',
+    body: { mobile_number: number, role },
+  });
+
+  if (!result?.message?.status) {
+    const msg = result?.message?.msg;
+    throw new ApiError(typeof msg === 'string' ? msg : 'Unable to send OTP');
+  }
+
+  return result;
+};
+
+export const verifyLeaderOtp = async (
+  number: string,
+  otp: string,
+  role: string
+) => {
+  const result = await postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.leader_approval.verify_leader_otp',
+    body: { mobile_number: number, otp, role },
+  });
+
+  if (!result?.message?.status) {
+    const msg = result?.message?.msg;
+    throw new ApiError(typeof msg === 'string' ? msg : 'Invalid OTP');
+  }
+
+  return result;
+};
+
+export const getLeaderApprovals = () => {
+  return postFrappe<CustomApiMessage>({
+    url: '/api/method/nomination.api.leader_approval.get_leader_approvals',
+    body: {},
+  });
+};
+
 export const validateAadhaar = (aadhaarNumber: string) => {
   return postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.form.validate_aadhaar',
