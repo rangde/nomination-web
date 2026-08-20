@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
@@ -9,6 +9,7 @@ import { MuiOtpInput } from 'mui-one-time-password-input';
 import DualLanguageText from '@/components/DualLanguageText';
 import { addToast } from '@/components/error/toastStore';
 import { ApiError, sendLeaderOtp, verifyLeaderOtp } from '@/services/api';
+import type { LeaderApproval } from '@/app/nomination_form/NominationFormProvider';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 
@@ -22,11 +23,34 @@ const LEADERS: { role: LeaderRole; label_1: string; label_2: string }[] = [
   { role: 'treasurer', label_1: hi.form.treasurer, label_2: en.form.treasurer },
 ];
 
+const RESEND_SECONDS = 60;
+
+// only the last 4 digits stay visible once an OTP is on its way
+const maskNumber = (number: string) =>
+  number.length < 4
+    ? number
+    : `${'X'.repeat(number.length - 4)}${number.slice(-4)}`;
+
+const formatVerifiedOn = (value: string) => {
+  if (!value) return '';
+
+  const parsed = new Date(value.replace(' ', 'T'));
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(parsed);
+};
+
 type Props = {
   numbers: Record<LeaderRole, string>;
-  approved: string[];
+  approved: LeaderApproval[];
   onNumberChange: (role: LeaderRole, value: string) => void;
-  onApproved: (role: LeaderRole) => void;
+  onApproved: (approval: LeaderApproval) => void;
   // the same three cards approve at the SHG, VO and CLF stages
   level?: LeaderLevel;
   heading_1?: string;
@@ -44,7 +68,31 @@ function ShgLeaderApproval({
 }: Props) {
   const [otpSentTo, setOtpSentTo] = useState<LeaderRole[]>([]);
   const [otps, setOtps] = useState<Record<string, string>>({});
+  const [countdowns, setCountdowns] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState<LeaderRole | null>(null);
+
+  // one ticker drives every card's resend countdown
+  useEffect(() => {
+    const active = Object.values(countdowns).some((seconds) => seconds > 0);
+    if (!active) return;
+
+    const timer = setInterval(() => {
+      setCountdowns((prev) => {
+        const next: Record<string, number> = {};
+        Object.entries(prev).forEach(([role, seconds]) => {
+          next[role] = seconds > 0 ? seconds - 1 : 0;
+        });
+        return next;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdowns]);
+
+  const approvalFor = useCallback(
+    (role: LeaderRole) => approved.find((item) => item.role === role),
+    [approved]
+  );
 
   const sendOtp = async (role: LeaderRole) => {
     const number = numbers[role];
@@ -76,6 +124,7 @@ function ShgLeaderApproval({
       await sendLeaderOtp(number, role, level);
 
       setOtpSentTo((prev) => (prev.includes(role) ? prev : [...prev, role]));
+      setCountdowns((prev) => ({ ...prev, [role]: RESEND_SECONDS }));
       addToast({
         type: 'success',
         hi: hi?.login?.otp_sent,
@@ -101,9 +150,17 @@ function ShgLeaderApproval({
       if (otp.length < 6) {
         throw new ApiError(en?.login?.invalid);
       }
-      await verifyLeaderOtp(numbers[role], otp, role, level);
+      const res = await verifyLeaderOtp(numbers[role], otp, role, level);
 
-      onApproved(role);
+      onApproved({
+        role,
+        mobile_number: numbers[role],
+        // the server stamps the time so a wrong device clock cannot
+        verified_on: String(
+          (res?.message as { verified_on?: string })?.verified_on || ''
+        ),
+      });
+
       addToast({
         type: 'success',
         hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
@@ -139,8 +196,11 @@ function ShgLeaderApproval({
 
       <Box display="flex" flexDirection="column" gap={2}>
         {LEADERS.map(({ role, label_1, label_2 }) => {
-          const isApproved = approved.includes(role);
+          const approval = approvalFor(role);
+          const isApproved = !!approval;
           const otpSent = otpSentTo.includes(role);
+          const secondsLeft = countdowns[role] ?? 0;
+          const canResend = secondsLeft === 0 && busy !== role;
 
           return (
             <Box
@@ -148,8 +208,8 @@ function ShgLeaderApproval({
               sx={{
                 p: 2,
                 borderRadius: 2,
-                border: '1px solid #E5E7EB',
-                bgcolor: '#fff',
+                border: `1px solid ${isApproved ? '#16A34A' : '#E5E7EB'}`,
+                bgcolor: isApproved ? '#F0FDF4' : '#fff',
               }}
             >
               <Box
@@ -184,62 +244,108 @@ function ShgLeaderApproval({
                 )}
               </Box>
 
-              <TextField
-                fullWidth
-                value={numbers[role]}
-                placeholder="0123456789"
-                variant="outlined"
-                type="tel"
-                disabled={isApproved}
-                sx={{
-                  mb: 1.5,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    backgroundColor: '#E5E7EB',
-                  },
-                  '& .MuiOutlinedInput-input': { fontSize: 15, py: 1.5 },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Typography sx={{ fontSize: 15 }}>+91</Typography>
-                    </InputAdornment>
-                  ),
-                }}
-                inputProps={{
-                  inputMode: 'numeric',
-                  pattern: '[0-9]*',
-                  maxLength: 10,
-                }}
-                onChange={(e) =>
-                  onNumberChange(role, e.target.value.replace(/\D/g, ''))
-                }
-              />
+              {isApproved ? (
+                <Box>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                    +91 {maskNumber(approval.mobile_number)}
+                  </Typography>
+                  {approval.verified_on && (
+                    <Typography sx={{ fontSize: 12, color: '#6B7280' }}>
+                      {hi?.form?.verified_on} ({en?.form?.verified_on}){' '}
+                      {formatVerifiedOn(approval.verified_on)}
+                    </Typography>
+                  )}
+                </Box>
+              ) : otpSent ? (
+                <Box>
+                  <Typography sx={{ fontSize: 12, color: '#6B7280', mb: 1 }}>
+                    {hi?.form?.otp_sent_to} / {en?.form?.otp_sent_to} +91{' '}
+                    {maskNumber(numbers[role])}
+                  </Typography>
 
-              {otpSent && !isApproved && (
-                <MuiOtpInput
-                  value={otps[role] || ''}
-                  onChange={(val) =>
-                    setOtps((prev) => ({
-                      ...prev,
-                      [role]: val.replace(/\D/g, ''),
-                    }))
-                  }
-                  length={6}
-                  TextFieldsProps={() => ({
-                    type: 'tel',
-                    autoComplete: 'one-time-code',
-                    inputProps: { inputMode: 'numeric', pattern: '[0-9]*' },
-                  })}
+                  <MuiOtpInput
+                    value={otps[role] || ''}
+                    onChange={(val) =>
+                      setOtps((prev) => ({
+                        ...prev,
+                        [role]: val.replace(/\D/g, ''),
+                      }))
+                    }
+                    length={6}
+                    TextFieldsProps={() => ({
+                      type: 'tel',
+                      autoComplete: 'one-time-code',
+                      inputProps: { inputMode: 'numeric', pattern: '[0-9]*' },
+                    })}
+                    sx={{
+                      gap: 0.5,
+                      mb: 1,
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: '#F9FAFB',
+                      },
+                      '& .MuiOutlinedInput-input': { fontSize: 15, py: 1.25 },
+                    }}
+                  />
+
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      mb: 1.5,
+                      cursor: canResend ? 'pointer' : 'not-allowed',
+                    }}
+                    onClick={() => canResend && sendOtp(role)}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: 13,
+                        fontWeight: canResend ? 700 : 400,
+                        color: canResend ? '#000' : '#9CA3AF',
+                      }}
+                    >
+                      {hi?.login?.resend} ({en?.login?.resend})
+                    </Typography>
+                    {secondsLeft > 0 && (
+                      <Typography
+                        sx={{ ml: 1, fontSize: 13, color: '#9CA3AF' }}
+                      >
+                        {secondsLeft}s
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              ) : (
+                <TextField
+                  fullWidth
+                  value={numbers[role]}
+                  placeholder="0123456789"
+                  variant="outlined"
+                  type="tel"
                   sx={{
-                    gap: 0.5,
                     mb: 1.5,
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
-                      backgroundColor: '#F9FAFB',
+                      backgroundColor: '#E5E7EB',
                     },
-                    '& .MuiOutlinedInput-input': { fontSize: 15, py: 1.25 },
+                    '& .MuiOutlinedInput-input': { fontSize: 15, py: 1.5 },
                   }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Typography sx={{ fontSize: 15 }}>+91</Typography>
+                      </InputAdornment>
+                    ),
+                  }}
+                  inputProps={{
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                    maxLength: 10,
+                  }}
+                  onChange={(e) =>
+                    onNumberChange(role, e.target.value.replace(/\D/g, ''))
+                  }
                 />
               )}
 
@@ -259,8 +365,8 @@ function ShgLeaderApproval({
                 >
                   <Box textAlign="center">
                     <DualLanguageText
-                      h1={otpSent ? hi?.form?.verify_otp : hi?.form?.send_otp}
-                      h2={otpSent ? en?.form?.verify_otp : en?.form?.send_otp}
+                      h1={otpSent ? hi?.form?.approved : hi?.form?.send_otp}
+                      h2={otpSent ? en?.form?.approved : en?.form?.send_otp}
                       h1style={{
                         fontWeight: 600,
                         textAlign: 'center',

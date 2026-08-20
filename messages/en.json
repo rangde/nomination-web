@@ -73,6 +73,8 @@
     "president": "President",
     "secretary": "Secretary",
     "treasurer": "Treasurer",
+    "otp_sent_to": "OTP sent to",
+    "verified_on": "Verified",
     "send_otp": "Send OTP",
     "verify_otp": "Verify OTP",
     "otp_approved": "Approved",

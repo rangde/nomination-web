@@ -17,6 +17,7 @@ import SelectField from '@/components/FormComponents/SelectField';
 import ShgLeaderApproval, {
   LeaderRole,
 } from '@/components/nomination/ShgLeaderApproval';
+import type { LeaderApproval } from '../NominationFormProvider';
 import { splitFullName, useNominationForm } from '../NominationFormProvider';
 import { getFormIssue } from '../requiredFields';
 import {
@@ -25,6 +26,8 @@ import {
   verifyOtpApi as verify_otp,
   getCreditScore,
 } from '@/services/api';
+
+const MIN_LEADER_APPROVALS = 2;
 
 function NominationStepOne() {
   const router = useRouter();
@@ -57,10 +60,15 @@ function NominationStepOne() {
     setStep3({ [`${role}_mobile`]: value });
   };
 
-  const markLeaderApproved = (role: LeaderRole) => {
-    if (approved_leaders.includes(role)) return;
-    setStep3({ approved_leaders: [...approved_leaders, role] });
+  const markLeaderApproved = (approval: LeaderApproval) => {
+    const others = approved_leaders.filter(
+      (item) => item.role !== approval.role
+    );
+    setStep3({ approved_leaders: [...others, approval] });
   };
+
+  // the spec requires any 2 of the 3 leaders before the nomination can go in
+  const hasEnoughApprovals = approved_leaders.length >= MIN_LEADER_APPROVALS;
 
   const getCreditCheckId = () => {
     const aadhaar = form.step1.aadhaar_number.trim();
@@ -322,7 +330,7 @@ function NominationStepOne() {
       return false;
     }
 
-    if (approved_leaders.length < 2) {
+    if (!hasEnoughApprovals) {
       addToast({
         type: 'error',
         hi: 'किन्हीं 2 पदाधिकारियों की OTP स्वीकृति आवश्यक है',
@@ -585,7 +593,9 @@ function NominationStepOne() {
               bgcolor: '#000',
               textTransform: 'none',
               '&:hover': { bgcolor: '#111' },
+              '&.Mui-disabled': { bgcolor: '#9CA3AF', color: '#fff' },
             }}
+            disabled={showCredit && !hasEnoughApprovals}
             onClick={handleRequestOTP}
           >
             <Box textAlign="center">

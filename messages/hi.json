@@ -73,6 +73,8 @@
     "president": "अध्यक्ष",
     "secretary": "सचिव",
     "treasurer": "कोषाध्यक्ष",
+    "otp_sent_to": "OTP भेजा गया",
+    "verified_on": "सत्यापित",
     "send_otp": "OTP भेजें",
     "verify_otp": "OTP सत्यापित करें",
     "otp_approved": "स्वीकृत",
