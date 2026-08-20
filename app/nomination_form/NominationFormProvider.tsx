@@ -55,7 +55,7 @@ export type NominationStep3Form = {
   approved_leaders: string[];
 };
 
-type NominationFormState = {
+export type NominationFormState = {
   step1: NominationStep1Form;
   shg: NominationShgForm;
   step2: NominationStep2Form;
@@ -67,13 +67,18 @@ export type NominationSubmitPayload = NominationStep1Form &
   NominationStep2Form &
   NominationStep3Form;
 
-// the form collects a single Full Name, the backend stores first + last
+// the form collects a single Full Name, the backend stores first + last.
+// the trailing word is the surname or initial: "Naresh Kanna S" -> "Naresh Kanna" + "S"
 export const splitFullName = (fullName: string) => {
   const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
 
+  if (parts.length < 2) {
+    return { first_name: parts[0] || '', last_name: '' };
+  }
+
   return {
-    first_name: parts[0] || '',
-    last_name: parts.slice(1).join(' '),
+    first_name: parts.slice(0, -1).join(' '),
+    last_name: parts[parts.length - 1],
   };
 };
 
