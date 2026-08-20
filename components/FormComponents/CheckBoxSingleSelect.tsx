@@ -58,7 +58,7 @@ function CheckBoxSingleSelect({
 
               <DualLanguageText
                 h1={`${opt.label_1}`}
-                h2={`(${opt.label_2})`}
+                h2={opt.label_2?.trim() ? `(${opt.label_2})` : undefined}
                 boxStyle={{
                   display: 'flex',
                   flexDirection: 'row',

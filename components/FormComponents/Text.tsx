@@ -7,6 +7,7 @@ import {
   InputAdornment,
   IconButton,
   Tooltip,
+  Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -23,6 +24,7 @@ type TextValue = {
   validate?: boolean;
   validated?: boolean;
   required?: boolean;
+  currency?: boolean;
   onValidateClick?: () => void;
 } & TextFieldProps;
 
@@ -36,10 +38,24 @@ function Text({
   validate = false,
   validated = false,
   required,
+  currency = false,
   onValidateClick,
 
   ...rest
 }: TextValue) {
+  const digitsOnly = String(rest.value ?? '').replace(/\D/g, '');
+  const currencyValue = digitsOnly
+    ? Number(digitsOnly).toLocaleString('en-IN')
+    : '';
+
+  // keep only digits in state, show them grouped in the Indian format
+  const handleCurrencyChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    e.target.value = e.target.value.replace(/\D/g, '');
+    rest.onChange?.(e);
+  };
+
   const iconColor = validated ? '#16A34A' : '#9CA3AF';
   const Icon = validated ? CheckCircleIcon : ErrorIcon;
   const tooltipText = validated ? 'Validated' : 'Not validated';
@@ -63,8 +79,18 @@ function Text({
         type={type}
         rows={rows}
         {...rest}
+        value={currency ? currencyValue : rest.value}
+        onChange={currency ? handleCurrencyChange : rest.onChange}
+        inputMode={currency ? 'numeric' : rest.inputMode}
         InputProps={{
           ...(rest.InputProps || {}),
+          startAdornment: currency ? (
+            <InputAdornment position="start">
+              <Typography sx={{ fontSize: 14, color: '#111' }}>₹</Typography>
+            </InputAdornment>
+          ) : (
+            rest.InputProps?.startAdornment
+          ),
           endAdornment: (
             <>
               {rest.InputProps?.endAdornment}

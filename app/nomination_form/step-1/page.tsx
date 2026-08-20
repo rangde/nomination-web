@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import DualLanguageText from '@/components/DualLanguageText';
 import Text from '@/components/FormComponents/Text';
+import PhotoCapture from '@/components/FormComponents/PhotoCapture';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import { addToast } from '@/components/error/toastStore';
@@ -174,19 +175,11 @@ export default function NominationStepOne() {
   };
 
   const validateRequired = (): boolean => {
-    if (isEmpty(form.step1.first_name)) {
+    if (isEmpty(form.step1.full_name)) {
       addToast({
         type: 'error',
-        hi: 'पहला नाम आवश्यक है',
-        en: 'First name is required',
-      });
-      return false;
-    }
-    if (isEmpty(form.step1.last_name)) {
-      addToast({
-        type: 'error',
-        hi: 'अंतिम नाम आवश्यक है',
-        en: 'Last name is required',
+        hi: 'पूरा नाम आवश्यक है',
+        en: 'Full name is required',
       });
       return false;
     }
@@ -281,7 +274,7 @@ export default function NominationStepOne() {
         }}
       >
         <Paper sx={{ p: 3, borderRadius: 3 }}>
-          <NominationStepper activeStep={0} />
+          <NominationStepper activeStep={0} totalSteps={4} />
 
           <DualLanguageText
             h1={hi?.form?.nomi_details}
@@ -292,21 +285,11 @@ export default function NominationStepOne() {
 
           <Box display="flex" flexDirection="column" gap={2}>
             <Text
-              name="first_name"
-              value={form.step1.first_name}
+              name="full_name"
+              value={form.step1.full_name}
               onChange={handleChange}
-              label_1={hi?.form?.first_name}
-              label_2={en?.form?.first_name}
-              placeholder="As per Aadhaar"
-              required
-            />
-
-            <Text
-              name="last_name"
-              value={form.step1.last_name}
-              onChange={handleChange}
-              label_1={hi?.form?.last_name}
-              label_2={en?.form?.last_name}
+              label_1={hi?.form?.full_name}
+              label_2={en?.form?.full_name}
               placeholder="As per Aadhaar"
               required
             />
@@ -396,6 +379,13 @@ export default function NominationStepOne() {
               validate
               validated={dobValidate}
               onValidateClick={validateDob}
+            />
+
+            <PhotoCapture
+              value={form.step1.photo_of_didi}
+              onChange={(base64) => setStep1({ photo_of_didi: base64 })}
+              label_1={hi?.form?.photo_of_didi}
+              label_2={en?.form?.photo_of_didi}
             />
           </Box>
 
