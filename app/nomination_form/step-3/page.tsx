@@ -13,11 +13,10 @@ import Text from '@/components/FormComponents/Text';
 import CheckBoxMultiSelect from '@/components/FormComponents/CheckBoxMultiSelect';
 import ImportantNote from '@/components/nomination/ImportantNote';
 import { useNominationForm } from '../NominationFormProvider';
+import { getEnterpriseIssue, OTHER_BUSINESS } from '../requiredFields';
 import { addToast } from '@/components/error/toastStore';
 
 type Sector = 'farm_based' | 'non_farm';
-
-const OTHER_BUSINESS = 'other';
 
 export default function NominationStepTwoPage() {
   const router = useRouter();
@@ -157,82 +156,11 @@ export default function NominationStepTwoPage() {
   ];
 
   const validateRequired = (): boolean => {
-    if (!sector) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया सेक्टर चुनें',
-        en: 'Please select sector',
-      });
-      return false;
-    }
+    const issue = getEnterpriseIssue(form);
+    if (!issue) return true;
 
-    if (!business_category) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया बिज़नेस टाइप चुनें',
-        en: 'Please select business type',
-      });
-      return false;
-    }
-
-    if (
-      business_category === OTHER_BUSINESS &&
-      !business_category_other.trim()
-    ) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया अपना व्यवसाय लिखें',
-        en: 'Please specify the type of business',
-      });
-      return false;
-    }
-
-    if (!years_of_experience) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया व्यवसाय का अनुभव चुनें',
-        en: 'Please select years of experience',
-      });
-      return false;
-    }
-
-    if (!number_of_businesses) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया व्यवसायों की संख्या चुनें',
-        en: 'Please select number of businesses',
-      });
-      return false;
-    }
-
-    if (!family_support) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया परिवार के सहयोग का विकल्प चुनें',
-        en: 'Please select family support in enterprise',
-      });
-      return false;
-    }
-
-    if (!business_helpers || business_helpers.length === 0) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया चुनें कि व्यवसाय या पैसों में कौन मदद करता है',
-        en: 'Please select who helps in business or finances',
-      });
-      return false;
-    }
-
-    if (!supportNeeded || supportNeeded.length === 0) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया सपोर्ट विकल्प चुनें',
-        en: 'Please select support needed',
-      });
-      return false;
-    }
-
-    return true;
+    addToast({ type: 'error', hi: issue.hi, en: issue.en });
+    return false;
   };
 
   const handleNext = () => {
