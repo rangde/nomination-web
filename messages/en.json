@@ -69,6 +69,8 @@
     "important_form": "Important - Final Review",
     "final_review_desc_form": "Please review all information carefully. Once submitted, you cannot edit this application. To edit the application you need to press on the screen number at top.",
     "shg_leader_approval": "SHG Leader Approval",
+    "vo_leader_approval": "VO Leader Approval",
+    "clf_leader_approval": "CLF Leader Approval",
     "approval_rule": "Any 2 of 3 must approve via OTP",
     "president": "President",
     "secretary": "Secretary",

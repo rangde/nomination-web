@@ -9,10 +9,39 @@ import en from '@/messages/en.json';
 import DualLanguageText from '@/components/DualLanguageText';
 import SelectField from '@/components/FormComponents/SelectField';
 import { getDoc, approveDoc } from '@/services/api';
+import ShgLeaderApproval, {
+  LeaderLevel,
+  LeaderRole,
+} from '@/components/nomination/ShgLeaderApproval';
+import type { LeaderApproval } from '@/app/nomination_form/NominationFormProvider';
 import { addToast } from '../error/toastStore';
 import CircularProgress from '@mui/material/CircularProgress';
 
 type FormValues = Record<string, unknown>;
+
+const MIN_LEADER_APPROVALS = 2;
+
+// the SHG submits, the VO reviews it next and the CLF after that, so the state a
+// nomination sits in says whose leaders have to approve to move it on
+const REVIEW_LEVEL: Record<string, LeaderLevel> = {
+  'SHG Proposed': 'VO',
+  'VO Approved': 'CLF',
+};
+
+const APPROVAL_HEADING: Record<LeaderLevel, { hi: string; en: string }> = {
+  SHG: {
+    hi: hi.form.shg_leader_approval,
+    en: en.form.shg_leader_approval,
+  },
+  VO: { hi: hi.form.vo_leader_approval, en: en.form.vo_leader_approval },
+  CLF: { hi: hi.form.clf_leader_approval, en: en.form.clf_leader_approval },
+};
+
+const NO_NUMBERS: Record<LeaderRole, string> = {
+  president: '',
+  secretary: '',
+  treasurer: '',
+};
 
 const s = (v: unknown, fallback = ''): string =>
   typeof v === 'string' ? v : fallback;
@@ -75,6 +104,9 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   const [creditLimit, setCreditLimit] = useState('');
   const [formValues, setFormValues] = useState<FormValues | null>(null);
   const [loading, setLoading] = useState(false);
+  const [leaderNumbers, setLeaderNumbers] =
+    useState<Record<LeaderRole, string>>(NO_NUMBERS);
+  const [approvals, setApprovals] = useState<LeaderApproval[]>([]);
 
   useEffect(() => {
     if (!name) return;
@@ -147,6 +179,11 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
   const docId = s(formValues?.name, '—');
   const workflowState = s(formValues?.workflow_state, '—');
+
+  // the same three roles approve again at each stage, under their own level
+  const approvalLevel = REVIEW_LEVEL[s(formValues?.workflow_state)];
+  const needsApprovals = !view && !!approvalLevel;
+  const hasEnoughApprovals = approvals.length >= MIN_LEADER_APPROVALS;
 
   const shgProposed =
     n(formValues?.shg_proposed, 0) || s(formValues?.shg_proposed, '0');
@@ -449,11 +486,32 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           />
         </Paper>
 
+        {needsApprovals && (
+          <Paper sx={{ p: 2, borderRadius: 3 }}>
+            <ShgLeaderApproval
+              level={approvalLevel}
+              heading_1={APPROVAL_HEADING[approvalLevel].hi}
+              heading_2={APPROVAL_HEADING[approvalLevel].en}
+              numbers={leaderNumbers}
+              approved={approvals}
+              onNumberChange={(role, value) =>
+                setLeaderNumbers((prev) => ({ ...prev, [role]: value }))
+              }
+              onApproved={(approval) =>
+                setApprovals((prev) => [
+                  ...prev.filter((item) => item.role !== approval.role),
+                  approval,
+                ])
+              }
+            />
+          </Paper>
+        )}
+
         {!view && (
           <Button
             fullWidth
             variant="contained"
-            disabled={loading}
+            disabled={loading || (needsApprovals && !hasEnoughApprovals)}
             onClick={(e) => {
               e.stopPropagation();
               handleApprove();
@@ -461,6 +519,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             sx={{
               backgroundColor: '#000',
               color: '#fff',
+              '&.Mui-disabled': { backgroundColor: '#9CA3AF', color: '#fff' },
             }}
           >
             {loading ? (
