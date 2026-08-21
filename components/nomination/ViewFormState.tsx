@@ -75,6 +75,41 @@ const parseApprovedLeaders = (raw: unknown): LeaderRole[] => {
   return LEADER_ROLES.filter((role) => roles.includes(role));
 };
 
+// submit_nomination writes one row per approving leader into this child table
+const APPROVERS_TABLE = 'table_nmzc';
+
+type LeaderApproval = { role: LeaderRole; on: string };
+
+// the stored label carries the level it was approved at, e.g. "SHG-President"
+const roleFromLabel = (label: unknown): LeaderRole | null =>
+  LEADER_ROLES.find((role) => s(label).trim().toLowerCase().endsWith(role)) ??
+  null;
+
+// the child table is the only source that knows when each leader approved
+const approvalsFromTable = (values: FormValues | null): LeaderApproval[] => {
+  const rows = values?.[APPROVERS_TABLE];
+  if (!Array.isArray(rows)) return [];
+
+  const verifiedOn = new Map<LeaderRole, string>();
+
+  rows.forEach((row) => {
+    if (!row || typeof row !== 'object') return;
+
+    const role = roleFromLabel((row as FormValues).name1);
+    if (role && !verifiedOn.has(role)) {
+      verifiedOn.set(
+        role,
+        formatApprovalDateTime((row as FormValues).verified_on)
+      );
+    }
+  });
+
+  return LEADER_ROLES.filter((role) => verifiedOn.has(role)).map((role) => ({
+    role,
+    on: verifiedOn.get(role) ?? '',
+  }));
+};
+
 function ViewFormStatus({ name }: FormControlProps) {
   const router = useRouter();
   const [formValues, setFormValues] = useState<FormValues | null>(null);
@@ -142,24 +177,34 @@ function ViewFormStatus({ name }: FormControlProps) {
       : clfName
         ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}`
         : pendingHi;
+  const shgOn = formatApprovalDateTime(formValues?.creation);
+
   const checkedApprovals = checkedLeaders(formValues);
-  const approvedLeaders =
+  const legacyRoles =
     checkedApprovals.length > 0
       ? checkedApprovals
       : parseApprovedLeaders(formValues?.approved_leaders);
-  const shgOn = formatApprovalDateTime(formValues?.creation);
+
+  // older nominations only recorded which roles approved, so they fall back to
+  // the time the nomination itself was submitted
+  const tableApprovals = approvalsFromTable(formValues);
+  const approvals =
+    tableApprovals.length > 0
+      ? tableApprovals
+      : legacyRoles.map((role) => ({ role, on: shgOn }));
 
   const shgLines =
-    approvedLeaders.length > 0
-      ? approvedLeaders.map((role) => {
+    approvals.length > 0
+      ? approvals.map(({ role, on }) => {
           const label = leaderLabel(role);
+          const when = on || shgOn;
 
           return {
-            h2: shgOn
-              ? `${en?.workflow?.reviewed_by}: ${label.en} ${en?.workflow?.on} ${shgOn}`
+            h2: when
+              ? `${en?.workflow?.reviewed_by}: ${label.en} ${en?.workflow?.on} ${when}`
               : `${en?.workflow?.reviewed_by}: ${label.en}`,
-            h3: shgOn
-              ? `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}, ${shgOn}`
+            h3: when
+              ? `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}, ${when}`
               : `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}`,
           };
         })
