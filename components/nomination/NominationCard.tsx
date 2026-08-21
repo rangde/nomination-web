@@ -105,12 +105,13 @@ export default function NominationCard({
       ? en?.workflow?.farm_based
       : en?.workflow?.non_farm_based;
 
-  // the approved tab is filtered to this reviewer, so name their own approval
-  // instead of a later one at another level
-  const ownApproved = !!form_approve && !!approvedLevel;
-  const approval = ownApproved
-    ? approvalAtLevel(data, approvedLevel)
-    : pickApproval(data);
+  // the approved tab is filtered to this reviewer, so read their own level rather
+  // than a later approval at another one
+  const ownApproved = !!form_approve && approvedLevel === 'CLF';
+  const approval =
+    form_approve && approvedLevel
+      ? approvalAtLevel(data, approvedLevel)
+      : pickApproval(data);
   const approvedBy = approval.by || 'XYZ';
   const approvedOn = approval.on ? formatApprovalDateTime(approval.on) : '';
   const isShgProposed = canReview && s(data.workflow_state) === 'SHG Proposed';
