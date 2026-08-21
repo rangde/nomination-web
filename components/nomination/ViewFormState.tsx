@@ -80,13 +80,31 @@ const APPROVERS_TABLE = 'table_nmzc';
 
 type LeaderApproval = { role: LeaderRole; on: string };
 
-// the stored label carries the level it was approved at, e.g. "SHG-President"
-const roleFromLabel = (label: unknown): LeaderRole | null =>
-  LEADER_ROLES.find((role) => s(label).trim().toLowerCase().endsWith(role)) ??
-  null;
+type LeaderLevel = 'SHG' | 'VO' | 'CLF';
 
-// the child table is the only source that knows when each leader approved
-const approvalsFromTable = (values: FormValues | null): LeaderApproval[] => {
+const LEADER_LEVELS: LeaderLevel[] = ['SHG', 'VO', 'CLF'];
+
+// the label is written as "<level>-<role>"; the first nominations stored the
+// bare role, and those were all approved at the SHG stage
+const splitLabel = (
+  label: unknown
+): { level: LeaderLevel; role: LeaderRole } | null => {
+  const value = s(label).trim().toLowerCase();
+  const role = LEADER_ROLES.find((item) => value.endsWith(item));
+  if (!role) return null;
+
+  const prefix = value.slice(0, -role.length).replace(/-$/, '');
+  const level = LEADER_LEVELS.find((item) => item.toLowerCase() === prefix);
+
+  return { level: level ?? 'SHG', role };
+};
+
+// the child table is the only source that knows when each leader approved, and
+// the same three roles approve again at every level
+const approvalsFromTable = (
+  values: FormValues | null,
+  level: LeaderLevel
+): LeaderApproval[] => {
   const rows = values?.[APPROVERS_TABLE];
   if (!Array.isArray(rows)) return [];
 
@@ -95,10 +113,10 @@ const approvalsFromTable = (values: FormValues | null): LeaderApproval[] => {
   rows.forEach((row) => {
     if (!row || typeof row !== 'object') return;
 
-    const role = roleFromLabel((row as FormValues).name1);
-    if (role && !verifiedOn.has(role)) {
+    const parsed = splitLabel((row as FormValues).name1);
+    if (parsed?.level === level && !verifiedOn.has(parsed.role)) {
       verifiedOn.set(
-        role,
+        parsed.role,
         formatApprovalDateTime((row as FormValues).verified_on)
       );
     }
@@ -109,6 +127,24 @@ const approvalsFromTable = (values: FormValues | null): LeaderApproval[] => {
     on: verifiedOn.get(role) ?? '',
   }));
 };
+
+// one "Reviewed by: <role> on <time>" line per leader who approved at this level
+const reviewLines = (approvals: LeaderApproval[], fallbackOn: string) =>
+  approvals.length > 0
+    ? approvals.map(({ role, on }) => {
+        const label = leaderLabel(role);
+        const when = on || fallbackOn;
+
+        return {
+          h2: when
+            ? `${en?.workflow?.reviewed_by}: ${label.en} ${en?.workflow?.on} ${when}`
+            : `${en?.workflow?.reviewed_by}: ${label.en}`,
+          h3: when
+            ? `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}, ${when}`
+            : `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}`,
+        };
+      })
+    : undefined;
 
 function ViewFormStatus({ name }: FormControlProps) {
   const router = useRouter();
@@ -187,28 +223,18 @@ function ViewFormStatus({ name }: FormControlProps) {
 
   // older nominations only recorded which roles approved, so they fall back to
   // the time the nomination itself was submitted
-  const tableApprovals = approvalsFromTable(formValues);
-  const approvals =
-    tableApprovals.length > 0
-      ? tableApprovals
-      : legacyRoles.map((role) => ({ role, on: shgOn }));
+  const shgApprovals = approvalsFromTable(formValues, 'SHG');
+  const shgLines = reviewLines(
+    shgApprovals.length > 0
+      ? shgApprovals
+      : legacyRoles.map((role) => ({ role, on: shgOn })),
+    shgOn
+  );
 
-  const shgLines =
-    approvals.length > 0
-      ? approvals.map(({ role, on }) => {
-          const label = leaderLabel(role);
-          const when = on || shgOn;
-
-          return {
-            h2: when
-              ? `${en?.workflow?.reviewed_by}: ${label.en} ${en?.workflow?.on} ${when}`
-              : `${en?.workflow?.reviewed_by}: ${label.en}`,
-            h3: when
-              ? `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}, ${when}`
-              : `${hi?.workflow?.reviewed_by}: ${label.hi} ${hi?.workflow?.by}`,
-          };
-        })
-      : undefined;
+  // each level keeps its own approvers, so a leader who approves at both the
+  // SHG and the VO stage is listed under each one
+  const voLines = reviewLines(approvalsFromTable(formValues, 'VO'), voOn);
+  const clfLines = reviewLines(approvalsFromTable(formValues, 'CLF'), clfOn);
 
   const steps = [
     {
@@ -224,12 +250,14 @@ function ViewFormStatus({ name }: FormControlProps) {
       h1: en?.workflow?.vo_approval,
       h2: voLine,
       h3: voLineHi,
+      lines: voLines,
       active: voActive,
     },
     {
       h1: en?.workflow?.clf_approval,
       h2: clfLine,
       h3: clfLineHi,
+      lines: clfLines,
       active: clfActive,
     },
   ];
