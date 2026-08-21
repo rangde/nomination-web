@@ -1,7 +1,7 @@
 'use client';
 
 import { Box } from '@mui/material';
-import NominationCard from './NominationCard';
+import NominationCard, { ApprovalLevel } from './NominationCard';
 import NominationCard2 from './NominationCard2';
 
 type NominationData = Record<string, unknown>;
@@ -9,9 +9,10 @@ type NominationData = Record<string, unknown>;
 type cardValue = {
   data: NominationData;
   canReview: boolean;
+  approvedLevel?: ApprovalLevel;
 };
 
-function ApprovedCard({ data, canReview }: cardValue) {
+function ApprovedCard({ data, canReview, approvedLevel }: cardValue) {
   return (
     <Box>
       {canReview ? (
@@ -23,6 +24,7 @@ function ApprovedCard({ data, canReview }: cardValue) {
             cardSx={{ borderLeft: '4px' }}
             approvedSx={{ backgroundColor: '#D1D5DB' }}
             form_approve={true}
+            approvedLevel={approvedLevel}
           />
         </Box>
       ) : (

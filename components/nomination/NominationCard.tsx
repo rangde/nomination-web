@@ -9,6 +9,8 @@ import en from '@/messages/en.json';
 
 type NominationData = Record<string, unknown>;
 
+export type ApprovalLevel = 'VO' | 'CLF';
+
 type CardValue = {
   data: NominationData;
   cardSx?: SxProps<Theme>;
@@ -16,6 +18,8 @@ type CardValue = {
   canReview: boolean;
   notshowapproved?: boolean;
   form_approve?: boolean;
+  // set on the approved tab, where every card was approved by the viewer
+  approvedLevel?: ApprovalLevel;
 };
 
 const s = (v: unknown, fallback = ''): string =>
@@ -44,6 +48,13 @@ const formatApprovalDateTime = (dateTimeStr: string): string => {
   }).format(dt);
 };
 
+// the viewer's own decision, rather than whoever acted on it last
+const approvalAtLevel = (fv: NominationData, level: ApprovalLevel) => ({
+  by: s(fv[`${level.toLowerCase()}_approval_by`]),
+  on: s(fv[`${level.toLowerCase()}_approved_on`]),
+  level,
+});
+
 const pickApproval = (fv: NominationData) => {
   const voBy = s(fv.vo_approval_by);
   const voOn = s(fv.vo_approved_on);
@@ -64,6 +75,7 @@ export default function NominationCard({
   approvedSx,
   notshowapproved,
   form_approve,
+  approvedLevel,
 }: CardValue) {
   const router = useRouter();
 
@@ -93,7 +105,12 @@ export default function NominationCard({
       ? en?.workflow?.farm_based
       : en?.workflow?.non_farm_based;
 
-  const approval = pickApproval(data);
+  // the approved tab is filtered to this reviewer, so name their own approval
+  // instead of a later one at another level
+  const ownApproved = !!form_approve && !!approvedLevel;
+  const approval = ownApproved
+    ? approvalAtLevel(data, approvedLevel)
+    : pickApproval(data);
   const approvedBy = approval.by || 'XYZ';
   const approvedOn = approval.on ? formatApprovalDateTime(approval.on) : '';
   const isShgProposed = canReview && s(data.workflow_state) === 'SHG Proposed';
@@ -186,7 +203,9 @@ export default function NominationCard({
         >
           <CheckCircleIcon sx={{ fontSize: 14 }} />
           <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
-            {en?.workflow?.approved_by} {approvedBy}
+            {ownApproved
+              ? en?.workflow?.you_approved
+              : `${en?.workflow?.approved_by} ${approvedBy}`}
           </Typography>
           <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
             {en?.workflow?.on} {approvedOn}

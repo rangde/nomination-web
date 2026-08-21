@@ -135,6 +135,7 @@
     "shg_only": "Only SHG user can create nomination",
     "credit_score_label": "Credit Score",
     "approved_by": "Approved by",
+    "you_approved": "You approved",
     "farm_based": "Farm Based",
     "non_farm_based": "Non - Farm Based",
     "support_needed": "Support Needed"
