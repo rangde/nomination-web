@@ -6,7 +6,9 @@ import { useEffect, useRef, useState } from 'react';
 import AppHeader from '@/components/header/AppHeader';
 import CreateNominationBox from '@/components/nomination/CreateNominationBox';
 import StatsButtons from '@/components/nomination/StatsButtons';
-import NominationCard from '@/components/nomination/NominationCard';
+import NominationCard, {
+  ApprovalLevel,
+} from '@/components/nomination/NominationCard';
 import ApprovedCard from '@/components/nomination/ApprovedCard';
 import DualLanguageText from '@/components/DualLanguageText';
 
@@ -49,6 +51,15 @@ const isNominationBuckets = (v: unknown): v is NominationBuckets => {
   return submittedOk && readyOk;
 };
 
+// get_nomination_list buckets a user on the first role that matches, in this
+// order, so the approved list belongs to that level
+const reviewLevelFor = (roles: string[]): ApprovalLevel | undefined => {
+  if (roles.includes('SHG')) return undefined;
+  if (roles.includes('VO')) return 'VO';
+  if (roles.includes('CLF')) return 'CLF';
+  return undefined;
+};
+
 export default function DashboardPage() {
   const [show, setShow] = useState<ShowState>({
     submitted: true,
@@ -59,6 +70,7 @@ export default function DashboardPage() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const [canReview, setCanReview] = useState(false);
+  const [reviewLevel, setReviewLevel] = useState<ApprovalLevel | undefined>();
   const [disableCreation, setDisableCreation] = useState(false);
 
   const [showPending, setShowPending] = useState(true);
@@ -88,6 +100,7 @@ export default function DashboardPage() {
         if (!mounted) return;
 
         setCanReview(r.includes('CLF') || r.includes('VO'));
+        setReviewLevel(reviewLevelFor(r));
         setDisableCreation(!r.includes('SHG'));
       } catch {}
     })();
@@ -281,6 +294,7 @@ export default function DashboardPage() {
                   key={item.name as string}
                   data={item}
                   canReview={canReview}
+                  approvedLevel={reviewLevel}
                 />
               ))
             ) : (
