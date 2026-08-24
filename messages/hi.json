@@ -14,6 +14,7 @@
 
   "dashboard": {
     "create_nomination": "नया नामांकन शुरू कर",
+    "resume_nomination": "नामांकन फिर से शुरू करें",
     "nomi_new": "नामांकन बनाएँ",
     "submitted_nominatio": "नॉमिनेशन जमा किया गया",
     "training": "स्वीकृति के लिए तैयार",

@@ -55,6 +55,7 @@ type Props = {
   level?: LeaderLevel;
   heading_1?: string;
   heading_2?: string;
+  nominationName?: string;
 };
 
 function ShgLeaderApproval({
@@ -65,6 +66,7 @@ function ShgLeaderApproval({
   level = 'SHG',
   heading_1 = hi?.form?.shg_leader_approval,
   heading_2 = en?.form?.shg_leader_approval,
+  nominationName,
 }: Props) {
   const [otpSentTo, setOtpSentTo] = useState<LeaderRole[]>([]);
   const [otps, setOtps] = useState<Record<string, string>>({});
@@ -150,7 +152,13 @@ function ShgLeaderApproval({
       if (otp.length < 6) {
         throw new ApiError(en?.login?.invalid);
       }
-      const res = await verifyLeaderOtp(numbers[role], otp, role, level);
+      const res = await verifyLeaderOtp(
+        numbers[role],
+        otp,
+        role,
+        level,
+        nominationName
+      );
 
       onApproved({
         role,

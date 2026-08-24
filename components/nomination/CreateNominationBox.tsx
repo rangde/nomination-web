@@ -2,19 +2,76 @@
 
 import { Box, Button, Paper } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useEffect, useState } from 'react';
 import DualLanguageText from '../DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import { useRouter } from 'next/navigation';
+import { getNominationDraft } from '@/services/api';
+import { storage } from '@/app/utils/localStorage';
 
 type CreateNominationFlow = {
   disable?: boolean;
 };
 
+const hasCompletedCreditCheck = (creditScore: unknown) => {
+  const score = Number(creditScore);
+  return Number.isFinite(score) && (score < 0 || score > 0);
+};
+
+const hasCreditCheckProgress = (creditScore: unknown) =>
+  creditScore !== undefined &&
+  creditScore !== null &&
+  String(creditScore) !== '';
+
 function CreateNominationBox({ disable = false }: CreateNominationFlow) {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
 
-  const openNominationForm = () => {
+  useEffect(() => {
+    let mounted = true;
+
+    const loadDraft = async () => {
+      try {
+        const res = await getNominationDraft();
+        const draft = res?.message?.status ? res.message.msg?.[0] : null;
+
+        if (!mounted) return;
+        setHasDraft(Boolean(draft?.name));
+        if (draft?.name) storage.set('nomination_form_draft_name', draft.name);
+      } catch {
+        if (mounted) setHasDraft(false);
+      }
+    };
+
+    if (!disable) loadDraft();
+
+    return () => {
+      mounted = false;
+    };
+  }, [disable]);
+
+  const openNominationForm = async () => {
+    if (loading) return;
+
+    try {
+      setLoading(true);
+      const res = await getNominationDraft();
+      const draft = res?.message?.status ? res.message.msg?.[0] : null;
+
+      if (draft?.name) {
+        storage.set('nomination_form_draft_name', draft.name);
+        router.push(
+          hasCompletedCreditCheck(draft.credit_score) ||
+            hasCreditCheckProgress(draft.credit_score)
+            ? '/nomination_form/step-4'
+            : '/nomination_form/step-1'
+        );
+        return;
+      }
+    } catch {}
+
     router.push('/nomination_form/step-1');
   };
 
@@ -38,6 +95,7 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
         <Button
           fullWidth
           onClick={openNominationForm}
+          disabled={loading}
           sx={{
             backgroundColor: '#000',
             color: '#fff',
@@ -50,8 +108,16 @@ function CreateNominationBox({ disable = false }: CreateNominationFlow) {
           }}
         >
           <DualLanguageText
-            h1={hi?.dashboard?.create_nomination}
-            h2={en?.dashboard?.create_nomination}
+            h1={
+              hasDraft
+                ? hi?.dashboard?.resume_nomination
+                : hi?.dashboard?.create_nomination
+            }
+            h2={
+              hasDraft
+                ? en?.dashboard?.resume_nomination
+                : en?.dashboard?.create_nomination
+            }
             h1style={{
               fontWeight: 600,
               fontSize: '0.9rem',
