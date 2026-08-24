@@ -14,6 +14,7 @@
 
   "dashboard": {
     "create_nomination": "Create New Nomination",
+    "resume_nomination": "Resume Nomination",
     "nomi_new": "Create Nomination",
     "submitted_nominatio": "Nomination Submitted",
     "training": "Ready for Training",

@@ -32,6 +32,22 @@ export type OrganizationSearchResult = {
   organisation_name: string;
 };
 
+export type NominationDraftResult = {
+  name: string;
+  photo_of_didi?: string;
+  approvals_cleared: boolean;
+  approved_leaders: {
+    role: string;
+    mobile_number: string;
+    verified_on: string;
+  }[];
+};
+
+export type NominationDraftDoc = Record<string, unknown> & {
+  name: string;
+  approved_leaders?: NominationDraftResult['approved_leaders'];
+};
+
 export type FrappeCsrfMessage = {
   csrf_token: string;
   user: string;
@@ -183,11 +199,18 @@ export const verifyLeaderOtp = async (
   number: string,
   otp: string,
   role: string,
-  level: string = 'SHG'
+  level: string = 'SHG',
+  nominationName?: string
 ) => {
   const result = await postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.leader_approval.verify_leader_otp',
-    body: { mobile_number: number, otp, role, level },
+    body: {
+      mobile_number: number,
+      otp,
+      role,
+      level,
+      nomination_name: nominationName,
+    },
   });
 
   if (!result?.message?.status) {
@@ -254,6 +277,20 @@ export const submitNominationForm = (payload: NominationSubmitPayload) => {
   return postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.form.submit_nomination',
     body: { payload: payload },
+  });
+};
+
+export const saveNominationDraft = (payload: NominationSubmitPayload) => {
+  return postFrappe<CustomApiMessage & { msg: NominationDraftResult }>({
+    url: '/api/method/nomination.api.form.save_nomination_draft',
+    body: { payload: payload },
+  });
+};
+
+export const getNominationDraft = (name?: string) => {
+  return postFrappe<CustomApiMessage & { msg: NominationDraftDoc[] }>({
+    url: '/api/method/nomination.api.form.get_nomination_draft',
+    body: { name },
   });
 };
 

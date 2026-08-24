@@ -41,7 +41,7 @@ function NominationStepOne() {
   const [score, setScore] = useState<number | null>(null);
   const otpContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const { form, setStep3, submitForm } = useNominationForm();
+  const { form, setStep3, saveDraft, submitForm } = useNominationForm();
   const {
     set_credit_limit,
     president_mobile,
@@ -49,6 +49,25 @@ function NominationStepOne() {
     treasurer_mobile,
     approved_leaders,
   } = form.step3;
+
+  useEffect(() => {
+    if (!form.step3.credit_score) return;
+
+    const parsedScore = Number(form.step3.credit_score);
+    const completedCreditCheck =
+      Number.isFinite(parsedScore) && (parsedScore < 0 || parsedScore > 0);
+
+    if (!completedCreditCheck) {
+      setMobile(form.step3.mobile_number);
+      setScore(null);
+      setShowCredit(false);
+      return;
+    }
+
+    setScore(Number.isFinite(parsedScore) ? parsedScore : 0);
+    setMobile(form.step3.mobile_number);
+    setShowCredit(true);
+  }, [form.step3.credit_score, form.step3.mobile_number]);
 
   const leaderNumbers: Record<LeaderRole, string> = {
     president: president_mobile,
@@ -174,6 +193,30 @@ function NominationStepOne() {
         /\D/g,
         ''
       );
+      const draft = await saveDraft(
+        mobileForSubmit.length >= 10
+          ? { mobile_number: mobileForSubmit }
+          : undefined
+      );
+
+      if (!draft.ok) {
+        addToast({
+          type: 'error',
+          hi: 'ड्राफ्ट सेव नहीं हुआ',
+          en: `Draft save failed: ${draft.error}`,
+        });
+        return;
+      }
+
+      if (draft.approvalsCleared) {
+        addToast({
+          type: 'error',
+          hi: 'फॉर्म में बदलाव हुआ है, कृपया फिर से OTP स्वीकृति लें',
+          en: 'Form changes cleared previous approvals. Please collect OTP approvals again.',
+        });
+        return;
+      }
+
       const res = await submitForm(
         mobileForSubmit.length >= 10
           ? { mobile_number: mobileForSubmit }
@@ -249,6 +292,21 @@ function NominationStepOne() {
             : '';
 
           const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
+          const draft = await saveDraft({
+            mobile_number: mobile,
+            credit_score: finalScore.toString(),
+            reportBase64,
+          });
+
+          if (!draft.ok) {
+            addToast({
+              type: 'error',
+              hi: 'ड्राफ्ट सेव नहीं हुआ',
+              en: `Draft save failed: ${draft.error}`,
+            });
+            return;
+          }
+
           setScore(finalScore);
           setStep3({
             mobile_number: mobile,
@@ -280,6 +338,10 @@ function NominationStepOne() {
                 : 'Failed to fetch credit score',
           });
           setScore(0);
+          await saveDraft({
+            mobile_number: mobile,
+            credit_score: '0',
+          });
           setShowCredit(true);
         }
       } catch (err) {
@@ -290,6 +352,10 @@ function NominationStepOne() {
           en: 'Credit score error',
         });
         setScore(0);
+        await saveDraft({
+          mobile_number: mobile,
+          credit_score: '0',
+        });
         setShowCredit(true);
       }
     } else {
@@ -457,6 +523,7 @@ function NominationStepOne() {
                   approved={approved_leaders}
                   onNumberChange={setLeaderNumber}
                   onApproved={markLeaderApproved}
+                  nominationName={form.draft_name}
                 />
               </Box>
             ) : (
