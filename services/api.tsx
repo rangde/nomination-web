@@ -25,6 +25,13 @@ export type CustomApiMessage = {
   msg: string | string[];
 };
 
+export type OrganizationType = 'SHG' | 'VO';
+
+export type OrganizationSearchResult = {
+  name: string;
+  organisation_name: string;
+};
+
 export type FrappeCsrfMessage = {
   csrf_token: string;
   user: string;
@@ -247,6 +254,19 @@ export const submitNominationForm = (payload: NominationSubmitPayload) => {
   return postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.form.submit_nomination',
     body: { payload: payload },
+  });
+};
+
+export const searchOrganizations = (
+  organizationType: OrganizationType,
+  searchText: string
+) => {
+  return postFrappe<CustomApiMessage & { msg: OrganizationSearchResult[] }>({
+    url: '/api/method/nomination.api.organization.search_organizations',
+    body: {
+      organization_type: organizationType,
+      search_text: searchText,
+    },
   });
 };
 
