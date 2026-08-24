@@ -7,6 +7,7 @@ import DualLanguageText from '@/components/DualLanguageText';
 import Text from '@/components/FormComponents/Text';
 import SelectField from '@/components/FormComponents/SelectField';
 import CheckBoxSingleSelect from '@/components/FormComponents/CheckBoxSingleSelect';
+import OrganizationSearch from '@/components/FormComponents/OrganizationSearch';
 import NominationStepper from '@/components/nomination/NominationStepper';
 import AppHeader from '@/components/header/AppHeader';
 import { addToast } from '@/components/error/toastStore';
@@ -65,6 +66,13 @@ export default function NominationShgRecordPage() {
   ) => {
     const { name, value } = e.target;
 
+    if (!(name in form.shg)) return;
+    const key = name as keyof typeof form.shg;
+
+    setShg({ [key]: value });
+  };
+
+  const handleOrganizationChange = (name: string, value: string) => {
     if (!(name in form.shg)) return;
     const key = name as keyof typeof form.shg;
 
@@ -131,19 +139,21 @@ export default function NominationShgRecordPage() {
           />
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <Text
+            <OrganizationSearch
               name="vo_name"
               value={vo_name}
-              onChange={handleChange}
+              onChange={handleOrganizationChange}
+              organizationType="VO"
               label_1={hi?.form?.vo_name}
               label_2={en?.form?.vo_name}
               required
             />
 
-            <Text
+            <OrganizationSearch
               name="shg_name"
               value={shg_name}
-              onChange={handleChange}
+              onChange={handleOrganizationChange}
+              organizationType="SHG"
               label_1={hi?.form?.shg_name}
               label_2={en?.form?.shg_name}
               required
