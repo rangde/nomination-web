@@ -4,6 +4,7 @@ import { Box, Typography, Button, TextField, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { MuiOtpInput } from 'mui-one-time-password-input';
 import { useState, useEffect, useMemo, useRef } from 'react';
+import Cookies from 'js-cookie';
 import DualLanguageText from '@/components/DualLanguageText';
 import InputAdornment from '@mui/material/InputAdornment';
 import hi from '@/messages/hi.json';
@@ -28,6 +29,7 @@ import {
 } from '@/services/api';
 
 const MIN_LEADER_APPROVALS = 2;
+const digits = (value?: string) => (value || '').replace(/\D/g, '');
 
 function NominationStepOne() {
   const router = useRouter();
@@ -369,10 +371,8 @@ function NominationStepOne() {
   };
 
   const validateRequired = (): boolean => {
-    const mobileToCheck = (form.step3.mobile_number || mobile).replace(
-      /\D/g,
-      ''
-    );
+    const mobileToCheck = digits(form.step3.mobile_number || mobile);
+    const loginMobileNumber = digits(Cookies.get('mobile'));
     if (mobileToCheck.length < 10) {
       addToast({
         type: 'error',
@@ -385,7 +385,25 @@ function NominationStepOne() {
       president_mobile,
       secretary_mobile,
       treasurer_mobile,
+    ]
+      .map(digits)
+      .filter((n) => n);
+    const allLeaderNumbers = [
+      ...enteredLeaderNumbers,
+      ...approved_leaders.map((leader) => digits(leader.mobile_number)),
     ].filter((n) => n);
+
+    if (
+      loginMobileNumber &&
+      allLeaderNumbers.some((number) => number === loginMobileNumber)
+    ) {
+      addToast({
+        type: 'error',
+        hi: 'JOSH लॉगिन नंबर पदाधिकारी के मोबाइल नंबर के रूप में उपयोग नहीं किया जा सकता',
+        en: 'The JOSH login number cannot be used as a leader mobile number',
+      });
+      return false;
+    }
 
     if (new Set(enteredLeaderNumbers).size !== enteredLeaderNumbers.length) {
       addToast({
