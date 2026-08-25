@@ -41,6 +41,7 @@ function NominationStepOne() {
   const [canResend, setCanResend] = useState(false);
   const [showCredit, setShowCredit] = useState(false);
   const [score, setScore] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const otpContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { form, setStep3, saveDraft, submitForm } = useNominationForm();
@@ -53,23 +54,23 @@ function NominationStepOne() {
   } = form.step3;
 
   useEffect(() => {
-    if (!form.step3.credit_score) return;
+    const storedScore = String(form.step3.credit_score ?? '');
+    const hasCreditCheckProgress = storedScore !== '';
+    const hasApprovalProgress =
+      form.step3.approved_leaders.length >= MIN_LEADER_APPROVALS;
 
-    const parsedScore = Number(form.step3.credit_score);
-    const completedCreditCheck =
-      Number.isFinite(parsedScore) && (parsedScore < 0 || parsedScore > 0);
+    if (!hasCreditCheckProgress && !hasApprovalProgress) return;
 
-    if (!completedCreditCheck) {
-      setMobile(form.step3.mobile_number);
-      setScore(null);
-      setShowCredit(false);
-      return;
-    }
+    const parsedScore = Number(storedScore);
 
     setScore(Number.isFinite(parsedScore) ? parsedScore : 0);
     setMobile(form.step3.mobile_number);
     setShowCredit(true);
-  }, [form.step3.credit_score, form.step3.mobile_number]);
+  }, [
+    form.step3.approved_leaders.length,
+    form.step3.credit_score,
+    form.step3.mobile_number,
+  ]);
 
   const leaderNumbers: Record<LeaderRole, string> = {
     president: president_mobile,
@@ -187,56 +188,63 @@ function NominationStepOne() {
   }, [fillOtp]);
 
   const handleRequestOTP = async () => {
+    if (submitting) return;
+
     if (showCredit) {
       const okRequired = validateRequired();
       if (!okRequired) return;
 
+      setSubmitting(true);
       const mobileForSubmit = (form.step3.mobile_number || mobile).replace(
         /\D/g,
         ''
       );
-      const draft = await saveDraft(
-        mobileForSubmit.length >= 10
-          ? { mobile_number: mobileForSubmit }
-          : undefined
-      );
+      try {
+        const draft = await saveDraft(
+          mobileForSubmit.length >= 10
+            ? { mobile_number: mobileForSubmit }
+            : undefined
+        );
 
-      if (!draft.ok) {
-        addToast({
-          type: 'error',
-          hi: 'ड्राफ्ट सेव नहीं हुआ',
-          en: `Draft save failed: ${draft.error}`,
-        });
-        return;
+        if (!draft.ok) {
+          addToast({
+            type: 'error',
+            hi: 'ड्राफ्ट सेव नहीं हुआ',
+            en: `Draft save failed: ${draft.error}`,
+          });
+          return;
+        }
+
+        if (draft.approvalsCleared) {
+          addToast({
+            type: 'error',
+            hi: 'फॉर्म में बदलाव हुआ है, कृपया फिर से OTP स्वीकृति लें',
+            en: 'Form changes cleared previous approvals. Please collect OTP approvals again.',
+          });
+          return;
+        }
+
+        const res = await submitForm(
+          mobileForSubmit.length >= 10
+            ? { mobile_number: mobileForSubmit }
+            : undefined
+        );
+
+        if (!res.ok) {
+          addToast({
+            type: 'error',
+            hi: 'फॉर्म सबमिट नहीं हुआ',
+            en: `Submit failed: ${res.error}`,
+          });
+          return;
+        }
+
+        router.push(
+          `/nomination_form/view_status?name=${encodeURIComponent(res?.name)}`
+        );
+      } finally {
+        setSubmitting(false);
       }
-
-      if (draft.approvalsCleared) {
-        addToast({
-          type: 'error',
-          hi: 'फॉर्म में बदलाव हुआ है, कृपया फिर से OTP स्वीकृति लें',
-          en: 'Form changes cleared previous approvals. Please collect OTP approvals again.',
-        });
-        return;
-      }
-
-      const res = await submitForm(
-        mobileForSubmit.length >= 10
-          ? { mobile_number: mobileForSubmit }
-          : undefined
-      );
-
-      if (!res.ok) {
-        addToast({
-          type: 'error',
-          hi: 'फॉर्म सबमिट नहीं हुआ',
-          en: `Submit failed: ${res.error}`,
-        });
-        return;
-      }
-
-      router.push(
-        `/nomination_form/view_status?name=${encodeURIComponent(res?.name)}`
-      );
     } else if (fillOtp) {
       try {
         if (otp.length < 6) {
@@ -680,7 +688,7 @@ function NominationStepOne() {
               '&:hover': { bgcolor: '#111' },
               '&.Mui-disabled': { bgcolor: '#9CA3AF', color: '#fff' },
             }}
-            disabled={showCredit && !hasEnoughApprovals}
+            disabled={submitting || (showCredit && !hasEnoughApprovals)}
             onClick={handleRequestOTP}
           >
             <Box textAlign="center">

@@ -67,14 +67,11 @@ function PhotoCapture({
           sx={{
             width: '100%',
             minHeight: 160,
-            p: 2,
             borderRadius: '12px',
             border: '1px dashed #9CA3AF',
             bgcolor: '#FFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 2,
+            overflow: 'hidden',
+            position: 'relative',
           }}
         >
           <Box
@@ -82,10 +79,9 @@ function PhotoCapture({
             src={value}
             alt="captured photo"
             sx={{
-              width: 96,
-              height: 112,
-              flexShrink: 0,
-              borderRadius: '10px',
+              display: 'block',
+              width: '100%',
+              height: 160,
               objectFit: 'cover',
             }}
           />
@@ -95,6 +91,10 @@ function PhotoCapture({
             size="small"
             startIcon={<AutorenewRoundedIcon sx={{ fontSize: 16 }} />}
             sx={{
+              position: 'absolute',
+              left: '50%',
+              bottom: 12,
+              transform: 'translateX(-50%)',
               px: 1.25,
               borderRadius: '999px',
               bgcolor: '#F3F4F6',
