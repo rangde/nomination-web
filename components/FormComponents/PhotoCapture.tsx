@@ -9,6 +9,9 @@ import DualLanguageText from '@/components/DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 
+const MAX_IMAGE_SIDE = 1280;
+const JPEG_QUALITY = 0.82;
+
 type PhotoCaptureProps = {
   label_1: string;
   label_2: string;
@@ -16,6 +19,43 @@ type PhotoCaptureProps = {
   value?: string;
   onChange: (base64: string) => void;
 };
+
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => resolve('');
+    reader.readAsDataURL(file);
+  });
+
+const resizeImage = (file: File) =>
+  new Promise<string>((resolve) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      const scale = Math.min(
+        1,
+        MAX_IMAGE_SIDE / Math.max(image.width, image.height)
+      );
+      const width = Math.max(1, Math.round(image.width * scale));
+      const height = Math.max(1, Math.round(image.height * scale));
+      const canvas = document.createElement('canvas');
+
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d')?.drawImage(image, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
+    };
+
+    image.onerror = async () => {
+      URL.revokeObjectURL(url);
+      resolve(await readFileAsDataUrl(file));
+    };
+
+    image.src = url;
+  });
 
 function PhotoCapture({
   label_1,
@@ -30,13 +70,11 @@ function PhotoCapture({
     inputRef.current?.click();
   };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => onChange(String(reader.result || ''));
-    reader.readAsDataURL(file);
+    onChange(await resizeImage(file));
 
     // allow re-selecting the same file again
     e.target.value = '';

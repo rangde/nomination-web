@@ -321,7 +321,7 @@ function NominationStepOne() {
           setStep3({
             mobile_number: mobile,
             credit_score: finalScore.toString(),
-            reportBase64,
+            reportBase64: '',
           });
           setShowCredit(true);
 
