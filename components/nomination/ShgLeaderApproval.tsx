@@ -5,6 +5,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import InputAdornment from '@mui/material/InputAdornment';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import { MuiOtpInput } from 'mui-one-time-password-input';
+import Cookies from 'js-cookie';
 
 import DualLanguageText from '@/components/DualLanguageText';
 import { addToast } from '@/components/error/toastStore';
@@ -24,6 +25,8 @@ const LEADERS: { role: LeaderRole; label_1: string; label_2: string }[] = [
 ];
 
 const RESEND_SECONDS = 60;
+
+const digits = (value?: string) => (value || '').replace(/\D/g, '');
 
 // only the last 4 digits stay visible once an OTP is on its way
 const maskNumber = (number: string) =>
@@ -72,6 +75,26 @@ function ShgLeaderApproval({
   const [otps, setOtps] = useState<Record<string, string>>({});
   const [countdowns, setCountdowns] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState<LeaderRole | null>(null);
+  const loginMobileNumber = digits(Cookies.get('mobile'));
+
+  const showLoginNumberError = () => {
+    addToast({
+      type: 'error',
+      hi: 'JOSH लॉगिन नंबर पदाधिकारी के मोबाइल नंबर के रूप में उपयोग नहीं किया जा सकता',
+      en: 'The JOSH login number cannot be used as a leader mobile number',
+    });
+  };
+
+  const handleNumberChange = (role: LeaderRole, value: string) => {
+    const next = digits(value);
+
+    if (next.length === 10 && loginMobileNumber === next) {
+      showLoginNumberError();
+      return;
+    }
+
+    onNumberChange(role, next);
+  };
 
   // one ticker drives every card's resend countdown
   useEffect(() => {
@@ -105,6 +128,11 @@ function ShgLeaderApproval({
         hi: hi?.login?.invalid_number,
         en: en?.login?.invalid_number,
       });
+      return;
+    }
+
+    if (loginMobileNumber === number) {
+      showLoginNumberError();
       return;
     }
 
@@ -351,9 +379,7 @@ function ShgLeaderApproval({
                     pattern: '[0-9]*',
                     maxLength: 10,
                   }}
-                  onChange={(e) =>
-                    onNumberChange(role, e.target.value.replace(/\D/g, ''))
-                  }
+                  onChange={(e) => handleNumberChange(role, e.target.value)}
                 />
               )}
 
