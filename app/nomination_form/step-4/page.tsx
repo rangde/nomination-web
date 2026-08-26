@@ -55,15 +55,24 @@ function NominationStepOne() {
 
   useEffect(() => {
     const storedScore = String(form.step3.credit_score ?? '');
-    const hasCreditCheckProgress = storedScore !== '';
+    const hasSavedApplicantMobile =
+      digits(form.step3.mobile_number).length === 10;
+    const hasCreditCheckProgress =
+      storedScore !== '' || hasSavedApplicantMobile;
     const hasApprovalProgress =
       form.step3.approved_leaders.length >= MIN_LEADER_APPROVALS;
 
     if (!hasCreditCheckProgress && !hasApprovalProgress) return;
 
-    const parsedScore = Number(storedScore);
+    const parsedScore = storedScore === '' ? null : Number(storedScore);
 
-    setScore(Number.isFinite(parsedScore) ? parsedScore : 0);
+    setScore(
+      parsedScore === null
+        ? null
+        : Number.isFinite(parsedScore)
+          ? parsedScore
+          : 0
+    );
     setMobile(form.step3.mobile_number);
     setShowCredit(true);
   }, [
@@ -82,11 +91,14 @@ function NominationStepOne() {
     setStep3({ [`${role}_mobile`]: value });
   };
 
-  const markLeaderApproved = (approval: LeaderApproval) => {
-    const others = approved_leaders.filter(
-      (item) => item.role !== approval.role
+  const markLeaderApproved = (approval: LeaderApproval | LeaderApproval[]) => {
+    const approvals = Array.isArray(approval) ? approval : [approval];
+    const byRole = new Map(
+      approved_leaders.map((item) => [item.role, item] as const)
     );
-    setStep3({ approved_leaders: [...others, approval] });
+
+    approvals.forEach((item) => byRole.set(item.role, item));
+    setStep3({ approved_leaders: Array.from(byRole.values()) });
   };
 
   // the spec requires any 2 of the 3 leaders before the nomination can go in
@@ -265,6 +277,7 @@ function NominationStepOne() {
         hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
         en: 'OTP verified successfully',
       });
+      setStep3({ mobile_number: mobile });
 
       try {
         const creditCheckId = getCreditCheckId();
@@ -352,6 +365,7 @@ function NominationStepOne() {
             mobile_number: mobile,
             credit_score: '0',
           });
+          setStep3({ mobile_number: mobile, credit_score: '0' });
           setShowCredit(true);
         }
       } catch (err) {
@@ -366,6 +380,7 @@ function NominationStepOne() {
           mobile_number: mobile,
           credit_score: '0',
         });
+        setStep3({ mobile_number: mobile, credit_score: '0' });
         setShowCredit(true);
       }
     } else {
