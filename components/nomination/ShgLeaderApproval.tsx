@@ -53,7 +53,7 @@ type Props = {
   numbers: Record<LeaderRole, string>;
   approved: LeaderApproval[];
   onNumberChange: (role: LeaderRole, value: string) => void;
-  onApproved: (approval: LeaderApproval) => void;
+  onApproved: (approval: LeaderApproval | LeaderApproval[]) => void;
   // the same three cards approve at the SHG, VO and CLF stages
   level?: LeaderLevel;
   heading_1?: string;
@@ -72,6 +72,9 @@ function ShgLeaderApproval({
   nominationName,
 }: Props) {
   const [otpSentTo, setOtpSentTo] = useState<LeaderRole[]>([]);
+  const [sentNumbers, setSentNumbers] = useState<
+    Partial<Record<LeaderRole, string>>
+  >({});
   const [otps, setOtps] = useState<Record<string, string>>({});
   const [countdowns, setCountdowns] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState<LeaderRole | null>(null);
@@ -119,8 +122,8 @@ function ShgLeaderApproval({
     [approved]
   );
 
-  const sendOtp = async (role: LeaderRole) => {
-    const number = numbers[role];
+  const sendOtp = async (role: LeaderRole, numberOverride?: string) => {
+    const number = digits(numberOverride || numbers[role]);
 
     if (number.length !== 10) {
       addToast({
@@ -151,9 +154,10 @@ function ShgLeaderApproval({
 
     try {
       setBusy(role);
-      await sendLeaderOtp(number, role, level);
+      await sendLeaderOtp(number, role, level, nominationName);
 
       setOtpSentTo((prev) => (prev.includes(role) ? prev : [...prev, role]));
+      setSentNumbers((prev) => ({ ...prev, [role]: number }));
       setCountdowns((prev) => ({ ...prev, [role]: RESEND_SECONDS }));
       addToast({
         type: 'success',
@@ -173,6 +177,7 @@ function ShgLeaderApproval({
 
   const verifyOtp = async (role: LeaderRole) => {
     const otp = otps[role] || '';
+    const number = sentNumbers[role];
 
     try {
       setBusy(role);
@@ -180,22 +185,41 @@ function ShgLeaderApproval({
       if (otp.length < 6) {
         throw new ApiError(en?.login?.invalid);
       }
+      if (!number) {
+        throw new ApiError('Please request an OTP for this number first');
+      }
       const res = await verifyLeaderOtp(
-        numbers[role],
+        number,
         otp,
         role,
         level,
         nominationName
       );
+      const serverApprovals = (
+        res?.message as { approved_leaders?: LeaderApproval[] }
+      )?.approved_leaders;
+      const fullServerApprovals = Array.isArray(serverApprovals)
+        ? serverApprovals.filter(
+            (approval): approval is LeaderApproval =>
+              typeof approval === 'object' &&
+              approval !== null &&
+              typeof approval.role === 'string' &&
+              typeof approval.mobile_number === 'string'
+          )
+        : [];
 
-      onApproved({
-        role,
-        mobile_number: numbers[role],
-        // the server stamps the time so a wrong device clock cannot
-        verified_on: String(
-          (res?.message as { verified_on?: string })?.verified_on || ''
-        ),
-      });
+      if (fullServerApprovals.length) {
+        onApproved(fullServerApprovals);
+      } else {
+        onApproved({
+          role,
+          mobile_number: number,
+          // the server stamps the time so a wrong device clock cannot
+          verified_on: String(
+            (res?.message as { verified_on?: string })?.verified_on || ''
+          ),
+        });
+      }
 
       addToast({
         type: 'success',
@@ -235,6 +259,7 @@ function ShgLeaderApproval({
           const approval = approvalFor(role);
           const isApproved = !!approval;
           const otpSent = otpSentTo.includes(role);
+          const sentNumber = sentNumbers[role] || numbers[role];
           const secondsLeft = countdowns[role] ?? 0;
           const canResend = secondsLeft === 0 && busy !== role;
 
@@ -296,7 +321,7 @@ function ShgLeaderApproval({
                 <Box>
                   <Typography sx={{ fontSize: 12, color: '#6B7280', mb: 1 }}>
                     {hi?.form?.otp_sent_to} / {en?.form?.otp_sent_to} +91{' '}
-                    {maskNumber(numbers[role])}
+                    {maskNumber(sentNumber)}
                   </Typography>
 
                   <MuiOtpInput
@@ -332,7 +357,7 @@ function ShgLeaderApproval({
                       mb: 1.5,
                       cursor: canResend ? 'pointer' : 'not-allowed',
                     }}
-                    onClick={() => canResend && sendOtp(role)}
+                    onClick={() => canResend && sendOtp(role, sentNumber)}
                   >
                     <Typography
                       sx={{

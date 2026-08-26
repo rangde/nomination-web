@@ -8,7 +8,7 @@ import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import DualLanguageText from '@/components/DualLanguageText';
 import SelectField from '@/components/FormComponents/SelectField';
-import { getDoc, approveDoc } from '@/services/api';
+import { getDoc, approveDoc, getLeaderApprovals } from '@/services/api';
 import ShgLeaderApproval, {
   LeaderLevel,
   LeaderRole,
@@ -124,6 +124,19 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
       const serverLimit = s(item?.set_credit_limit);
       if (serverLimit) setCreditLimit(serverLimit);
+
+      const approvalLevel = REVIEW_LEVEL[s(item?.workflow_state)];
+      if (approvalLevel) {
+        const approvalRes = await getLeaderApprovals(approvalLevel, name).catch(
+          () => null
+        );
+        const cachedApprovals = approvalRes?.message?.status
+          ? approvalRes.message.msg
+          : [];
+        if (Array.isArray(cachedApprovals) && cachedApprovals.length) {
+          setApprovals(cachedApprovals);
+        }
+      }
     };
 
     getFormData();
@@ -133,8 +146,10 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
     if (!name) return;
 
     const limitToApprove = creditLimit || s(formValues?.set_credit_limit);
+    const currentApprovalLevel = REVIEW_LEVEL[s(formValues?.workflow_state)];
+    const creditLimitRequired = currentApprovalLevel !== 'VO';
 
-    if (!limitToApprove) {
+    if (creditLimitRequired && !limitToApprove) {
       addToast({
         type: 'error',
         hi: 'कृपया क्रेडिट सीमा चुनें',
@@ -490,6 +505,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           <Paper sx={{ p: 2, borderRadius: 3 }}>
             <ShgLeaderApproval
               level={approvalLevel}
+              nominationName={name}
               heading_1={APPROVAL_HEADING[approvalLevel].hi}
               heading_2={APPROVAL_HEADING[approvalLevel].en}
               numbers={leaderNumbers}
@@ -498,10 +514,17 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
                 setLeaderNumbers((prev) => ({ ...prev, [role]: value }))
               }
               onApproved={(approval) =>
-                setApprovals((prev) => [
-                  ...prev.filter((item) => item.role !== approval.role),
-                  approval,
-                ])
+                setApprovals((prev) => {
+                  const approvals = Array.isArray(approval)
+                    ? approval
+                    : [approval];
+                  const byRole = new Map(
+                    prev.map((item) => [item.role, item] as const)
+                  );
+
+                  approvals.forEach((item) => byRole.set(item.role, item));
+                  return Array.from(byRole.values());
+                })
               }
             />
           </Paper>

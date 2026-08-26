@@ -1,4 +1,7 @@
-import { NominationSubmitPayload } from '@/app/nomination_form/NominationFormProvider';
+import type {
+  LeaderApproval,
+  NominationSubmitPayload,
+} from '@/app/nomination_form/NominationFormProvider';
 
 export type FrappeCustomResponse<ResponseType> = {
   message: ResponseType;
@@ -180,11 +183,17 @@ export const verifyOtpApi = async (
 export const sendLeaderOtp = async (
   number: string,
   role: string,
-  level: string = 'SHG'
+  level: string = 'SHG',
+  nominationName?: string
 ) => {
   const result = await postFrappe<CustomApiMessage>({
     url: '/api/method/nomination.api.leader_approval.send_leader_otp',
-    body: { mobile_number: number, role, level },
+    body: {
+      mobile_number: number,
+      role,
+      level,
+      nomination_name: nominationName,
+    },
   });
 
   if (!result?.message?.status) {
@@ -221,10 +230,13 @@ export const verifyLeaderOtp = async (
   return result;
 };
 
-export const getLeaderApprovals = (level: string = 'SHG') => {
-  return postFrappe<CustomApiMessage>({
+export const getLeaderApprovals = (
+  level: string = 'SHG',
+  nominationName?: string
+) => {
+  return postFrappe<CustomApiMessage & { msg: LeaderApproval[] }>({
     url: '/api/method/nomination.api.leader_approval.get_leader_approvals',
-    body: { level },
+    body: { level, nomination_name: nominationName },
   });
 };
 
@@ -308,7 +320,7 @@ export const searchOrganizations = (
 };
 
 export const getDoc = (name: string) => {
-  return postFrappe<CustomApiMessage>({
+  return postFrappe<CustomApiMessage & { msg: NominationDraftDoc[] }>({
     url: '/api/method/nomination.api.form.get_nomination_form',
     body: {
       name: name,

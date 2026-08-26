@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import {
   getNominationDraft,
+  getDoc,
   NominationDraftDoc,
   saveNominationDraft,
   submitNominationForm,
@@ -212,7 +213,12 @@ const NON_FARM_BUSINESS = new Set([
   'petty_trade',
 ]);
 
-const s = (value: unknown) => (typeof value === 'string' ? value : '');
+const s = (value: unknown) =>
+  typeof value === 'string' ||
+  typeof value === 'number' ||
+  typeof value === 'boolean'
+    ? String(value)
+    : '';
 const n = (value: unknown) => Number(value || 0);
 const digits = (value: unknown) => s(value).replace(/\D/g, '').slice(-10);
 
@@ -345,7 +351,13 @@ export function NominationFormProvider({
       const savedDraftName =
         storage.get<string>(DRAFT_STORAGE_KEY) || undefined;
       const res = await getNominationDraft(savedDraftName).catch(() => null);
-      const draft = res?.message?.status ? res.message.msg?.[0] : null;
+      let draft = res?.message?.status ? res.message.msg?.[0] : null;
+
+      if (!draft && savedDraftName) {
+        const fallback = await getDoc(savedDraftName).catch(() => null);
+        const msg = fallback?.message?.msg;
+        draft = fallback?.message?.status && Array.isArray(msg) ? msg[0] : null;
+      }
 
       if (!mounted || !draft) return;
 
