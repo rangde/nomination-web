@@ -43,8 +43,55 @@ const NO_NUMBERS: Record<LeaderRole, string> = {
   treasurer: '',
 };
 
+const LEADER_ROLES: LeaderRole[] = ['president', 'secretary', 'treasurer'];
+const APPROVERS_TABLE = 'table_nmzc';
+
 const s = (v: unknown, fallback = ''): string =>
   typeof v === 'string' ? v : fallback;
+
+const digits = (v: unknown) => s(v).replace(/\D/g, '').slice(-10);
+
+const approvalRoleFromLabel = (
+  label: unknown,
+  level: LeaderLevel
+): LeaderRole | null => {
+  const value = s(label).trim().toLowerCase();
+  const prefix = `${level.toLowerCase()}-`;
+  if (!value.startsWith(prefix)) return null;
+
+  const roleLabel = value.slice(prefix.length);
+  return LEADER_ROLES.find((role) => role === roleLabel) || null;
+};
+
+const savedApprovalsForLevel = (
+  item: FormValues | null,
+  level: LeaderLevel
+): LeaderApproval[] => {
+  const rows = item?.[APPROVERS_TABLE];
+  if (!Array.isArray(rows)) return [];
+
+  return rows.reduce<LeaderApproval[]>((out, row) => {
+    if (!row || typeof row !== 'object') return out;
+
+    const values = row as FormValues;
+    const role = approvalRoleFromLabel(values.name1, level);
+    const mobileNumber = digits(values.mobile_number);
+    if (
+      !role ||
+      !mobileNumber ||
+      out.some((approval) => approval.role === role)
+    ) {
+      return out;
+    }
+
+    out.push({
+      role,
+      mobile_number: mobileNumber,
+      verified_on: s(values.verified_on),
+    });
+    return out;
+  }, []);
+};
 
 const n = (v: unknown, fallback = 0): number => {
   if (typeof v === 'number') return v;
@@ -127,6 +174,12 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
       const approvalLevel = REVIEW_LEVEL[s(item?.workflow_state)];
       if (approvalLevel) {
+        const savedApprovals = savedApprovalsForLevel(item, approvalLevel);
+        if (savedApprovals.length) {
+          setApprovals(savedApprovals);
+          return;
+        }
+
         const approvalRes = await getLeaderApprovals(approvalLevel, name).catch(
           () => null
         );
