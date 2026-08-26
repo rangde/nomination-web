@@ -228,10 +228,11 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           `/nomination_form/view_status?name=${encodeURIComponent(name)}`
         );
       } else {
+        const message = s(payload?.msg, s(en?.workflow?.approval_failed));
         addToast({
           type: 'error',
-          hi: hi?.workflow?.approval_failed,
-          en: en?.workflow?.approval_failed,
+          hi: message,
+          en: message,
         });
       }
     } catch (error) {
