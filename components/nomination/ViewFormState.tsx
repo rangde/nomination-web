@@ -312,6 +312,7 @@ function ViewFormStatus({ name }: FormControlProps) {
               data={formValues}
               canReview={false}
               notshowapproved={true}
+              showApprovalBlocks={true}
             />
           </Box>
         )}
