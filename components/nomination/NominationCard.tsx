@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import DualLanguageText from '../DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
+import ApprovalBlocks from './ApprovalBlocks';
 
 type NominationData = Record<string, unknown>;
 
@@ -18,6 +19,7 @@ type CardValue = {
   canReview: boolean;
   notshowapproved?: boolean;
   form_approve?: boolean;
+  showApprovalBlocks?: boolean;
   // set on the approved tab, where every card was approved by the viewer
   approvedLevel?: ApprovalLevel;
 };
@@ -48,14 +50,16 @@ const formatApprovalDateTime = (dateTimeStr: string): string => {
   }).format(dt);
 };
 
-// the viewer's own decision, rather than whoever acted on it last
-const approvalAtLevel = (fv: NominationData, level: ApprovalLevel) => ({
-  by: s(fv[`${level.toLowerCase()}_approval_by`]),
-  on: s(fv[`${level.toLowerCase()}_approved_on`]),
-  level,
-});
+const pickApproval = (fv: NominationData, approvedLevel?: ApprovalLevel) => {
+  if (approvedLevel) {
+    const level = approvedLevel.toLowerCase();
+    return {
+      by: s(fv[`${level}_approval_by`]),
+      on: s(fv[`${level}_approved_on`]),
+      level: approvedLevel,
+    };
+  }
 
-const pickApproval = (fv: NominationData) => {
   const voBy = s(fv.vo_approval_by);
   const voOn = s(fv.vo_approved_on);
 
@@ -64,8 +68,33 @@ const pickApproval = (fv: NominationData) => {
 
   if (clfBy && clfOn) return { by: clfBy, on: clfOn, level: 'CLF' as const };
   if (voBy && voOn) return { by: voBy, on: voOn, level: 'VO' as const };
+  if (s(fv.shg_approval_by) || s(fv.name_of_the_shg)) {
+    return {
+      by: s(fv.shg_approval_by) || s(fv.name_of_the_shg),
+      on: s(fv.shg_approved_on),
+      level: 'SHG' as const,
+    };
+  }
 
   return { by: '', on: '', level: 'NONE' as const };
+};
+
+const approvalText = (
+  data: NominationData,
+  approval: ReturnType<typeof pickApproval>
+) => {
+  const shgName = s(data.name_of_the_shg);
+  if (approval.level === 'VO' && shgName) {
+    return `${en?.workflow?.approved_by} VO associated with ${shgName}`;
+  }
+  if (approval.level === 'CLF' && shgName) {
+    return `${en?.workflow?.approved_by} CLF associated with ${shgName}`;
+  }
+  if (approval.level === 'SHG') {
+    return `${en?.workflow?.approved_by} ${shgName || approval.by}`;
+  }
+
+  return `${en?.workflow?.approved_by} ${approval.by}`;
 };
 
 export default function NominationCard({
@@ -75,6 +104,7 @@ export default function NominationCard({
   approvedSx,
   notshowapproved,
   form_approve,
+  showApprovalBlocks,
   approvedLevel,
 }: CardValue) {
   const router = useRouter();
@@ -107,17 +137,13 @@ export default function NominationCard({
 
   // the approved tab is filtered to this reviewer, so name their own approval
   // instead of a later one at another level
-  const ownApproved = !!form_approve && !!approvedLevel;
-  const approval = ownApproved
-    ? approvalAtLevel(data, approvedLevel)
+  const approval = form_approve
+    ? pickApproval(data, approvedLevel)
     : pickApproval(data);
-  const approvedBy = approval.by || 'XYZ';
   const approvedOn = approval.on ? formatApprovalDateTime(approval.on) : '';
-  const isShgProposed = canReview && s(data.workflow_state) === 'SHG Proposed';
-  const showApproved = isShgProposed ? true : !approval.by;
 
   const shouldShowApprovedStrip =
-    !showApproved && !notshowapproved && !!approval.by;
+    !notshowapproved && !!approval.by && approval.level !== 'NONE';
 
   return (
     <Paper
@@ -172,6 +198,12 @@ export default function NominationCard({
         </Typography>
       </Box>
 
+      {showApprovalBlocks && (
+        <Box sx={{ mt: 1 }}>
+          <ApprovalBlocks data={data} />
+        </Box>
+      )}
+
       <Box
         display="flex"
         justifyContent="space-between"
@@ -195,6 +227,7 @@ export default function NominationCard({
             display: 'flex',
             gap: 0.5,
             alignItems: 'center',
+            flexWrap: 'wrap',
             mt: 1,
             p: 1,
             borderRadius: '10px',
@@ -203,13 +236,13 @@ export default function NominationCard({
         >
           <CheckCircleIcon sx={{ fontSize: 14 }} />
           <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
-            {ownApproved
-              ? en?.workflow?.you_approved
-              : `${en?.workflow?.approved_by} ${approvedBy}`}
+            {approvalText(data, approval)}
           </Typography>
-          <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
-            {en?.workflow?.on} {approvedOn}
-          </Typography>
+          {approvedOn && (
+            <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
+              {en?.workflow?.on} {approvedOn}
+            </Typography>
+          )}
         </Box>
       )}
 
