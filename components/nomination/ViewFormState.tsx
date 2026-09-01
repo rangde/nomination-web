@@ -179,40 +179,9 @@ function ViewFormStatus({ name }: FormControlProps) {
   const pendingEn = en?.workflow?.pending_review;
   const pendingHi = hi?.workflow?.pending_review;
 
-  const shgName = s(formValues?.owner);
-  const voName = s(formValues?.vo_approval_by);
-  const clfName = s(formValues?.clf_approval_by);
-
   const voOn = formatApprovalDateTime(formValues?.vo_approved_on);
   const clfOn = formatApprovalDateTime(formValues?.clf_approved_on);
 
-  const voLine =
-    voName && voOn
-      ? `${en?.workflow?.reviewed_by}: VO ${voName} ${en?.workflow?.on} ${voOn}`
-      : voName
-        ? `${en?.workflow?.reviewed_by}: VO ${voName}`
-        : pendingEn;
-
-  const voLineHi =
-    voName && voOn
-      ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}, ${voOn}`
-      : voName
-        ? `${hi?.workflow?.reviewed_by}: VO ${voName} ${hi?.workflow?.by}`
-        : pendingHi;
-
-  const clfLine =
-    clfName && clfOn
-      ? `${en?.workflow?.reviewed_by}: CLF ${clfName} ${en?.workflow?.on} ${clfOn}`
-      : clfName
-        ? `${en?.workflow?.reviewed_by}: CLF ${clfName}`
-        : pendingEn;
-
-  const clfLineHi =
-    clfName && clfOn
-      ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}, ${clfOn}`
-      : clfName
-        ? `${hi?.workflow?.reviewed_by}: CLF ${clfName} ${hi?.workflow?.by}`
-        : pendingHi;
   const shgOn = formatApprovalDateTime(formValues?.creation);
 
   const checkedApprovals = checkedLeaders(formValues);
@@ -239,24 +208,22 @@ function ViewFormStatus({ name }: FormControlProps) {
   const steps = [
     {
       h1: en?.workflow?.shg_review,
-      h2: shgName ? `${en?.workflow?.reviewed_by}: SHG ${shgName}` : pendingEn,
-      h3: shgName
-        ? `${hi?.workflow?.reviewed_by}: SHG ${shgName} ${hi?.workflow?.by}`
-        : pendingHi,
+      h2: pendingEn,
+      h3: pendingHi,
       lines: shgLines,
       active: shgActive,
     },
     {
       h1: en?.workflow?.vo_approval,
-      h2: voLine,
-      h3: voLineHi,
+      h2: pendingEn,
+      h3: pendingHi,
       lines: voLines,
       active: voActive,
     },
     {
       h1: en?.workflow?.clf_approval,
-      h2: clfLine,
-      h3: clfLineHi,
+      h2: pendingEn,
+      h3: pendingHi,
       lines: clfLines,
       active: clfActive,
     },
