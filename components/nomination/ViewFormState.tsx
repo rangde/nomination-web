@@ -277,7 +277,7 @@ function ViewFormStatus({ name }: FormControlProps) {
         h1={hi?.form?.nomi_form}
         h2={en?.form?.nomi_form}
       />
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 2, pb: 4 }}>
         <Box
           sx={{
             display: 'flex',

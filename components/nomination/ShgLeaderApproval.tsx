@@ -227,10 +227,11 @@ function ShgLeaderApproval({
         en: 'OTP verified successfully',
       });
     } catch (err) {
+      console.error(err);
       addToast({
         type: 'error',
         hi: hi?.login?.invalid,
-        en: err instanceof ApiError ? err.message : en?.login?.invalid,
+        en: en?.login?.invalid,
       });
     } finally {
       setBusy(null);

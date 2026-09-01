@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import DualLanguageText from '../DualLanguageText';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
-import ApprovalBlocks from './ApprovalBlocks';
 
 type NominationData = Record<string, unknown>;
 
@@ -19,7 +18,6 @@ type CardValue = {
   canReview: boolean;
   notshowapproved?: boolean;
   form_approve?: boolean;
-  showApprovalBlocks?: boolean;
   // set on the approved tab, where every card was approved by the viewer
   approvedLevel?: ApprovalLevel;
 };
@@ -104,7 +102,6 @@ export default function NominationCard({
   approvedSx,
   notshowapproved,
   form_approve,
-  showApprovalBlocks,
   approvedLevel,
 }: CardValue) {
   const router = useRouter();
@@ -197,12 +194,6 @@ export default function NominationCard({
           {hasCreditLimit ? `₹${creditLimit}` : notSetLabel}
         </Typography>
       </Box>
-
-      {showApprovalBlocks && (
-        <Box sx={{ mt: 1 }}>
-          <ApprovalBlocks data={data} />
-        </Box>
-      )}
 
       <Box
         display="flex"
