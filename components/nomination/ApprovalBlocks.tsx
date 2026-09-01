@@ -45,11 +45,6 @@ const splitLabel = (
   return { level: level ?? 'SHG', role };
 };
 
-const levelIsComplete = (data: FormValues, level: LeaderLevel): boolean => {
-  const field = `${level.toLowerCase()}_approval_by`;
-  return !!s(data[field]);
-};
-
 const leaderLabel = (role: LeaderRole) => ({
   hi: s(hi?.form?.[role], role),
   en: s(en?.form?.[role], role),
@@ -88,8 +83,7 @@ function ApprovalBlocks({ data }: { data: FormValues | null }) {
   if (!data) return null;
 
   const levels = LEADER_LEVELS.filter(
-    (level) =>
-      levelIsComplete(data, level) || approvalsForLevel(data, level).length > 0
+    (level) => approvalsForLevel(data, level).length > 0
   );
 
   if (!levels.length) return null;
@@ -98,10 +92,6 @@ function ApprovalBlocks({ data }: { data: FormValues | null }) {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       {levels.map((level) => {
         const heading = levelHeading(level);
-        const approvedBy = s(data[`${level.toLowerCase()}_approval_by`]);
-        const approvedOn = formatDateTime(
-          data[`${level.toLowerCase()}_approved_on`]
-        );
         const leaderApprovals = approvalsForLevel(data, level);
 
         return (
@@ -120,12 +110,6 @@ function ApprovalBlocks({ data }: { data: FormValues | null }) {
                 <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
                   {s(heading.hi)} ({s(heading.en)})
                 </Typography>
-                {approvedBy && (
-                  <Typography sx={{ fontSize: 12, color: '#6B7280' }}>
-                    {s(en?.workflow?.approved_by)} {approvedBy}
-                    {approvedOn ? ` ${s(en?.workflow?.on)} ${approvedOn}` : ''}
-                  </Typography>
-                )}
               </Box>
             </Box>
 

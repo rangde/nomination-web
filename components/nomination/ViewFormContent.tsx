@@ -13,7 +13,6 @@ import ShgLeaderApproval, {
   LeaderLevel,
   LeaderRole,
 } from '@/components/nomination/ShgLeaderApproval';
-import ApprovalBlocks from '@/components/nomination/ApprovalBlocks';
 import type { LeaderApproval } from '@/app/nomination_form/NominationFormProvider';
 import { addToast } from '../error/toastStore';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -201,7 +200,8 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
     const limitToApprove = creditLimit || s(formValues?.set_credit_limit);
     const currentApprovalLevel = REVIEW_LEVEL[s(formValues?.workflow_state)];
-    const creditLimitRequired = currentApprovalLevel !== 'VO';
+    const creditLimitRequired =
+      currentApprovalLevel !== 'VO' && currentApprovalLevel !== 'CLF';
 
     if (creditLimitRequired && !limitToApprove) {
       addToast({
@@ -555,8 +555,6 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             ]}
           />
         </Paper>
-
-        <ApprovalBlocks data={formValues} />
 
         {needsApprovals && (
           <Paper sx={{ p: 2, borderRadius: 3 }}>
