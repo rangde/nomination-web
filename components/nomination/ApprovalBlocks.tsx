@@ -4,6 +4,7 @@ import { Box, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
+import DualLanguageText from '@/components/DualLanguageText';
 
 type FormValues = Record<string, unknown>;
 type LeaderRole = 'president' | 'secretary' | 'treasurer';
@@ -79,10 +80,16 @@ const levelHeading = (level: LeaderLevel) => {
   return { hi: hi?.workflow?.shg_review, en: en?.workflow?.shg_review };
 };
 
-function ApprovalBlocks({ data }: { data: FormValues | null }) {
+function ApprovalBlocks({
+  data,
+  levels: selectedLevels,
+}: {
+  data: FormValues | null;
+  levels?: LeaderLevel[];
+}) {
   if (!data) return null;
 
-  const levels = LEADER_LEVELS.filter(
+  const levels = (selectedLevels || LEADER_LEVELS).filter(
     (level) => approvalsForLevel(data, level).length > 0
   );
 
@@ -117,16 +124,28 @@ function ApprovalBlocks({ data }: { data: FormValues | null }) {
               <Box sx={{ mt: 0.75, pl: 3 }}>
                 {leaderApprovals.map((approval) => {
                   const label = leaderLabel(approval.role);
+                  const enLine = approval.on
+                    ? `${s(en?.workflow?.reviewed_by)}: ${label.en} ${s(
+                        en?.workflow?.on
+                      )} ${approval.on}`
+                    : `${s(en?.workflow?.reviewed_by)}: ${label.en}`;
+                  const hiLine = approval.on
+                    ? `${s(hi?.workflow?.reviewed_by)}: ${label.hi} ${s(
+                        hi?.workflow?.by
+                      )}, ${approval.on}`
+                    : `${s(hi?.workflow?.reviewed_by)}: ${label.hi} ${s(
+                        hi?.workflow?.by
+                      )}`;
+
                   return (
-                    <Typography
+                    <DualLanguageText
                       key={approval.role}
-                      sx={{ fontSize: 12, color: '#6B7280' }}
-                    >
-                      {s(en?.workflow?.reviewed_by)}: {label.en}
-                      {approval.on
-                        ? ` ${s(en?.workflow?.on)} ${approval.on}`
-                        : ''}
-                    </Typography>
+                      h1={enLine}
+                      h2={hiLine}
+                      boxStyle={{ mt: 0.5 }}
+                      h1style={{ fontSize: 12, color: '#6B7280' }}
+                      h2style={{ fontSize: 12, color: '#6B7280' }}
+                    />
                   );
                 })}
               </Box>

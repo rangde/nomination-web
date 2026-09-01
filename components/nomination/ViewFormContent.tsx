@@ -13,6 +13,7 @@ import ShgLeaderApproval, {
   LeaderLevel,
   LeaderRole,
 } from '@/components/nomination/ShgLeaderApproval';
+import ApprovalBlocks from '@/components/nomination/ApprovalBlocks';
 import type { LeaderApproval } from '@/app/nomination_form/NominationFormProvider';
 import { addToast } from '../error/toastStore';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -26,6 +27,12 @@ const MIN_LEADER_APPROVALS = 2;
 const REVIEW_LEVEL: Record<string, LeaderLevel> = {
   'SHG Proposed': 'VO',
   'VO Approved': 'CLF',
+};
+
+const FORM_APPROVAL_LEVEL: Record<string, LeaderLevel> = {
+  'SHG Proposed': 'SHG',
+  'VO Approved': 'VO',
+  'CLF Approved': 'CLF',
 };
 
 const APPROVAL_HEADING: Record<LeaderLevel, { hi: string; en: string }> = {
@@ -254,6 +261,8 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   const approvalLevel = REVIEW_LEVEL[s(formValues?.workflow_state)];
   const needsApprovals = !view && !!approvalLevel;
   const hasEnoughApprovals = approvals.length >= MIN_LEADER_APPROVALS;
+  const displayedApprovalLevel =
+    FORM_APPROVAL_LEVEL[s(formValues?.workflow_state)];
 
   const shgProposed =
     n(formValues?.shg_proposed, 0) || s(formValues?.shg_proposed, '0');
@@ -555,6 +564,10 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             ]}
           />
         </Paper>
+
+        {displayedApprovalLevel && (
+          <ApprovalBlocks data={formValues} levels={[displayedApprovalLevel]} />
+        )}
 
         {needsApprovals && (
           <Paper sx={{ p: 2, borderRadius: 3 }}>
