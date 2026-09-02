@@ -263,6 +263,9 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   const hasEnoughApprovals = approvals.length >= MIN_LEADER_APPROVALS;
   const displayedApprovalLevel =
     FORM_APPROVAL_LEVEL[s(formValues?.workflow_state)];
+  const isVoOrClfFlow = approvalLevel === 'VO' || approvalLevel === 'CLF';
+  const showApprovalHistoryBelowCreditLimit =
+    !!displayedApprovalLevel && !(isVoOrClfFlow && !view);
 
   const shgProposed =
     n(formValues?.shg_proposed, 0) || s(formValues?.shg_proposed, '0');
@@ -565,7 +568,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           />
         </Paper>
 
-        {displayedApprovalLevel && (
+        {showApprovalHistoryBelowCreditLimit && (
           <ApprovalBlocks data={formValues} levels={[displayedApprovalLevel]} />
         )}
 
