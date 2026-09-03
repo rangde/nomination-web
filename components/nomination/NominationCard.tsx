@@ -9,6 +9,8 @@ import en from '@/messages/en.json';
 
 type NominationData = Record<string, unknown>;
 
+export type ApprovalLevel = 'VO' | 'CLF';
+
 type CardValue = {
   data: NominationData;
   cardSx?: SxProps<Theme>;
@@ -16,6 +18,8 @@ type CardValue = {
   canReview: boolean;
   notshowapproved?: boolean;
   form_approve?: boolean;
+  // set on the approved tab, where every card was approved by the viewer
+  approvedLevel?: ApprovalLevel;
 };
 
 const s = (v: unknown, fallback = ''): string =>
@@ -44,7 +48,16 @@ const formatApprovalDateTime = (dateTimeStr: string): string => {
   }).format(dt);
 };
 
-const pickApproval = (fv: NominationData) => {
+const pickApproval = (fv: NominationData, approvedLevel?: ApprovalLevel) => {
+  if (approvedLevel) {
+    const level = approvedLevel.toLowerCase();
+    return {
+      by: s(fv[`${level}_approval_by`]),
+      on: s(fv[`${level}_approved_on`]),
+      level: approvedLevel,
+    };
+  }
+
   const voBy = s(fv.vo_approval_by);
   const voOn = s(fv.vo_approved_on);
 
@@ -53,8 +66,33 @@ const pickApproval = (fv: NominationData) => {
 
   if (clfBy && clfOn) return { by: clfBy, on: clfOn, level: 'CLF' as const };
   if (voBy && voOn) return { by: voBy, on: voOn, level: 'VO' as const };
+  if (s(fv.shg_approval_by) || s(fv.name_of_the_shg)) {
+    return {
+      by: s(fv.shg_approval_by) || s(fv.name_of_the_shg),
+      on: s(fv.shg_approved_on),
+      level: 'SHG' as const,
+    };
+  }
 
   return { by: '', on: '', level: 'NONE' as const };
+};
+
+const approvalText = (
+  data: NominationData,
+  approval: ReturnType<typeof pickApproval>
+) => {
+  const shgName = s(data.name_of_the_shg);
+  if (approval.level === 'VO' && shgName) {
+    return `${en?.workflow?.approved_by} VO associated with ${shgName}`;
+  }
+  if (approval.level === 'CLF' && shgName) {
+    return `${en?.workflow?.approved_by} CLF associated with ${shgName}`;
+  }
+  if (approval.level === 'SHG') {
+    return `${en?.workflow?.approved_by} ${shgName || approval.by}`;
+  }
+
+  return `${en?.workflow?.approved_by} ${approval.by}`;
 };
 
 export default function NominationCard({
@@ -64,6 +102,7 @@ export default function NominationCard({
   approvedSx,
   notshowapproved,
   form_approve,
+  approvedLevel,
 }: CardValue) {
   const router = useRouter();
 
@@ -83,21 +122,25 @@ export default function NominationCard({
 
   const docId = s(data.name);
 
+  // the SHG credit limit step is optional, so an unset limit is expected
   const creditLimit = n(data.set_credit_limit, 0);
+  const hasCreditLimit = creditLimit > 0;
+  const notSetLabel = `${s(hi?.dashboard?.not_set)} (${s(en?.dashboard?.not_set)})`;
 
   const entType =
     n(data.farm_based, 0) === 1
       ? en?.workflow?.farm_based
       : en?.workflow?.non_farm_based;
 
-  const approval = pickApproval(data);
-  const approvedBy = approval.by || 'XYZ';
+  // the approved tab is filtered to this reviewer, so name their own approval
+  // instead of a later one at another level
+  const approval = form_approve
+    ? pickApproval(data, approvedLevel)
+    : pickApproval(data);
   const approvedOn = approval.on ? formatApprovalDateTime(approval.on) : '';
-  const isShgProposed = canReview && s(data.workflow_state) === 'SHG Proposed';
-  const showApproved = isShgProposed ? true : !approval.by;
 
   const shouldShowApprovedStrip =
-    !showApproved && !notshowapproved && !!approval.by;
+    !notshowapproved && !!approval.by && approval.level !== 'NONE';
 
   return (
     <Paper
@@ -141,8 +184,14 @@ export default function NominationCard({
           h1style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6B7280' }}
           h2style={{ fontWeight: 400, fontSize: '0.65rem', color: '#6B7280' }}
         />
-        <Typography fontWeight={600} sx={{ fontSize: '0.9rem' }}>
-          ₹{creditLimit}
+        <Typography
+          fontWeight={600}
+          sx={{
+            fontSize: '0.9rem',
+            color: hasCreditLimit ? 'inherit' : '#6B7280',
+          }}
+        >
+          {hasCreditLimit ? `₹${creditLimit}` : notSetLabel}
         </Typography>
       </Box>
 
@@ -169,6 +218,7 @@ export default function NominationCard({
             display: 'flex',
             gap: 0.5,
             alignItems: 'center',
+            flexWrap: 'wrap',
             mt: 1,
             p: 1,
             borderRadius: '10px',
@@ -177,11 +227,13 @@ export default function NominationCard({
         >
           <CheckCircleIcon sx={{ fontSize: 14 }} />
           <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
-            {en?.workflow?.approved_by} {approvedBy}
+            {approvalText(data, approval)}
           </Typography>
-          <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
-            {en?.workflow?.on} {approvedOn}
-          </Typography>
+          {approvedOn && (
+            <Typography sx={{ fontSize: '0.6rem', color: '#374151' }}>
+              {en?.workflow?.on} {approvedOn}
+            </Typography>
+          )}
         </Box>
       )}
 

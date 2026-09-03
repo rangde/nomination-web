@@ -2,108 +2,93 @@
 
 import { Box, Button, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
+
 import DualLanguageText from '@/components/DualLanguageText';
+import Text from '@/components/FormComponents/Text';
+import SelectField from '@/components/FormComponents/SelectField';
+import CheckBoxSingleSelect from '@/components/FormComponents/CheckBoxSingleSelect';
+import OrganizationSearch from '@/components/FormComponents/OrganizationSearch';
+import NominationStepper from '@/components/nomination/NominationStepper';
+import AppHeader from '@/components/header/AppHeader';
+import { addToast } from '@/components/error/toastStore';
 import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
-import AppHeader from '@/components/header/AppHeader';
-import CheckBoxSingleSelect from '@/components/FormComponents/CheckBoxSingleSelect';
-import NominationStepper from '@/components/nomination/NominationStepper';
-import SelectField from '@/components/FormComponents/SelectField';
-import CheckBoxMultiSelect from '@/components/FormComponents/CheckBoxMultiSelect';
-import ImportantNote from '@/components/nomination/ImportantNote';
 import { useNominationForm } from '../NominationFormProvider';
-import { addToast } from '@/components/error/toastStore';
+import { getShgIssue } from '../requiredFields';
 
-type Sector = 'farm_based' | 'non_farm';
+const CURRENT_YEAR = new Date().getFullYear();
 
-export default function NominationStepTwoPage() {
+const FIRST_JOINING_YEAR = 2000;
+
+const yearOptions = Array.from(
+  { length: CURRENT_YEAR - FIRST_JOINING_YEAR + 1 },
+  (_, i) => {
+    const year = String(CURRENT_YEAR - i);
+    return { label_1: year, value: year };
+  }
+);
+
+const attendanceOptions = [
+  { label_1: '10 या अधिक', label_2: '10 or more', value: '10_or_more' },
+  { label_1: '7 से 9', label_2: '7 to 9', value: '7_to_9' },
+  { label_1: '7 से कम', label_2: 'fewer than 7', value: 'fewer_than_7' },
+];
+
+const repaymentOptions = [
+  {
+    label_1: 'हमेशा समय पर',
+    label_2: 'Always on time',
+    value: 'always_on_time',
+  },
+  {
+    label_1: 'अधिकतर समय पर',
+    label_2: 'Mostly on time',
+    value: 'mostly_on_time',
+  },
+  { label_1: 'देरी हुई है', label_2: 'Has delayed', value: 'has_delayed' },
+];
+
+export default function NominationShgRecordPage() {
   const router = useRouter();
-  const { form, setStep2 } = useNominationForm();
+  const { form, setShg } = useNominationForm();
 
-  const { sector, business_category, supportNeeded } = form.step2;
+  const {
+    vo_name,
+    shg_name,
+    year_of_joining_shg,
+    attendance_last_12_meetings,
+    repayment_record,
+    total_savings,
+  } = form.shg;
 
-  const farmSelectOptions = [
-    { label_1: 'कृषि', label_2: 'Agriculture', value: 'agriculture' },
-    { label_1: 'डेयरी', label_2: 'Dairy', value: 'dairy' },
-    { label_1: 'बकरी पालन', label_2: 'Goat rearing', value: 'goat_rearing' },
-    {
-      label_1: 'मुर्गी पालन',
-      label_2: 'Poultry farming',
-      value: 'poultry_farming',
-    },
-    {
-      label_1: 'मशरूम उत्पादन',
-      label_2: 'Mushroom cultivation',
-      value: 'mushroom_cultivation',
-    },
-    {
-      label_1: 'कृषि इनपुट दुकान',
-      label_2: 'Agri input shop',
-      value: 'agri_input_shop',
-    },
-  ];
-  const nonFarmSelectOptions = [
-    {
-      label_1: 'हस्तशिल्प',
-      label_2: 'Handicraft',
-      value: 'handicraft',
-    },
-    {
-      label_1: 'सिलाई',
-      label_2: 'Tailoring',
-      value: 'tailoring',
-    },
-    {
-      label_1: 'ब्यूटी पार्लर',
-      label_2: 'Beauty Parlour',
-      value: 'beauty_parlour',
-    },
-    {
-      label_1: 'किराना दुकान',
-      label_2: 'Grocery Store',
-      value: 'grocery_store',
-    },
-    {
-      label_1: 'सब्जी विक्रेता',
-      label_2: 'Vegetable Vendor',
-      value: 'vegetable_vendor',
-    },
-  ];
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    if (!(name in form.shg)) return;
+    const key = name as keyof typeof form.shg;
+
+    setShg({ [key]: value });
+  };
+
+  const handleOrganizationChange = (name: string, value: string) => {
+    if (!(name in form.shg)) return;
+    const key = name as keyof typeof form.shg;
+
+    setShg({ [key]: value });
+  };
 
   const validateRequired = (): boolean => {
-    if (!sector) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया सेक्टर चुनें',
-        en: 'Please select sector',
-      });
-      return false;
-    }
+    const issue = getShgIssue(form);
+    if (!issue) return true;
 
-    if (!business_category) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया बिज़नेस टाइप चुनें',
-        en: 'Please select business type',
-      });
-      return false;
-    }
-
-    if (!supportNeeded || supportNeeded.length === 0) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया सपोर्ट विकल्प चुनें',
-        en: 'Please select support needed',
-      });
-      return false;
-    }
-
-    return true;
+    addToast({ type: 'error', hi: issue.hi, en: issue.en });
+    return false;
   };
 
   const handleNext = () => {
-    const ok = validateRequired();
-    if (!ok) return;
+    if (!validateRequired()) return;
 
     addToast({
       type: 'success',
@@ -137,86 +122,77 @@ export default function NominationStepTwoPage() {
           overflowY: 'auto',
           px: 2,
           py: 2,
+          pb: 5,
           '&::-webkit-scrollbar': { display: 'none' },
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
         }}
       >
         <Paper sx={{ p: 3, borderRadius: 3 }}>
-          <NominationStepper activeStep={1} />
+          <NominationStepper activeStep={1} totalSteps={4} />
 
           <DualLanguageText
-            h1={hi?.form?.enterprise}
-            h2={en?.form?.enterprise}
+            h1={hi?.form?.shg_record}
+            h2={en?.form?.shg_record}
             h1style={{ fontSize: 18, fontWeight: 700 }}
             h2style={{ mb: 2, fontSize: 14 }}
           />
 
           <Box display="flex" flexDirection="column" gap={2}>
-            <CheckBoxSingleSelect
-              label_1={hi?.form?.sector_type}
-              label_2={en?.form?.sector_type}
-              value={sector}
-              onChange={(val) => {
-                setStep2({ sector: val as Sector, business_category: '' });
-              }}
-              options={[
-                {
-                  label_1: 'कृषि आधारित',
-                  label_2: 'Farm-based',
-                  value: 'farm_based',
-                },
-                {
-                  label_1: 'गैर-कृषि आधारित',
-                  label_2: 'Non-farm',
-                  value: 'non_farm',
-                },
-              ]}
+            <OrganizationSearch
+              name="vo_name"
+              value={vo_name}
+              onChange={handleOrganizationChange}
+              organizationType="VO"
+              label_1={hi?.form?.vo_name}
+              label_2={en?.form?.vo_name}
+              required
+            />
+
+            <OrganizationSearch
+              name="shg_name"
+              value={shg_name}
+              onChange={handleOrganizationChange}
+              organizationType="SHG"
+              label_1={hi?.form?.shg_name}
+              label_2={en?.form?.shg_name}
+              required
             />
 
             <SelectField
-              label_1={hi?.form?.business_type}
-              label_2={en?.form?.business_type}
-              placeholder={
-                sector === 'farm_based'
-                  ? 'Select Farm-based enterprises'
-                  : 'Select Non-farm enterprises'
-              }
-              value={business_category}
-              onChange={(val) => setStep2({ business_category: val })}
-              options={
-                sector === 'farm_based'
-                  ? farmSelectOptions
-                  : nonFarmSelectOptions
-              }
+              label_1={hi?.form?.year_of_joining_shg}
+              label_2={en?.form?.year_of_joining_shg}
+              placeholder={en?.form?.select_year}
+              value={year_of_joining_shg}
+              onChange={(val) => setShg({ year_of_joining_shg: val })}
+              options={yearOptions}
             />
 
-            <CheckBoxMultiSelect
-              label_1={hi?.form?.support}
-              label_2={en?.form?.support}
-              value={supportNeeded}
-              onChange={(vals) => setStep2({ supportNeeded: vals })}
-              options={[
-                {
-                  label_1: 'बाजार तक पहुंच',
-                  label_2: 'Market Access',
-                  value: 'market_access',
-                },
-                { label_1: 'विपणन', label_2: 'Marketing', value: 'marketing' },
-                {
-                  label_1: 'मांग का आकलन',
-                  label_2: 'Demand Assessment',
-                  value: 'demand_assessment',
-                },
-                { label_1: 'कोई नहीं', label_2: 'None', value: 'none' },
-              ]}
+            <CheckBoxSingleSelect
+              label_1={hi?.form?.attendance_12_meetings}
+              label_2={en?.form?.attendance_12_meetings}
+              value={attendance_last_12_meetings}
+              onChange={(val) => setShg({ attendance_last_12_meetings: val })}
+              options={attendanceOptions}
             />
 
-            <ImportantNote
-              h1={hi.form.important_form}
-              h2={en.form.important_form}
-              desc_1={hi.form.final_review_desc_form}
-              desc_2={en.form.final_review_desc_form}
+            <CheckBoxSingleSelect
+              label_1={hi?.form?.repayment_record}
+              label_2={en?.form?.repayment_record}
+              value={repayment_record}
+              onChange={(val) => setShg({ repayment_record: val })}
+              options={repaymentOptions}
+            />
+
+            <Text
+              name="total_savings"
+              value={total_savings}
+              onChange={handleChange}
+              label_1={hi?.form?.total_savings}
+              label_2={en?.form?.total_savings}
+              placeholder={`${hi?.form?.numeric_rupees} / ${en?.form?.numeric_rupees}`}
+              currency
+              required
             />
           </Box>
 
@@ -231,13 +207,12 @@ export default function NominationStepTwoPage() {
               textTransform: 'none',
               '&:hover': { bgcolor: '#111' },
             }}
-            // onClick={() => router.push('/nomination_form/step-3')}
             onClick={handleNext}
           >
             <Box textAlign="center">
               <DualLanguageText
                 h1={hi?.form?.next_step}
-                h2={en?.form?.save_and_next}
+                h2={en?.form?.next_step}
                 h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}
                 h2style={{ fontWeight: 400, fontSize: 12, textAlign: 'center' }}
               />

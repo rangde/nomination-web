@@ -2,6 +2,8 @@
 
 import { Box, Typography, Paper } from '@mui/material';
 import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp';
+import hi from '@/messages/hi.json';
+import en from '@/messages/en.json';
 
 type NominationData = Record<string, unknown>;
 
@@ -41,6 +43,14 @@ function NominationCard2({ data }: cardValue) {
   const fullName = `${firstName} ${lastName}`.trim() || 'guest';
   const approval = pickApproval(data);
   const approvedOn = approval.on ? formatApprovalDateTime(approval.on) : '';
+
+  // the SHG credit limit step is optional, so an unset limit is expected
+  const creditLimit = Number(data.set_credit_limit);
+  const creditLimitLabel =
+    Number.isFinite(creditLimit) && creditLimit > 0
+      ? `₹${creditLimit}`
+      : `${s(hi?.dashboard?.not_set)} (${s(en?.dashboard?.not_set)})`;
+
   return (
     <Paper
       elevation={2}
@@ -59,19 +69,7 @@ function NominationCard2({ data }: cardValue) {
         <Box>
           <Typography fontWeight={600}>{fullName}</Typography>
           <Typography fontSize={12} color="#6B7280">
-            {approvedOn} • ₹
-            {(() => {
-              const value = data.set_credit_limit;
-
-              if (typeof value === 'number') return value;
-
-              if (typeof value === 'string') {
-                const parsed = Number(value);
-                return Number.isFinite(parsed) ? parsed : 0;
-              }
-
-              return 0;
-            })()}
+            {approvedOn} • {creditLimitLabel}
           </Typography>
         </Box>
       </Box>

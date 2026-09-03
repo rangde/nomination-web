@@ -8,17 +8,24 @@ import {
   TimelineContent,
   TimelineDot,
 } from '@mui/lab';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import GroupsIcon from '@mui/icons-material/Groups';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 
 import DualLanguageText from '@/components/DualLanguageText';
 
+type ReviewLine = {
+  h2: string;
+  h3?: string;
+};
+
 type Step = {
   h1: string;
   h2: string;
   h3?: string;
+  // one entry per reviewer; falls back to the single h2/h3 pair when omitted
+  lines?: ReviewLine[];
   active?: boolean;
 };
 
@@ -44,6 +51,11 @@ function NextTimeline({ steps }: Props) {
     >
       {steps.map((item, index) => {
         const isActive = !!item.active;
+
+        const reviewLines =
+          item.lines && item.lines.length > 0
+            ? item.lines
+            : [{ h2: item.h2, h3: item.h3 }];
 
         return (
           <TimelineItem key={`${item.h1}-${index}`} sx={{ minHeight: 72 }}>
@@ -77,29 +89,39 @@ function NextTimeline({ steps }: Props) {
 
             <TimelineContent sx={{ py: 0, mt: 0.5 }}>
               <Box sx={{ opacity: isActive ? 1 : 0.55 }}>
-                <DualLanguageText
-                  h1={item.h1}
-                  h2={item.h2}
-                  h3={item.h3 || '-'}
-                  h1style={{
+                <Typography
+                  component="span"
+                  sx={{
+                    display: 'block',
                     fontSize: 14,
                     fontWeight: 700,
                     color: isActive ? '#111827' : '#6B7280',
                     lineHeight: 1.5,
                   }}
-                  h2style={{
-                    fontWeight: 500,
-                    fontSize: 11,
-                    color: '#6B7280',
-                    lineHeight: 1.5,
-                  }}
-                  h3style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: '#6B7280',
-                    lineHeight: 1.5,
-                  }}
-                />
+                >
+                  {item.h1}
+                </Typography>
+
+                {reviewLines.map((line, lineIndex) => (
+                  <DualLanguageText
+                    key={`${line.h2}-${lineIndex}`}
+                    h1={line.h2}
+                    h2={line.h3 || '-'}
+                    boxStyle={{ mt: lineIndex === 0 ? 0 : 0.75 }}
+                    h1style={{
+                      fontWeight: 500,
+                      fontSize: 11,
+                      color: '#6B7280',
+                      lineHeight: 1.5,
+                    }}
+                    h2style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      color: '#6B7280',
+                      lineHeight: 1.5,
+                    }}
+                  />
+                ))}
               </Box>
             </TimelineContent>
           </TimelineItem>

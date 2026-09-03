@@ -4,9 +4,13 @@ import { Stepper, Step, StepLabel } from '@mui/material';
 
 type Props = {
   activeStep: number;
+  totalSteps?: number;
 };
 
-export default function NominationStepper({ activeStep }: Props) {
+export default function NominationStepper({
+  activeStep,
+  totalSteps = 3,
+}: Props) {
   return (
     <Stepper
       activeStep={activeStep}
@@ -38,7 +42,7 @@ export default function NominationStepper({ activeStep }: Props) {
         },
       }}
     >
-      {[0, 1, 2].map((_, index) => (
+      {Array.from({ length: totalSteps }).map((_, index) => (
         <Step key={index}>
           <StepLabel />
         </Step>

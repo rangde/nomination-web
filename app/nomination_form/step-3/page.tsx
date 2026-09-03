@@ -1,327 +1,179 @@
 'use client';
 
-import { Box, Typography, Button, TextField, Paper } from '@mui/material';
+import { Box, Button, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { MuiOtpInput } from 'mui-one-time-password-input';
-import { useState, useEffect, useMemo, useRef } from 'react';
 import DualLanguageText from '@/components/DualLanguageText';
-import InputAdornment from '@mui/material/InputAdornment';
 import hi from '@/messages/hi.json';
-import { addToast } from '@/components/error/toastStore';
 import en from '@/messages/en.json';
 import AppHeader from '@/components/header/AppHeader';
+import CheckBoxSingleSelect from '@/components/FormComponents/CheckBoxSingleSelect';
 import NominationStepper from '@/components/nomination/NominationStepper';
-import ImportantNote from '@/components/nomination/ImportantNote';
-import CreditScoreGauge from '@/components/nomination/CreditScoreGauge';
 import SelectField from '@/components/FormComponents/SelectField';
+import Text from '@/components/FormComponents/Text';
+import CheckBoxMultiSelect from '@/components/FormComponents/CheckBoxMultiSelect';
+import ImportantNote from '@/components/nomination/ImportantNote';
 import { useNominationForm } from '../NominationFormProvider';
-import {
-  ApiError,
-  getNumberChecked,
-  verifyOtpApi as verify_otp,
-  getCreditScore,
-} from '@/services/api';
+import { getEnterpriseIssue, OTHER_BUSINESS } from '../requiredFields';
+import { addToast } from '@/components/error/toastStore';
 
-function NominationStepOne() {
+type Sector = 'farm_based' | 'non_farm';
+
+export default function NominationStepTwoPage() {
   const router = useRouter();
-  const [mobile, setMobile] = useState('');
-  const [fillOtp, setFillOtp] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [resend, SetResend] = useState(false);
-  const [seconds, setSeconds] = useState(60);
-  const [canResend, setCanResend] = useState(false);
-  const [showCredit, setShowCredit] = useState(false);
-  const [score, setScore] = useState<number | null>(null);
-  const otpContainerRef = useRef<HTMLDivElement | null>(null);
+  const { form, setStep2 } = useNominationForm();
 
-  const { form, setStep3, submitForm } = useNominationForm();
-  const { set_credit_limit } = form.step3;
+  const {
+    sector,
+    business_category,
+    business_category_other,
+    years_of_experience,
+    number_of_businesses,
+    family_support,
+    business_helpers,
+    supportNeeded,
+  } = form.step2;
 
-  const getCreditCheckId = () => {
-    const aadhaar = form.step1.aadhaar_number.trim();
-    const pan = form.step1.pan_number.trim().toUpperCase();
-    const voterId = form.step1.voter_id.trim().toUpperCase();
+  const farmSelectOptions = [
+    { label_1: 'कृषि', label_2: 'Agriculture', value: 'agriculture' },
+    { label_1: 'डेयरी', label_2: 'Dairy', value: 'dairy' },
+    { label_1: 'बकरी पालन', label_2: 'Goat Rearing', value: 'goat_rearing' },
+    {
+      label_1: 'मुर्गी पालन',
+      label_2: 'Poultry Farming',
+      value: 'poultry_farming',
+    },
+    { label_1: 'मछली पालन', label_2: 'Fishery', value: 'fishery' },
+    {
+      label_1: 'मशरूम की खेती',
+      label_2: 'Mushroom Cultivation',
+      value: 'mushroom_cultivation',
+    },
+    { label_1: 'मधुमक्खी पालन', label_2: 'Beekeeping', value: 'beekeeping' },
+    {
+      label_1: 'वर्मी कम्पोस्ट',
+      label_2: 'Vermicompost',
+      value: 'vermicompost',
+    },
+    {
+      label_1: 'नर्सरी / पौधशाला',
+      label_2: 'Plant Nursery',
+      value: 'plant_nursery',
+    },
+    {
+      label_1: 'कृषि इनपुट दुकान',
+      label_2: 'Agri Input Shop',
+      value: 'agri_input_shop',
+    },
+    {
+      label_1: 'पशु आहार दुकान',
+      label_2: 'Cattle Feed Shop',
+      value: 'cattle_feed_shop',
+    },
+    { label_1: 'अन्य', label_2: 'Other', value: OTHER_BUSINESS },
+  ];
 
-    if (aadhaar) {
-      return { id_number: aadhaar, id_type: 'AADHAAR' as const };
-    }
-    if (pan) {
-      return { id_number: pan, id_type: 'PAN' as const };
-    }
-    if (voterId) {
-      return { id_number: voterId, id_type: 'VOTERID' as const };
-    }
-    return null;
-  };
+  const nonFarmSelectOptions = [
+    { label_1: 'सिलाई', label_2: 'Tailoring', value: 'tailoring' },
+    {
+      label_1: 'ब्यूटी पार्लर',
+      label_2: 'Beauty Parlour',
+      value: 'beauty_parlour',
+    },
+    {
+      label_1: 'किराना दुकान',
+      label_2: 'Grocery Store',
+      value: 'grocery_store',
+    },
+    {
+      label_1: 'सब्ज़ी विक्रेता',
+      label_2: 'Vegetable Vendor',
+      value: 'vegetable_vendor',
+    },
+    {
+      label_1: 'टिफ़िन / भोजनालय',
+      label_2: 'Tiffin / Food Stall',
+      value: 'tiffin_food_stall',
+    },
+    {
+      label_1: 'अचार-पापड़ निर्माण',
+      label_2: 'Pickle and Papad Making',
+      value: 'pickle_papad_making',
+    },
+    {
+      label_1: 'हस्तशिल्प / हथकरघा',
+      label_2: 'Handicraft / Handloom',
+      value: 'handicraft_handloom',
+    },
+    {
+      label_1: 'चूड़ी व सौन्दर्य सामग्री',
+      label_2: 'Bangles and Cosmetics',
+      value: 'bangles_cosmetics',
+    },
+    { label_1: 'आटा चक्की', label_2: 'Flour Mill', value: 'flour_mill' },
+    {
+      label_1: 'मोबाइल रिचार्ज व मरम्मत',
+      label_2: 'Mobile Recharge and Repair',
+      value: 'mobile_recharge_repair',
+    },
+    {
+      label_1: 'दोना-पत्तल निर्माण',
+      label_2: 'Dona-Pattal Making',
+      value: 'dona_pattal_making',
+    },
+    {
+      label_1: 'अगरबत्ती निर्माण',
+      label_2: 'Agarbatti Making',
+      value: 'agarbatti_making',
+    },
+    { label_1: 'छोटा व्यापार', label_2: 'Petty Trade', value: 'petty_trade' },
+    { label_1: 'अन्य', label_2: 'Other', value: OTHER_BUSINESS },
+  ];
 
-  const verifyOtp = async (number: string, otp: string) => {
-    await verify_otp(number, otp, true);
-  };
+  const experienceOptions = [
+    { label_1: '1 वर्ष से कम', label_2: 'Under 1 year', value: 'below_1' },
+    { label_1: '1 से 2 वर्ष', label_2: '1 to 2 years', value: '1_to_2' },
+    { label_1: '3 से 5 वर्ष', label_2: '3 to 5 years', value: '3_to_5' },
+    { label_1: '5 वर्ष से अधिक', label_2: 'Over 5 years', value: 'above_5' },
+  ];
 
-  const resendOtp = () => {
-    if (!canResend) return;
-    setCanResend(false);
-    setFillOtp(true);
-    setSeconds(60);
-    validteAndSendOtp();
-  };
+  const businessCountOptions = [
+    { label_1: '1', label_2: '', value: '1' },
+    { label_1: '2', label_2: '', value: '2' },
+    { label_1: '3 या अधिक', label_2: '3 or more', value: '3_or_more' },
+  ];
 
-  const remark = useMemo(() => {
-    if (score === null || score < 0) {
-      return {
-        l1: hi?.credit_score?.needs_help,
-        l2: en?.credit_score?.needs_help
-          ? `(${en?.credit_score?.needs_help})`
-          : '',
-      };
-    } else if (score < 681) {
-      return {
-        l1: hi?.credit_score?.needs_help,
-        l2: en?.credit_score?.needs_help
-          ? `(${en?.credit_score?.needs_help})`
-          : '',
-      };
-    } else if (score <= 730) {
-      return {
-        l1: hi?.credit_score?.average,
-        l2: en?.credit_score?.average ? `(${en?.credit_score?.average})` : '',
-      };
-    } else if (score <= 770) {
-      return {
-        l1: hi?.credit_score?.fair,
-        l2: en?.credit_score?.fair ? `(${en?.credit_score?.fair})` : '',
-      };
-    } else if (score <= 790) {
-      return {
-        l1: hi?.credit_score?.good,
-        l2: en?.credit_score?.good ? `(${en?.credit_score?.good})` : '',
-      };
-    } else {
-      return {
-        l1: hi?.credit_score?.excellent,
-        l2: en?.credit_score?.excellent
-          ? `(${en?.credit_score?.excellent})`
-          : '',
-      };
-    }
-  }, [score]);
+  const familySupportOptions = [
+    { label_1: 'हाँ', label_2: 'Yes', value: 'yes' },
+    { label_1: 'आंशिक रूप से', label_2: 'Partially', value: 'partially' },
+    { label_1: 'नहीं', label_2: 'No', value: 'no' },
+  ];
 
-  useEffect(() => {
-    if (!fillOtp) return;
-    const interval = setInterval(() => {
-      setSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setCanResend(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [fillOtp, resend]);
-
-  useEffect(() => {
-    if (!fillOtp) return;
-
-    const focusTimer = window.setTimeout(() => {
-      const firstOtpInput = otpContainerRef.current?.querySelector('input');
-      firstOtpInput?.focus();
-    }, 150);
-
-    return () => window.clearTimeout(focusTimer);
-  }, [fillOtp]);
-
-  const handleRequestOTP = async () => {
-    if (showCredit) {
-      const okRequired = validateRequired();
-      if (!okRequired) return;
-
-      const mobileForSubmit = (form.step3.mobile_number || mobile).replace(
-        /\D/g,
-        ''
-      );
-      const res = await submitForm(
-        mobileForSubmit.length >= 10
-          ? { mobile_number: mobileForSubmit }
-          : undefined
-      );
-
-      if (!res.ok) {
-        addToast({
-          type: 'error',
-          hi: 'फॉर्म सबमिट नहीं हुआ',
-          en: `Submit failed: ${res.error}`,
-        });
-        return;
-      }
-
-      router.push(
-        `/nomination_form/view_status?name=${encodeURIComponent(res?.name)}`
-      );
-    } else if (fillOtp) {
-      try {
-        if (otp.length < 6) {
-          throw new ApiError(en?.login?.invalid);
-        }
-        await verifyOtp(mobile, otp);
-      } catch (err) {
-        addToast({
-          type: 'error',
-          hi: hi?.login?.invalid,
-          en: err instanceof ApiError ? err.message : en?.login?.invalid,
-        });
-        return;
-      }
-
-      addToast({
-        type: 'success',
-        hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
-        en: 'OTP verified successfully',
-      });
-
-      try {
-        const creditCheckId = getCreditCheckId();
-
-        if (!creditCheckId) {
-          addToast({
-            type: 'error',
-            hi: 'आधार, पैन या वोटर आईडी में से कोई एक आवश्यक है',
-            en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
-          });
-          return;
-        }
-
-        const res = await getCreditScore({
-          first_name: form.step1.first_name,
-          last_name: form.step1.last_name,
-          dob: form.step1.date_of_birth,
-          mobile_number: mobile,
-          id_number: creditCheckId.id_number,
-          id_type: creditCheckId.id_type,
-          pincode: form.step1.pincode,
-        });
-
-        if (res?.message?.status === 1) {
-          const msg = res.message.msg;
-
-          const isMsgObject =
-            typeof msg === 'object' && msg !== null && !Array.isArray(msg);
-
-          const rawScore = isMsgObject
-            ? (msg as { score: number }).score
-            : Number(msg);
-
-          const reportBase64 = isMsgObject
-            ? ((msg as { reportBase64?: string }).reportBase64 ?? '')
-            : '';
-
-          const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
-          setScore(finalScore);
-          setStep3({
-            mobile_number: mobile,
-            credit_score: finalScore.toString(),
-            reportBase64,
-          });
-          setShowCredit(true);
-
-          if (finalScore < 0) {
-            addToast({
-              type: 'error',
-              hi: 'क्रेडिट स्कोर उपलब्ध नहीं है',
-              en: 'Credit score not available',
-            });
-          } else {
-            addToast({
-              type: 'success',
-              hi: 'क्रेडिट स्कोर प्राप्त हुआ',
-              en: 'Credit score fetched successfully',
-            });
-          }
-        } else {
-          addToast({
-            type: 'error',
-            hi: 'क्रेडिट स्कोर प्राप्त नहीं हुआ',
-            en:
-              typeof res?.message?.msg === 'string'
-                ? res.message.msg
-                : 'Failed to fetch credit score',
-          });
-          setScore(0);
-          setShowCredit(true);
-        }
-      } catch (err) {
-        console.error(err);
-        addToast({
-          type: 'error',
-          hi: 'क्रेडिट स्कोर त्रुटि',
-          en: 'Credit score error',
-        });
-        setScore(0);
-        setShowCredit(true);
-      }
-    } else {
-      validteAndSendOtp();
-    }
-  };
-
-  const numberChecked = async (number: string) => {
-    const result = await getNumberChecked(number, true);
-    return result?.message?.status ? true : false;
-  };
+  const helperOptions = [
+    { label_1: 'पति', label_2: 'Husband', value: 'husband' },
+    { label_1: 'बच्चे', label_2: 'Children', value: 'children' },
+    { label_1: 'ससुराल पक्ष', label_2: 'In laws', value: 'in_laws' },
+    { label_1: 'कोई नहीं', label_2: 'None', value: 'none' },
+  ];
 
   const validateRequired = (): boolean => {
-    const mobileToCheck = (form.step3.mobile_number || mobile).replace(
-      /\D/g,
-      ''
-    );
-    if (mobileToCheck.length < 10) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया मान्य मोबाइल नंबर दर्ज करें',
-        en: 'Please enter a valid mobile number',
-      });
-      return false;
-    }
-    if (!set_credit_limit) {
-      addToast({
-        type: 'error',
-        hi: 'कृपया क्रेडिट लिमिट चुनें',
-        en: 'Please select credit limit',
-      });
-      return false;
-    }
-    return true;
+    const issue = getEnterpriseIssue(form);
+    if (!issue) return true;
+
+    addToast({ type: 'error', hi: issue.hi, en: issue.en });
+    return false;
   };
 
-  const validteAndSendOtp = async () => {
-    if (mobile.length > 10) {
-      addToast({
-        type: 'error',
-        hi: hi?.login?.enter_number,
-        en: en?.login?.enter_number,
-      });
-    } else if (await numberChecked(mobile)) {
-      addToast({
-        type: 'success',
-        hi: hi?.login?.otp_sent,
-        en: en?.login?.otp_sent,
-      });
-      setFillOtp(true);
-      setCanResend(false);
-      SetResend(!resend);
-    } else {
-      addToast({
-        type: 'error',
-        hi: hi?.login?.invalid_number,
-        en: en?.login?.invalid_number,
-      });
-    }
-  };
+  const handleNext = () => {
+    const ok = validateRequired();
+    if (!ok) return;
 
-  const mobilbumber = (value: string) => {
-    const numbersOnly = value.replace(/\D/g, '');
-    setMobile(numbersOnly);
+    addToast({
+      type: 'success',
+      hi: 'तीसरा चरण सफलतापूर्वक पूरा हुआ',
+      en: 'Step 3 completed successfully',
+    });
+
+    router.push('/nomination_form/step-4');
   };
 
   return (
@@ -340,6 +192,7 @@ function NominationStepOne() {
         h1={hi?.form?.nomi_form}
         h2={en?.form?.nomi_form}
       />
+
       <Box
         sx={{
           flex: 1,
@@ -352,161 +205,135 @@ function NominationStepOne() {
         }}
       >
         <Paper sx={{ p: 3, borderRadius: 3 }}>
-          <NominationStepper activeStep={2} />
+          <NominationStepper activeStep={2} totalSteps={4} />
 
           <DualLanguageText
-            h1={hi?.form?.check_credit}
-            h2={en?.form?.check_credit}
+            h1={hi?.form?.enterprise}
+            h2={en?.form?.enterprise}
             h1style={{ fontSize: 18, fontWeight: 700 }}
             h2style={{ mb: 2, fontSize: 14 }}
           />
 
-          <Box>
-            {showCredit ? (
-              <Box>
-                {score !== null && (
-                  <CreditScoreGauge score={score} label={remark} />
-                )}
-                <Box sx={{ mt: 2 }}>
-                  <SelectField
-                    label_1={hi?.credit_score?.set_credit_limit}
-                    label_2={en?.credit_score?.set_credit_limit}
-                    placeholder="Set Credit Limit"
-                    value={set_credit_limit}
-                    onChange={(val) => setStep3({ set_credit_limit: val })}
-                    options={[
-                      { label_1: '50000', value: '50000' },
-                      { label_1: '100000', value: '100000' },
-                      { label_1: '150000', value: '150000' },
-                      { label_1: '200000', value: '200000' },
-                      { label_1: '250000', value: '250000' },
-                      { label_1: '300000', value: '300000' },
-                    ]}
-                  />
-                </Box>
-              </Box>
-            ) : (
-              <Box display="flex" flexDirection="column" gap={2}>
-                <Box sx={{ mt: 2 }}>
-                  {fillOtp ? (
-                    <Box>
-                      <Box ref={otpContainerRef}>
-                        <MuiOtpInput
-                          value={otp}
-                          onChange={(val) => setOtp(val.replace(/\D/g, ''))}
-                          length={6}
-                          TextFieldsProps={() => ({
-                            type: 'tel',
-                            autoComplete: 'one-time-code',
-                            inputProps: {
-                              inputMode: 'numeric',
-                              pattern: '[0-9]*',
-                            },
-                          })}
-                          sx={{
-                            gap: 1,
-                            mb: 2,
-                            py: 1,
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: 3,
-                              backgroundColor: '#F9FAFB',
-                            },
-                            '& .MuiOutlinedInput-input': {
-                              fontSize: 16,
-                              py: 1.5,
-                            },
-                          }}
-                        />
-                      </Box>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          mb: 2,
-                        }}
-                        onClick={resendOtp}
-                      >
-                        <DualLanguageText
-                          h1={`${hi.login.resend}`}
-                          h2={`(${en.login.resend})`}
-                          boxStyle={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: canResend ? 'pointer' : 'not-allowed',
-                          }}
-                          h1style={{
-                            fontSize: 13,
-                            fontWeight: canResend ? 700 : 400,
-                            color: canResend ? '#000' : '#9CA3AF',
-                          }}
-                          h2style={{
-                            pl: 1,
-                            fontSize: 13,
-                            fontWeight: canResend ? 600 : 400,
-                            color: canResend ? '#000' : '#9CA3AF',
-                          }}
-                        />
-                        {!canResend && (
-                          <Typography
-                            sx={{ ml: 1, fontSize: 13, color: '#9CA3AF' }}
-                          >
-                            {seconds}s
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  ) : (
-                    <Box>
-                      <DualLanguageText
-                        h1={hi.login.mobile}
-                        h2={en.login.mobile}
-                        h1style={{ fontSize: 18, fontWeight: 600 }}
-                        h2style={{ fontWeight: 300, mb: 2, fontSize: 14 }}
-                      />
-                      <TextField
-                        fullWidth
-                        value={mobile}
-                        placeholder="0123456789"
-                        variant="outlined"
-                        type="tel"
-                        sx={{
-                          mb: 3,
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 3,
-                            backgroundColor: '#F9FAFB',
-                          },
-                          '& .MuiOutlinedInput-input': {
-                            fontSize: 15,
-                            py: 1.5,
-                          },
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Typography sx={{ fontSize: 15 }}>+91</Typography>
-                            </InputAdornment>
-                          ),
-                        }}
-                        inputProps={{
-                          inputMode: 'numeric',
-                          pattern: '[0-9]*',
-                          maxLength: 10,
-                        }}
-                        onChange={(e) => mobilbumber(e.target.value)}
-                      />
-                    </Box>
-                  )}
-                </Box>
-                <ImportantNote
-                  h1={hi.form.important_credit_check}
-                  h2={en.form.important_credit_check}
-                  desc_1={hi.form.final_review_credit_check}
-                  desc_2={en.form.final_review_credit_check}
-                />
-              </Box>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <CheckBoxSingleSelect
+              label_1={hi?.form?.sector_type}
+              label_2={en?.form?.sector_type}
+              value={sector}
+              onChange={(val) => {
+                setStep2({
+                  sector: val as Sector,
+                  business_category: '',
+                  business_category_other: '',
+                });
+              }}
+              options={[
+                {
+                  label_1: 'कृषि आधारित',
+                  label_2: 'Farm-based',
+                  value: 'farm_based',
+                },
+                {
+                  label_1: 'गैर-कृषि आधारित',
+                  label_2: 'Non-farm',
+                  value: 'non_farm',
+                },
+              ]}
+            />
+
+            <SelectField
+              label_1={hi?.form?.business_type}
+              label_2={en?.form?.business_type}
+              placeholder={en?.form?.select_type}
+              value={business_category}
+              onChange={(val) =>
+                setStep2({
+                  business_category: val,
+                  ...(val === OTHER_BUSINESS
+                    ? {}
+                    : { business_category_other: '' }),
+                })
+              }
+              options={
+                sector === 'farm_based'
+                  ? farmSelectOptions
+                  : nonFarmSelectOptions
+              }
+            />
+
+            {business_category === OTHER_BUSINESS && (
+              <Text
+                name="business_category_other"
+                value={business_category_other}
+                onChange={(e) =>
+                  setStep2({ business_category_other: e.target.value })
+                }
+                label_1={hi?.form?.specify_business}
+                label_2={en?.form?.specify_business}
+                placeholder={en?.form?.enter_business}
+                required
+              />
             )}
+
+            <SelectField
+              label_1={hi?.form?.years_of_experience}
+              label_2={en?.form?.years_of_experience}
+              placeholder={en?.form?.select_years}
+              value={years_of_experience}
+              onChange={(val) => setStep2({ years_of_experience: val })}
+              options={experienceOptions}
+            />
+
+            <CheckBoxSingleSelect
+              label_1={hi?.form?.number_of_businesses}
+              label_2={en?.form?.number_of_businesses}
+              value={number_of_businesses}
+              onChange={(val) => setStep2({ number_of_businesses: val })}
+              options={businessCountOptions}
+            />
+
+            <CheckBoxSingleSelect
+              label_1={hi?.form?.family_support}
+              label_2={en?.form?.family_support}
+              value={family_support}
+              onChange={(val) => setStep2({ family_support: val })}
+              options={familySupportOptions}
+            />
+
+            <CheckBoxMultiSelect
+              label_1={hi?.form?.business_helpers}
+              label_2={en?.form?.business_helpers}
+              value={business_helpers}
+              onChange={(vals) => setStep2({ business_helpers: vals })}
+              options={helperOptions}
+            />
+
+            <CheckBoxMultiSelect
+              label_1={hi?.form?.support}
+              label_2={en?.form?.support}
+              value={supportNeeded}
+              onChange={(vals) => setStep2({ supportNeeded: vals })}
+              options={[
+                {
+                  label_1: 'बाजार तक पहुंच',
+                  label_2: 'Market Access',
+                  value: 'market_access',
+                },
+                { label_1: 'विपणन', label_2: 'Marketing', value: 'marketing' },
+                {
+                  label_1: 'मांग का आकलन',
+                  label_2: 'Demand Assessment',
+                  value: 'demand_assessment',
+                },
+                { label_1: 'कोई नहीं', label_2: 'None', value: 'none' },
+              ]}
+            />
+
+            <ImportantNote
+              h1={hi.form.important_form}
+              h2={en.form.important_form}
+              desc_1={hi.form.final_review_desc_form}
+              desc_2={en.form.final_review_desc_form}
+            />
           </Box>
 
           <Button
@@ -520,24 +347,13 @@ function NominationStepOne() {
               textTransform: 'none',
               '&:hover': { bgcolor: '#111' },
             }}
-            onClick={handleRequestOTP}
+            // onClick={() => router.push('/nomination_form/step-3')}
+            onClick={handleNext}
           >
             <Box textAlign="center">
               <DualLanguageText
-                h1={
-                  showCredit
-                    ? hi?.form?.submit_credit
-                    : fillOtp
-                      ? hi.form.submit
-                      : hi.login.otp
-                }
-                h2={
-                  showCredit
-                    ? en?.form?.submit_credit
-                    : fillOtp
-                      ? en.form.submit
-                      : en.login.otp
-                }
+                h1={hi?.form?.next_step}
+                h2={en?.form?.save_and_next}
                 h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}
                 h2style={{ fontWeight: 400, fontSize: 12, textAlign: 'center' }}
               />
@@ -548,5 +364,3 @@ function NominationStepOne() {
     </Box>
   );
 }
-
-export default NominationStepOne;

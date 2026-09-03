@@ -1,0 +1,736 @@
+'use client';
+
+import { Box, Typography, Button, TextField, Paper } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { MuiOtpInput } from 'mui-one-time-password-input';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import Cookies from 'js-cookie';
+import DualLanguageText from '@/components/DualLanguageText';
+import InputAdornment from '@mui/material/InputAdornment';
+import hi from '@/messages/hi.json';
+import { addToast } from '@/components/error/toastStore';
+import en from '@/messages/en.json';
+import AppHeader from '@/components/header/AppHeader';
+import NominationStepper from '@/components/nomination/NominationStepper';
+import ImportantNote from '@/components/nomination/ImportantNote';
+import CreditScoreGauge from '@/components/nomination/CreditScoreGauge';
+import SelectField from '@/components/FormComponents/SelectField';
+import ShgLeaderApproval, {
+  LeaderRole,
+} from '@/components/nomination/ShgLeaderApproval';
+import type { LeaderApproval } from '../NominationFormProvider';
+import { splitFullName, useNominationForm } from '../NominationFormProvider';
+import { getFormIssue } from '../requiredFields';
+import {
+  ApiError,
+  getNumberChecked,
+  verifyOtpApi as verify_otp,
+  getCreditScore,
+} from '@/services/api';
+
+const MIN_LEADER_APPROVALS = 2;
+const digits = (value?: string) => (value || '').replace(/\D/g, '');
+
+function NominationStepOne() {
+  const router = useRouter();
+  const [mobile, setMobile] = useState('');
+  const [fillOtp, setFillOtp] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [resend, SetResend] = useState(false);
+  const [seconds, setSeconds] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+  const [showCredit, setShowCredit] = useState(false);
+  const [score, setScore] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const otpContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const { form, setStep3, saveDraft, submitForm } = useNominationForm();
+  const {
+    set_credit_limit,
+    president_mobile,
+    secretary_mobile,
+    treasurer_mobile,
+    approved_leaders,
+  } = form.step3;
+
+  useEffect(() => {
+    const storedScore = String(form.step3.credit_score ?? '');
+    const hasSavedApplicantMobile =
+      digits(form.step3.mobile_number).length === 10;
+    const hasCreditCheckProgress =
+      storedScore !== '' || hasSavedApplicantMobile;
+    const hasApprovalProgress =
+      form.step3.approved_leaders.length >= MIN_LEADER_APPROVALS;
+
+    if (!hasCreditCheckProgress && !hasApprovalProgress) return;
+
+    const parsedScore = storedScore === '' ? null : Number(storedScore);
+
+    setScore(
+      parsedScore === null
+        ? null
+        : Number.isFinite(parsedScore)
+          ? parsedScore
+          : 0
+    );
+    setMobile(form.step3.mobile_number);
+    setShowCredit(true);
+  }, [
+    form.step3.approved_leaders.length,
+    form.step3.credit_score,
+    form.step3.mobile_number,
+  ]);
+
+  const leaderNumbers: Record<LeaderRole, string> = {
+    president: president_mobile,
+    secretary: secretary_mobile,
+    treasurer: treasurer_mobile,
+  };
+
+  const setLeaderNumber = (role: LeaderRole, value: string) => {
+    setStep3({ [`${role}_mobile`]: value });
+  };
+
+  const markLeaderApproved = (approval: LeaderApproval | LeaderApproval[]) => {
+    const approvals = Array.isArray(approval) ? approval : [approval];
+    const byRole = new Map(
+      approved_leaders.map((item) => [item.role, item] as const)
+    );
+
+    approvals.forEach((item) => byRole.set(item.role, item));
+    setStep3({ approved_leaders: Array.from(byRole.values()) });
+  };
+
+  // the spec requires any 2 of the 3 leaders before the nomination can go in
+  const hasEnoughApprovals = approved_leaders.length >= MIN_LEADER_APPROVALS;
+
+  const getCreditCheckId = () => {
+    const aadhaar = form.step1.aadhaar_number.trim();
+    const pan = form.step1.pan_number.trim().toUpperCase();
+    const voterId = form.step1.voter_id.trim().toUpperCase();
+
+    if (aadhaar) {
+      return { id_number: aadhaar, id_type: 'AADHAAR' as const };
+    }
+    if (pan) {
+      return { id_number: pan, id_type: 'PAN' as const };
+    }
+    if (voterId) {
+      return { id_number: voterId, id_type: 'VOTERID' as const };
+    }
+    return null;
+  };
+
+  const verifyOtp = async (number: string, otp: string) => {
+    await verify_otp(number, otp, true);
+  };
+
+  const resendOtp = () => {
+    if (!canResend) return;
+    setCanResend(false);
+    setFillOtp(true);
+    setSeconds(60);
+    validteAndSendOtp();
+  };
+
+  const remark = useMemo(() => {
+    if (score === null || score < 0) {
+      return {
+        l1: hi?.credit_score?.needs_help,
+        l2: en?.credit_score?.needs_help
+          ? `(${en?.credit_score?.needs_help})`
+          : '',
+      };
+    } else if (score < 681) {
+      return {
+        l1: hi?.credit_score?.needs_help,
+        l2: en?.credit_score?.needs_help
+          ? `(${en?.credit_score?.needs_help})`
+          : '',
+      };
+    } else if (score <= 730) {
+      return {
+        l1: hi?.credit_score?.average,
+        l2: en?.credit_score?.average ? `(${en?.credit_score?.average})` : '',
+      };
+    } else if (score <= 770) {
+      return {
+        l1: hi?.credit_score?.fair,
+        l2: en?.credit_score?.fair ? `(${en?.credit_score?.fair})` : '',
+      };
+    } else if (score <= 790) {
+      return {
+        l1: hi?.credit_score?.good,
+        l2: en?.credit_score?.good ? `(${en?.credit_score?.good})` : '',
+      };
+    } else {
+      return {
+        l1: hi?.credit_score?.excellent,
+        l2: en?.credit_score?.excellent
+          ? `(${en?.credit_score?.excellent})`
+          : '',
+      };
+    }
+  }, [score]);
+
+  useEffect(() => {
+    if (!fillOtp) return;
+    const interval = setInterval(() => {
+      setSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [fillOtp, resend]);
+
+  useEffect(() => {
+    if (!fillOtp) return;
+
+    const focusTimer = window.setTimeout(() => {
+      const firstOtpInput = otpContainerRef.current?.querySelector('input');
+      firstOtpInput?.focus();
+    }, 150);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [fillOtp]);
+
+  const handleRequestOTP = async () => {
+    if (submitting) return;
+
+    if (showCredit) {
+      const okRequired = validateRequired();
+      if (!okRequired) return;
+
+      setSubmitting(true);
+      const mobileForSubmit = (form.step3.mobile_number || mobile).replace(
+        /\D/g,
+        ''
+      );
+      try {
+        const draft = await saveDraft(
+          mobileForSubmit.length >= 10
+            ? { mobile_number: mobileForSubmit }
+            : undefined
+        );
+
+        if (!draft.ok) {
+          addToast({
+            type: 'error',
+            hi: 'ड्राफ्ट सेव नहीं हुआ',
+            en: `Draft save failed: ${draft.error}`,
+          });
+          return;
+        }
+
+        if (draft.approvalsCleared) {
+          addToast({
+            type: 'error',
+            hi: 'फॉर्म में बदलाव हुआ है, कृपया फिर से OTP स्वीकृति लें',
+            en: 'Form changes cleared previous approvals. Please collect OTP approvals again.',
+          });
+          return;
+        }
+
+        const res = await submitForm(
+          mobileForSubmit.length >= 10
+            ? { mobile_number: mobileForSubmit }
+            : undefined
+        );
+
+        if (!res.ok) {
+          addToast({
+            type: 'error',
+            hi: 'फॉर्म सबमिट नहीं हुआ',
+            en: `Submit failed: ${res.error}`,
+          });
+          return;
+        }
+
+        router.push(
+          `/nomination_form/view_status?name=${encodeURIComponent(res?.name)}`
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    } else if (fillOtp) {
+      try {
+        if (otp.length < 6) {
+          throw new ApiError(en?.login?.invalid);
+        }
+        await verifyOtp(mobile, otp);
+      } catch (err) {
+        addToast({
+          type: 'error',
+          hi: hi?.login?.invalid,
+          en: err instanceof ApiError ? err.message : en?.login?.invalid,
+        });
+        return;
+      }
+
+      addToast({
+        type: 'success',
+        hi: 'ओटीपी सफलतापूर्वक सत्यापित हुआ',
+        en: 'OTP verified successfully',
+      });
+      setStep3({ mobile_number: mobile });
+
+      try {
+        const creditCheckId = getCreditCheckId();
+
+        if (!creditCheckId) {
+          addToast({
+            type: 'error',
+            hi: 'आधार, पैन या वोटर आईडी में से कोई एक आवश्यक है',
+            en: 'Enter any one ID: Aadhaar, PAN, or Voter ID',
+          });
+          return;
+        }
+
+        const res = await getCreditScore({
+          ...splitFullName(form.step1.full_name),
+          dob: form.step1.date_of_birth,
+          mobile_number: mobile,
+          id_number: creditCheckId.id_number,
+          id_type: creditCheckId.id_type,
+          pincode: form.step1.pincode,
+        });
+
+        if (res?.message?.status === 1) {
+          const msg = res.message.msg;
+
+          const isMsgObject =
+            typeof msg === 'object' && msg !== null && !Array.isArray(msg);
+
+          const rawScore = isMsgObject
+            ? (msg as { score: number }).score
+            : Number(msg);
+
+          const reportBase64 = isMsgObject
+            ? ((msg as { reportBase64?: string }).reportBase64 ?? '')
+            : '';
+
+          const finalScore = Number.isFinite(rawScore) ? rawScore : 0;
+          const draft = await saveDraft({
+            mobile_number: mobile,
+            credit_score: finalScore.toString(),
+            reportBase64,
+          });
+
+          if (!draft.ok) {
+            addToast({
+              type: 'error',
+              hi: 'ड्राफ्ट सेव नहीं हुआ',
+              en: `Draft save failed: ${draft.error}`,
+            });
+            return;
+          }
+
+          setScore(finalScore);
+          setStep3({
+            mobile_number: mobile,
+            credit_score: finalScore.toString(),
+            reportBase64: '',
+          });
+          setShowCredit(true);
+
+          if (finalScore < 0) {
+            addToast({
+              type: 'error',
+              hi: 'क्रेडिट स्कोर उपलब्ध नहीं है',
+              en: 'Credit score not available',
+            });
+          } else {
+            addToast({
+              type: 'success',
+              hi: 'क्रेडिट स्कोर प्राप्त हुआ',
+              en: 'Credit score fetched successfully',
+            });
+          }
+        } else {
+          addToast({
+            type: 'error',
+            hi: 'क्रेडिट स्कोर प्राप्त नहीं हुआ',
+            en:
+              typeof res?.message?.msg === 'string'
+                ? res.message.msg
+                : 'Failed to fetch credit score',
+          });
+          setScore(0);
+          await saveDraft({
+            mobile_number: mobile,
+            credit_score: '0',
+          });
+          setStep3({ mobile_number: mobile, credit_score: '0' });
+          setShowCredit(true);
+        }
+      } catch (err) {
+        console.error(err);
+        addToast({
+          type: 'error',
+          hi: 'क्रेडिट स्कोर त्रुटि',
+          en: 'Credit score error',
+        });
+        setScore(0);
+        await saveDraft({
+          mobile_number: mobile,
+          credit_score: '0',
+        });
+        setStep3({ mobile_number: mobile, credit_score: '0' });
+        setShowCredit(true);
+      }
+    } else {
+      validteAndSendOtp();
+    }
+  };
+
+  const numberChecked = async (number: string) => {
+    const result = await getNumberChecked(number, true);
+    return result?.message?.status ? true : false;
+  };
+
+  const validateRequired = (): boolean => {
+    const mobileToCheck = digits(form.step3.mobile_number || mobile);
+    const loginMobileNumber = digits(Cookies.get('mobile'));
+    if (mobileToCheck.length < 10) {
+      addToast({
+        type: 'error',
+        hi: 'कृपया मान्य मोबाइल नंबर दर्ज करें',
+        en: 'Please enter a valid mobile number',
+      });
+      return false;
+    }
+    const enteredLeaderNumbers = [
+      president_mobile,
+      secretary_mobile,
+      treasurer_mobile,
+    ]
+      .map(digits)
+      .filter((n) => n);
+    const allLeaderNumbers = [
+      ...enteredLeaderNumbers,
+      ...approved_leaders.map((leader) => digits(leader.mobile_number)),
+    ].filter((n) => n);
+
+    if (
+      loginMobileNumber &&
+      allLeaderNumbers.some((number) => number === loginMobileNumber)
+    ) {
+      addToast({
+        type: 'error',
+        hi: 'JOSH लॉगिन नंबर पदाधिकारी के मोबाइल नंबर के रूप में उपयोग नहीं किया जा सकता',
+        en: 'The JOSH login number cannot be used as a leader mobile number',
+      });
+      return false;
+    }
+
+    if (new Set(enteredLeaderNumbers).size !== enteredLeaderNumbers.length) {
+      addToast({
+        type: 'error',
+        hi: 'हर पदाधिकारी का मोबाइल नंबर अलग होना चाहिए',
+        en: 'Each leader must have a different mobile number',
+      });
+      return false;
+    }
+
+    if (!hasEnoughApprovals) {
+      addToast({
+        type: 'error',
+        hi: 'किन्हीं 2 पदाधिकारियों की OTP स्वीकृति आवश्यक है',
+        en: 'Any 2 of 3 leaders must approve via OTP',
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const validteAndSendOtp = async () => {
+    // the credit pull uses answers from steps 1-3, so refuse to start it
+    // while any mandatory answer is still missing
+    const issue = getFormIssue(form);
+    if (issue) {
+      addToast({
+        type: 'error',
+        hi: `${issue.hi} (चरण ${issue.step})`,
+        en: `${issue.en} (Step ${issue.step})`,
+      });
+      router.push(`/nomination_form/step-${issue.step}`);
+      return;
+    }
+
+    if (mobile.length > 10) {
+      addToast({
+        type: 'error',
+        hi: hi?.login?.enter_number,
+        en: en?.login?.enter_number,
+      });
+      return;
+    }
+
+    try {
+      if (!(await numberChecked(mobile))) {
+        throw new ApiError(en?.login?.invalid_number);
+      }
+
+      addToast({
+        type: 'success',
+        hi: hi?.login?.otp_sent,
+        en: en?.login?.otp_sent,
+      });
+      setFillOtp(true);
+      setCanResend(false);
+      SetResend(!resend);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        hi: hi?.login?.invalid_number,
+        en: err instanceof ApiError ? err.message : en?.login?.invalid_number,
+      });
+    }
+  };
+
+  const mobilbumber = (value: string) => {
+    const numbersOnly = value.replace(/\D/g, '');
+    setMobile(numbersOnly);
+  };
+
+  return (
+    <Box
+      sx={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: '#F3F4F6',
+        overflow: 'hidden',
+      }}
+    >
+      <AppHeader
+        showBack
+        onBack={() => router.push('/nomination_form/step-3')}
+        h1={hi?.form?.nomi_form}
+        h2={en?.form?.nomi_form}
+      />
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          px: 2,
+          py: 2,
+          '&::-webkit-scrollbar': { display: 'none' },
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        <Paper sx={{ p: 3, borderRadius: 3 }}>
+          <NominationStepper activeStep={3} totalSteps={4} />
+
+          <DualLanguageText
+            h1={hi?.form?.check_credit}
+            h2={en?.form?.check_credit}
+            h1style={{ fontSize: 18, fontWeight: 700 }}
+            h2style={{ mb: 2, fontSize: 14 }}
+          />
+
+          <Box>
+            {showCredit ? (
+              <Box>
+                {score !== null && (
+                  <CreditScoreGauge score={score} label={remark} />
+                )}
+                <Box sx={{ mt: 2 }}>
+                  <SelectField
+                    label_1={hi?.credit_score?.set_credit_limit}
+                    label_2={en?.credit_score?.set_credit_limit}
+                    placeholder="Set Credit Limit"
+                    value={set_credit_limit}
+                    onChange={(val) => setStep3({ set_credit_limit: val })}
+                    options={[
+                      { label_1: '50000', value: '50000' },
+                      { label_1: '100000', value: '100000' },
+                      { label_1: '150000', value: '150000' },
+                      { label_1: '200000', value: '200000' },
+                      { label_1: '250000', value: '250000' },
+                      { label_1: '300000', value: '300000' },
+                    ]}
+                  />
+                </Box>
+
+                <ShgLeaderApproval
+                  numbers={leaderNumbers}
+                  approved={approved_leaders}
+                  onNumberChange={setLeaderNumber}
+                  onApproved={markLeaderApproved}
+                  nominationName={form.draft_name}
+                />
+              </Box>
+            ) : (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <Box sx={{ mt: 2 }}>
+                  {fillOtp ? (
+                    <Box>
+                      <Box ref={otpContainerRef}>
+                        <MuiOtpInput
+                          value={otp}
+                          onChange={(val) => setOtp(val.replace(/\D/g, ''))}
+                          length={6}
+                          TextFieldsProps={() => ({
+                            type: 'tel',
+                            autoComplete: 'one-time-code',
+                            inputProps: {
+                              inputMode: 'numeric',
+                              pattern: '[0-9]*',
+                            },
+                          })}
+                          sx={{
+                            gap: 1,
+                            mb: 2,
+                            py: 1,
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 3,
+                              backgroundColor: '#F9FAFB',
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              fontSize: 16,
+                              py: 1.5,
+                            },
+                          }}
+                        />
+                      </Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          mb: 2,
+                        }}
+                        onClick={resendOtp}
+                      >
+                        <DualLanguageText
+                          h1={`${hi.login.resend}`}
+                          h2={`(${en.login.resend})`}
+                          boxStyle={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: canResend ? 'pointer' : 'not-allowed',
+                          }}
+                          h1style={{
+                            fontSize: 13,
+                            fontWeight: canResend ? 700 : 400,
+                            color: canResend ? '#000' : '#9CA3AF',
+                          }}
+                          h2style={{
+                            pl: 1,
+                            fontSize: 13,
+                            fontWeight: canResend ? 600 : 400,
+                            color: canResend ? '#000' : '#9CA3AF',
+                          }}
+                        />
+                        {!canResend && (
+                          <Typography
+                            sx={{ ml: 1, fontSize: 13, color: '#9CA3AF' }}
+                          >
+                            {seconds}s
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box>
+                      <DualLanguageText
+                        h1={hi.login.mobile}
+                        h2={en.login.mobile}
+                        h1style={{ fontSize: 18, fontWeight: 600 }}
+                        h2style={{ fontWeight: 300, mb: 2, fontSize: 14 }}
+                      />
+                      <TextField
+                        fullWidth
+                        value={mobile}
+                        placeholder="0123456789"
+                        variant="outlined"
+                        type="tel"
+                        sx={{
+                          mb: 3,
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 3,
+                            backgroundColor: '#F9FAFB',
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            fontSize: 15,
+                            py: 1.5,
+                          },
+                        }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Typography sx={{ fontSize: 15 }}>+91</Typography>
+                            </InputAdornment>
+                          ),
+                        }}
+                        inputProps={{
+                          inputMode: 'numeric',
+                          pattern: '[0-9]*',
+                          maxLength: 10,
+                        }}
+                        onChange={(e) => mobilbumber(e.target.value)}
+                      />
+                    </Box>
+                  )}
+                </Box>
+                <ImportantNote
+                  h1={hi.form.important_credit_check}
+                  h2={en.form.important_credit_check}
+                  desc_1={hi.form.final_review_credit_check}
+                  desc_2={en.form.final_review_credit_check}
+                />
+              </Box>
+            )}
+          </Box>
+
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              py: 1.5,
+              borderRadius: 2,
+              bgcolor: '#000',
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#111' },
+              '&.Mui-disabled': { bgcolor: '#9CA3AF', color: '#fff' },
+            }}
+            disabled={submitting || (showCredit && !hasEnoughApprovals)}
+            onClick={handleRequestOTP}
+          >
+            <Box textAlign="center">
+              <DualLanguageText
+                h1={
+                  showCredit
+                    ? hi?.form?.submit_credit
+                    : fillOtp
+                      ? hi.form.submit
+                      : hi.login.otp
+                }
+                h2={
+                  showCredit
+                    ? en?.form?.submit_credit
+                    : fillOtp
+                      ? en.form.submit
+                      : en.login.otp
+                }
+                h1style={{ fontWeight: 600, textAlign: 'center', fontSize: 15 }}
+                h2style={{ fontWeight: 400, fontSize: 12, textAlign: 'center' }}
+              />
+            </Box>
+          </Button>
+        </Paper>
+      </Box>
+    </Box>
+  );
+}
+
+export default NominationStepOne;

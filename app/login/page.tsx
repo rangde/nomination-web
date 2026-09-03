@@ -157,7 +157,14 @@ function LoginPage() {
         hi: hi?.login?.enter_number,
         en: en?.login?.enter_number,
       });
-    } else if (await numberChecked(mobile)) {
+      return;
+    }
+
+    try {
+      if (!(await numberChecked(mobile))) {
+        throw new ApiError(en?.login?.invalid_number);
+      }
+
       addToast({
         type: 'success',
         hi: hi?.login?.otp_sent,
@@ -166,11 +173,11 @@ function LoginPage() {
       setFillOtp(true);
       setCanResend(false);
       SetResend(!resend);
-    } else {
+    } catch (err) {
       addToast({
         type: 'error',
         hi: hi?.login?.invalid_number,
-        en: en?.login?.invalid_number,
+        en: err instanceof ApiError ? err.message : en?.login?.invalid_number,
       });
     }
   };

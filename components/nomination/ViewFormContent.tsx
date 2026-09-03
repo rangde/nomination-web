@@ -8,14 +8,97 @@ import hi from '@/messages/hi.json';
 import en from '@/messages/en.json';
 import DualLanguageText from '@/components/DualLanguageText';
 import SelectField from '@/components/FormComponents/SelectField';
-import { getDoc, approveDoc } from '@/services/api';
+import { getDoc, approveDoc, getLeaderApprovals } from '@/services/api';
+import ShgLeaderApproval, {
+  LeaderLevel,
+  LeaderRole,
+} from '@/components/nomination/ShgLeaderApproval';
+import ApprovalBlocks from '@/components/nomination/ApprovalBlocks';
+import type { LeaderApproval } from '@/app/nomination_form/NominationFormProvider';
 import { addToast } from '../error/toastStore';
 import CircularProgress from '@mui/material/CircularProgress';
 
 type FormValues = Record<string, unknown>;
 
+const MIN_LEADER_APPROVALS = 2;
+
+// the SHG submits, the VO reviews it next and the CLF after that, so the state a
+// nomination sits in says whose leaders have to approve to move it on
+const REVIEW_LEVEL: Record<string, LeaderLevel> = {
+  'SHG Proposed': 'VO',
+  'VO Approved': 'CLF',
+};
+
+const FORM_APPROVAL_LEVEL: Record<string, LeaderLevel> = {
+  'SHG Proposed': 'SHG',
+  'VO Approved': 'VO',
+  'CLF Approved': 'CLF',
+};
+
+const APPROVAL_HEADING: Record<LeaderLevel, { hi: string; en: string }> = {
+  SHG: {
+    hi: hi.form.shg_leader_approval,
+    en: en.form.shg_leader_approval,
+  },
+  VO: { hi: hi.form.vo_leader_approval, en: en.form.vo_leader_approval },
+  CLF: { hi: hi.form.clf_leader_approval, en: en.form.clf_leader_approval },
+};
+
+const NO_NUMBERS: Record<LeaderRole, string> = {
+  president: '',
+  secretary: '',
+  treasurer: '',
+};
+
+const LEADER_ROLES: LeaderRole[] = ['president', 'secretary', 'treasurer'];
+const APPROVERS_TABLE = 'table_nmzc';
+
 const s = (v: unknown, fallback = ''): string =>
   typeof v === 'string' ? v : fallback;
+
+const digits = (v: unknown) => s(v).replace(/\D/g, '').slice(-10);
+
+const approvalRoleFromLabel = (
+  label: unknown,
+  level: LeaderLevel
+): LeaderRole | null => {
+  const value = s(label).trim().toLowerCase();
+  const prefix = `${level.toLowerCase()}-`;
+  if (!value.startsWith(prefix)) return null;
+
+  const roleLabel = value.slice(prefix.length);
+  return LEADER_ROLES.find((role) => role === roleLabel) || null;
+};
+
+const savedApprovalsForLevel = (
+  item: FormValues | null,
+  level: LeaderLevel
+): LeaderApproval[] => {
+  const rows = item?.[APPROVERS_TABLE];
+  if (!Array.isArray(rows)) return [];
+
+  return rows.reduce<LeaderApproval[]>((out, row) => {
+    if (!row || typeof row !== 'object') return out;
+
+    const values = row as FormValues;
+    const role = approvalRoleFromLabel(values.name1, level);
+    const mobileNumber = digits(values.mobile_number);
+    if (
+      !role ||
+      !mobileNumber ||
+      out.some((approval) => approval.role === role)
+    ) {
+      return out;
+    }
+
+    out.push({
+      role,
+      mobile_number: mobileNumber,
+      verified_on: s(values.verified_on),
+    });
+    return out;
+  }, []);
+};
 
 const n = (v: unknown, fallback = 0): number => {
   if (typeof v === 'number') return v;
@@ -75,6 +158,9 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   const [creditLimit, setCreditLimit] = useState('');
   const [formValues, setFormValues] = useState<FormValues | null>(null);
   const [loading, setLoading] = useState(false);
+  const [leaderNumbers, setLeaderNumbers] =
+    useState<Record<LeaderRole, string>>(NO_NUMBERS);
+  const [approvals, setApprovals] = useState<LeaderApproval[]>([]);
 
   useEffect(() => {
     if (!name) return;
@@ -92,6 +178,25 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
       const serverLimit = s(item?.set_credit_limit);
       if (serverLimit) setCreditLimit(serverLimit);
+
+      const approvalLevel = REVIEW_LEVEL[s(item?.workflow_state)];
+      if (approvalLevel) {
+        const savedApprovals = savedApprovalsForLevel(item, approvalLevel);
+        if (savedApprovals.length) {
+          setApprovals(savedApprovals);
+          return;
+        }
+
+        const approvalRes = await getLeaderApprovals(approvalLevel, name).catch(
+          () => null
+        );
+        const cachedApprovals = approvalRes?.message?.status
+          ? approvalRes.message.msg
+          : [];
+        if (Array.isArray(cachedApprovals) && cachedApprovals.length) {
+          setApprovals(cachedApprovals);
+        }
+      }
     };
 
     getFormData();
@@ -99,10 +204,25 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
   const handleApprove = async () => {
     if (!name) return;
+
+    const limitToApprove = creditLimit || s(formValues?.set_credit_limit);
+    const currentApprovalLevel = REVIEW_LEVEL[s(formValues?.workflow_state)];
+    const creditLimitRequired =
+      currentApprovalLevel !== 'VO' && currentApprovalLevel !== 'CLF';
+
+    if (creditLimitRequired && !limitToApprove) {
+      addToast({
+        type: 'error',
+        hi: 'कृपया क्रेडिट सीमा चुनें',
+        en: 'Please select a credit limit before approving',
+      });
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const res = await approveDoc(name, creditLimit);
+      const res = await approveDoc(name, limitToApprove);
 
       const payload = res?.message ?? res;
 
@@ -116,10 +236,11 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           `/nomination_form/view_status?name=${encodeURIComponent(name)}`
         );
       } else {
+        const message = s(payload?.msg, s(en?.workflow?.approval_failed));
         addToast({
           type: 'error',
-          hi: hi?.workflow?.approval_failed,
-          en: en?.workflow?.approval_failed,
+          hi: message,
+          en: message,
         });
       }
     } catch (error) {
@@ -135,6 +256,16 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
 
   const docId = s(formValues?.name, '—');
   const workflowState = s(formValues?.workflow_state, '—');
+
+  // the same three roles approve again at each stage, under their own level
+  const approvalLevel = REVIEW_LEVEL[s(formValues?.workflow_state)];
+  const needsApprovals = !view && !!approvalLevel;
+  const hasEnoughApprovals = approvals.length >= MIN_LEADER_APPROVALS;
+  const displayedApprovalLevel =
+    FORM_APPROVAL_LEVEL[s(formValues?.workflow_state)];
+  const isVoOrClfFlow = approvalLevel === 'VO' || approvalLevel === 'CLF';
+  const showApprovalHistoryBelowCreditLimit =
+    !!displayedApprovalLevel && !(isVoOrClfFlow && !view);
 
   const shgProposed =
     n(formValues?.shg_proposed, 0) || s(formValues?.shg_proposed, '0');
@@ -420,8 +551,10 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           <SelectField
             label_1={s(hi?.credit_score?.set_credit_limit)}
             label_2={s(en?.credit_score?.set_credit_limit)}
-            placeholder="Set Credit Limit"
-            value={creditLimit || s(formValues?.set_credit_limit, '50000')}
+            placeholder={`${s(hi?.dashboard?.not_set)} (${s(
+              en?.dashboard?.not_set
+            )})`}
+            value={creditLimit || s(formValues?.set_credit_limit)}
             onChange={setCreditLimit}
             view={view}
             options={[
@@ -435,11 +568,44 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
           />
         </Paper>
 
+        {showApprovalHistoryBelowCreditLimit && (
+          <ApprovalBlocks data={formValues} levels={[displayedApprovalLevel]} />
+        )}
+
+        {needsApprovals && (
+          <Paper sx={{ p: 2, borderRadius: 3 }}>
+            <ShgLeaderApproval
+              level={approvalLevel}
+              nominationName={name}
+              heading_1={APPROVAL_HEADING[approvalLevel].hi}
+              heading_2={APPROVAL_HEADING[approvalLevel].en}
+              numbers={leaderNumbers}
+              approved={approvals}
+              onNumberChange={(role, value) =>
+                setLeaderNumbers((prev) => ({ ...prev, [role]: value }))
+              }
+              onApproved={(approval) =>
+                setApprovals((prev) => {
+                  const approvals = Array.isArray(approval)
+                    ? approval
+                    : [approval];
+                  const byRole = new Map(
+                    prev.map((item) => [item.role, item] as const)
+                  );
+
+                  approvals.forEach((item) => byRole.set(item.role, item));
+                  return Array.from(byRole.values());
+                })
+              }
+            />
+          </Paper>
+        )}
+
         {!view && (
           <Button
             fullWidth
             variant="contained"
-            disabled={loading}
+            disabled={loading || (needsApprovals && !hasEnoughApprovals)}
             onClick={(e) => {
               e.stopPropagation();
               handleApprove();
@@ -447,6 +613,7 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
             sx={{
               backgroundColor: '#000',
               color: '#fff',
+              '&.Mui-disabled': { backgroundColor: '#9CA3AF', color: '#fff' },
             }}
           >
             {loading ? (

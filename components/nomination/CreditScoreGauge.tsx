@@ -26,7 +26,7 @@ export default function CreditScoreGauge({ score, label }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const activeColor = useMemo(() => getScoreColor(score), [score]);
 
-  const minValue = score < 0 ? score - 1 : 300;
+  const minValue = score < 0 ? score - 1 : score === 0 ? 0 : 300;
   const maxValue = score < 0 ? 0 : 900;
 
   return (
