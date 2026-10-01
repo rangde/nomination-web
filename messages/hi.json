@@ -73,6 +73,7 @@
     "vo_leader_approval": "ग्राम संगठन पदाधिकारियों की मंजूरी",
     "clf_leader_approval": "संकुल स्तरीय महासंघ पदाधिकारियों की मंजूरी",
     "approval_rule": "किन्हीं 2 सदस्यों की OTP द्वारा स्वीकृति आवश्यक है",
+    "approval_rule_optional": "OTP द्वारा स्वीकृति अभी वैकल्पिक है",
     "president": "अध्यक्ष",
     "secretary": "सचिव",
     "treasurer": "कोषाध्यक्ष",

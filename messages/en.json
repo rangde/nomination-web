@@ -73,6 +73,7 @@
     "vo_leader_approval": "VO Leader Approval",
     "clf_leader_approval": "CLF Leader Approval",
     "approval_rule": "Any 2 of 3 must approve via OTP",
+    "approval_rule_optional": "OTP approval is optional for now",
     "president": "President",
     "secretary": "Secretary",
     "treasurer": "Treasurer",

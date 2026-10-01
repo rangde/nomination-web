@@ -24,6 +24,13 @@ const LEADERS: { role: LeaderRole; label_1: string; label_2: string }[] = [
   { role: 'treasurer', label_1: hi.form.treasurer, label_2: en.form.treasurer },
 ];
 
+// TEMPORARY: field teams are struggling to collect OTP approvals from 2 of 3
+// office bearers, so the leader approval step is optional at every level
+// (SHG, VO, CLF) for now. Set back to true to enforce it again.
+export const LEADER_APPROVAL_REQUIRED = false;
+
+export const MIN_LEADER_APPROVALS = 2;
+
 const RESEND_SECONDS = 60;
 
 const digits = (value?: string) => (value || '').replace(/\D/g, '');
@@ -248,8 +255,16 @@ function ShgLeaderApproval({
       />
 
       <DualLanguageText
-        h1={hi?.form?.approval_rule}
-        h2={en?.form?.approval_rule}
+        h1={
+          LEADER_APPROVAL_REQUIRED
+            ? hi?.form?.approval_rule
+            : hi?.form?.approval_rule_optional
+        }
+        h2={
+          LEADER_APPROVAL_REQUIRED
+            ? en?.form?.approval_rule
+            : en?.form?.approval_rule_optional
+        }
         boxStyle={{ mt: 0.5, mb: 2 }}
         h1style={{ fontSize: 12, fontWeight: 400, color: '#6B7280' }}
         h2style={{ fontSize: 12, fontWeight: 400, color: '#6B7280' }}
