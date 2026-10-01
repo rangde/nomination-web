@@ -10,8 +10,10 @@ import DualLanguageText from '@/components/DualLanguageText';
 import SelectField from '@/components/FormComponents/SelectField';
 import { getDoc, approveDoc, getLeaderApprovals } from '@/services/api';
 import ShgLeaderApproval, {
+  LEADER_APPROVAL_REQUIRED,
   LeaderLevel,
   LeaderRole,
+  MIN_LEADER_APPROVALS,
 } from '@/components/nomination/ShgLeaderApproval';
 import ApprovalBlocks from '@/components/nomination/ApprovalBlocks';
 import type { LeaderApproval } from '@/app/nomination_form/NominationFormProvider';
@@ -19,8 +21,6 @@ import { addToast } from '../error/toastStore';
 import CircularProgress from '@mui/material/CircularProgress';
 
 type FormValues = Record<string, unknown>;
-
-const MIN_LEADER_APPROVALS = 2;
 
 // the SHG submits, the VO reviews it next and the CLF after that, so the state a
 // nomination sits in says whose leaders have to approve to move it on
@@ -260,7 +260,8 @@ export default function ViewFormContent({ view, name }: FormControlProps) {
   // the same three roles approve again at each stage, under their own level
   const approvalLevel = REVIEW_LEVEL[s(formValues?.workflow_state)];
   const needsApprovals = !view && !!approvalLevel;
-  const hasEnoughApprovals = approvals.length >= MIN_LEADER_APPROVALS;
+  const hasEnoughApprovals =
+    !LEADER_APPROVAL_REQUIRED || approvals.length >= MIN_LEADER_APPROVALS;
   const displayedApprovalLevel =
     FORM_APPROVAL_LEVEL[s(formValues?.workflow_state)];
   const isVoOrClfFlow = approvalLevel === 'VO' || approvalLevel === 'CLF';
