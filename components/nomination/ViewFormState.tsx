@@ -146,6 +146,22 @@ const reviewLines = (approvals: LeaderApproval[], fallbackOn: string) =>
       })
     : undefined;
 
+// while leader OTP approval is optional, a stage can move on with no leader
+// rows at all, so credit the user who moved it on: "Reviewed by: <name> on <time>"
+const approverLine = (name: string, on: string) =>
+  name
+    ? [
+        {
+          h2: on
+            ? `${en?.workflow?.reviewed_by}: ${name} ${en?.workflow?.on} ${on}`
+            : `${en?.workflow?.reviewed_by}: ${name}`,
+          h3: on
+            ? `${hi?.workflow?.reviewed_by}: ${name} ${hi?.workflow?.by}, ${on}`
+            : `${hi?.workflow?.reviewed_by}: ${name} ${hi?.workflow?.by}`,
+        },
+      ]
+    : undefined;
+
 function ViewFormStatus({ name }: FormControlProps) {
   const router = useRouter();
   const [formValues, setFormValues] = useState<FormValues | null>(null);
@@ -182,7 +198,10 @@ function ViewFormStatus({ name }: FormControlProps) {
   const voOn = formatApprovalDateTime(formValues?.vo_approved_on);
   const clfOn = formatApprovalDateTime(formValues?.clf_approved_on);
 
-  const shgOn = formatApprovalDateTime(formValues?.creation);
+  // older nominations were submitted before shg_approved_on was stamped
+  const shgOn =
+    formatApprovalDateTime(formValues?.shg_approved_on) ||
+    formatApprovalDateTime(formValues?.creation);
 
   const checkedApprovals = checkedLeaders(formValues);
   const legacyRoles =
@@ -193,17 +212,22 @@ function ViewFormStatus({ name }: FormControlProps) {
   // older nominations only recorded which roles approved, so they fall back to
   // the time the nomination itself was submitted
   const shgApprovals = approvalsFromTable(formValues, 'SHG');
-  const shgLines = reviewLines(
-    shgApprovals.length > 0
-      ? shgApprovals
-      : legacyRoles.map((role) => ({ role, on: shgOn })),
-    shgOn
-  );
+  const shgLines =
+    reviewLines(
+      shgApprovals.length > 0
+        ? shgApprovals
+        : legacyRoles.map((role) => ({ role, on: shgOn })),
+      shgOn
+    ) ?? approverLine(s(formValues?.shg_approval_by), shgOn);
 
   // each level keeps its own approvers, so a leader who approves at both the
   // SHG and the VO stage is listed under each one
-  const voLines = reviewLines(approvalsFromTable(formValues, 'VO'), voOn);
-  const clfLines = reviewLines(approvalsFromTable(formValues, 'CLF'), clfOn);
+  const voLines =
+    reviewLines(approvalsFromTable(formValues, 'VO'), voOn) ??
+    approverLine(s(formValues?.vo_approval_by), voOn);
+  const clfLines =
+    reviewLines(approvalsFromTable(formValues, 'CLF'), clfOn) ??
+    approverLine(s(formValues?.clf_approval_by), clfOn);
 
   const steps = [
     {
