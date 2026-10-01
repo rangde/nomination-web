@@ -16,7 +16,9 @@ import ImportantNote from '@/components/nomination/ImportantNote';
 import CreditScoreGauge from '@/components/nomination/CreditScoreGauge';
 import SelectField from '@/components/FormComponents/SelectField';
 import ShgLeaderApproval, {
+  LEADER_APPROVAL_REQUIRED,
   LeaderRole,
+  MIN_LEADER_APPROVALS,
 } from '@/components/nomination/ShgLeaderApproval';
 import type { LeaderApproval } from '../NominationFormProvider';
 import { splitFullName, useNominationForm } from '../NominationFormProvider';
@@ -28,7 +30,6 @@ import {
   getCreditScore,
 } from '@/services/api';
 
-const MIN_LEADER_APPROVALS = 2;
 const digits = (value?: string) => (value || '').replace(/\D/g, '');
 
 function NominationStepOne() {
@@ -101,8 +102,11 @@ function NominationStepOne() {
     setStep3({ approved_leaders: Array.from(byRole.values()) });
   };
 
-  // the spec requires any 2 of the 3 leaders before the nomination can go in
-  const hasEnoughApprovals = approved_leaders.length >= MIN_LEADER_APPROVALS;
+  // the spec requires any 2 of the 3 leaders before the nomination can go in,
+  // unless the approval step is temporarily switched off
+  const hasEnoughApprovals =
+    !LEADER_APPROVAL_REQUIRED ||
+    approved_leaders.length >= MIN_LEADER_APPROVALS;
 
   const getCreditCheckId = () => {
     const aadhaar = form.step1.aadhaar_number.trim();
